@@ -7,13 +7,13 @@ import { db } from "./firebase"
 type UserStore = {
 	currentUser: SystemUser | null
 	isLoading: boolean
-	fetchUserInfo: (uid: string) => Promise<void>
+	fetchUserInfo: (uid: string | undefined) => Promise<void>
 }
 
 export const useUserStore = create<UserStore>((set) => ({
 	currentUser: null,
 	isLoading: true,
-	fetchUserInfo: async (uid: string) => {
+	fetchUserInfo: async (uid: string | undefined) => {
 		if (!uid) {
 			set({ currentUser: null, isLoading: false })
 			return
