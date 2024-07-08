@@ -1,29 +1,35 @@
-import "./userInfo.css"
+import "./userBar.css"
 
 import { useUserStore } from "../../../lib/userStore"
 
-type UserInfoProps = {
+type UserBarProps = {
 	turnOnAdminMode: () => void
 }
 
-function UserInfo({ turnOnAdminMode }: UserInfoProps): JSX.Element {
-	const { currentUser } = useUserStore()
+function UserBar({ turnOnAdminMode }: UserBarProps): JSX.Element {
+	const { currentUser, logout } = useUserStore()
+
+	function handleLogout() {
+		logout()
+	}
 
 	function handleAdmin() {
 		turnOnAdminMode()
 	}
 
 	return (
-		<div className="userInfo">
+		<div className="UserBar">
 			<div className="user">
 				<img src={currentUser?.avatar ?? `./avatar.png`} alt="avatar" />
 				<h2>{currentUser?.username}</h2>
 			</div>
 			<div className="icons">
-				<img src="./more.png" alt="more" />
+				<button type="button" onClick={handleLogout}>
+					<img src="./power-off-icon.svg" alt="logout" />
+				</button>
 				{currentUser?.admin && (
 					<button type="button" onClick={handleAdmin}>
-						Admin
+						<img src="./gear-icon.svg" alt="admin" />
 					</button>
 				)}
 				<img src="./edit.png" alt="edit" />
@@ -32,4 +38,4 @@ function UserInfo({ turnOnAdminMode }: UserInfoProps): JSX.Element {
 	)
 }
 
-export default UserInfo
+export default UserBar

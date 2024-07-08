@@ -1,13 +1,15 @@
+import { signOut } from "firebase/auth"
 import { doc, getDoc } from "firebase/firestore"
 import { create } from "zustand"
 
 import type { SystemUser } from "../types"
-import { db } from "./firebase"
+import { auth, db } from "./firebase"
 
 type UserStore = {
 	currentUser: SystemUser | null
 	isLoading: boolean
 	fetchUserInfo: (uid: string | undefined) => Promise<void>
+	logout: () => void
 }
 
 export const useUserStore = create<UserStore>((set) => ({
@@ -36,5 +38,14 @@ export const useUserStore = create<UserStore>((set) => ({
 		} catch (error) {
 			console.error(error)
 		}
+	},
+	logout: () => {
+		signOut(auth)
+			.then(() => {
+				set({ currentUser: null, isLoading: false })
+			})
+			.catch((error) => {
+				console.error(error)
+			})
 	},
 }))

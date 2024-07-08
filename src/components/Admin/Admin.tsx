@@ -113,7 +113,7 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 				<div className="waiting">
 					<ul>
 						{voters.map((voter) => (
-							<div className="userInfo" key={voter.id}>
+							<div className="UserBar" key={voter.id}>
 								<div className="user">
 									<img src={voter?.avatar ?? `./avatar.png`} alt="avatar" />
 									<h2>{voter?.username}</h2>

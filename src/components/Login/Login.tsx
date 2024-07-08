@@ -87,14 +87,16 @@ function Login(): JSX.Element {
 			const passwordString = password as string
 			const usernameString = username as string
 			const res = await createUserWithEmailAndPassword(auth, emailString, passwordString)
-			const avatarUrl = await uploadImage(avatarImage.file as File, res.user.uid)
 			const user: SystemUser = {
 				username: usernameString,
 				email: emailString,
 				id: res.user.uid,
 			}
-			if (avatarUrl) {
-				user.avatar = avatarUrl
+			if (avatarImage.file) {
+				const avatarUrl = await uploadImage(avatarImage.file, res.user.uid)
+				if (avatarUrl) {
+					user.avatar = avatarUrl
+				}
 			}
 			await setDoc(doc(db, `users`, res.user.uid), user)
 			await setDoc(doc(db, `votes`, res.user.uid), {
