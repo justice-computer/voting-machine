@@ -25,5 +25,13 @@
       height: 20px;
       cursor: pointer;
     }
+    button {
+      padding: 10px;
+      border-radius: 10px;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
   }
 }
