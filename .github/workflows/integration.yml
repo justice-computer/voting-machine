@@ -41,14 +41,8 @@ jobs:
       - name: Install Dependencies
         run: pnpm i
 
-      - name: Biome
-        run: bun lint:biome
-
-      - name: ESLint
-        run: bun lint:eslint
-
-      - name: Type Check
-        run: bun lint:types
+      - name: Lint
+        run: bun run lint
 
   Test:
     name: Build & Test
