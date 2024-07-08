@@ -2,15 +2,14 @@ import { selectorFamily } from "atom.io"
 import { findRelations } from "atom.io/data"
 
 import { electionConfigAtoms, registeredVoters } from "./election"
+import { Rational } from "./rational"
 
-export function droopQuota(numberOfVoters: bigint, numberOfWinners: bigint): bigint {
+export function droopQuota(numberOfVoters: bigint, numberOfWinners: bigint): Rational {
 	const numberOfWinnersPlusOne = numberOfWinners + 1n
-	const quotientWithoutRemainder = numberOfVoters / numberOfWinnersPlusOne
-	const quota = quotientWithoutRemainder + 1n
-	return quota
+	return new Rational(numberOfVoters, numberOfWinnersPlusOne)
 }
 
-export const droopQuotaSelectors = selectorFamily<Error | bigint, string>({
+export const droopQuotaSelectors = selectorFamily<Error | Rational, string>({
 	key: `droopQuota`,
 	get:
 		(electionId) =>

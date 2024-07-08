@@ -1,18 +1,78 @@
 import type { CtorToolkit, MoleculeType, ReadonlySelectorToken } from "atom.io"
 import { moleculeFamily, selectorFamily } from "atom.io"
+import { findRelations } from "atom.io/data"
 
 import { electionRoundCandidateMolecules } from "./candidate"
-import { type ElectionInstance, electionMolecules } from "./election"
+import { type ElectionInstance, electionMolecules, votes } from "./election"
 import { Rational } from "./rational"
 import { need } from "./refinements"
-import type { ElectionRoundVoterInstance, ElectionRoundVoteTotal } from "./voter"
-import { electionRoundVoterMolecules, electionRoundVoteTotalsSelectors } from "./voter"
+import type { ElectionRoundVoterInstance } from "./voter"
+import { electionRoundVoterMolecules, voterRemainingEnergySelectors } from "./voter"
 
 export type ElectionRoundKey = { election: string; round: number }
 
+export type ElectionRoundVoteTotal = { key: string; total: Rational }
+export const electionRoundVoteTotalsSelectors = selectorFamily<
+	ElectionRoundVoteTotal[],
+	ElectionRoundKey
+>({
+	key: `electionRoundVoteTotals`,
+	get:
+		(keys) =>
+		({ get }) => {
+			const election = get(electionMolecules, keys.election)
+			const electionRound = get(electionRoundMolecules, keys)
+
+			const candidates = get(election.state.candidates.relatedKeys)
+			const runningCandidates = candidates.filter((candidateKey) => {
+				const candidateRoundKey = {
+					electionRound: keys,
+					candidate: candidateKey,
+				}
+				const candidate = get(electionRoundCandidateMolecules, candidateRoundKey)
+				const status = get(candidate.state.status)
+				return status === `running`
+			})
+
+			const voteTotals = runningCandidates
+				.map<ElectionRoundVoteTotal>((candidateKey) => {
+					const candidateTotalVote = new Rational()
+					const candidateVoterKeys = get(findRelations(votes, candidateKey).voterKeysOfCandidate)
+
+					const candidateVoteNumbers = candidateVoterKeys
+						.map<Rational | null>((voterKey) => {
+							const voter = electionRound.voters.get(voterKey) ?? electionRound.spawnVoter(voterKey)
+							const [voterTopFavorites] = get(voter.state.favorites)
+							if (!voterTopFavorites.includes(candidateKey)) {
+								return null
+							}
+							const numerator = get(voterRemainingEnergySelectors, {
+								electionRound: keys,
+								voter: voterKey,
+							})
+							if (numerator instanceof Error) {
+								return null
+							}
+							const denominator = BigInt(voterTopFavorites.length)
+							return new Rational(1n, denominator).mul(numerator)
+						})
+						.filter((total) => total !== null)
+
+					for (const rational of candidateVoteNumbers) {
+						candidateTotalVote.add(rational)
+					}
+					return { key: candidateKey, total: candidateTotalVote }
+				})
+				.sort(({ total: totalA }, { total: totalB }) => (totalA.isGreaterThan(totalB) ? -1 : 1))
+			return voteTotals
+		},
+})
+
+export type ElectedCandidate = { key: string; surplus: Rational; total: Rational }
+export type EliminatedCandidate = { key: string }
 export type ElectionRoundOutcome =
-	| { type: `elected`; candidates: [key: string, surplus: Rational][] }
-	| { type: `eliminated`; candidates: string[] }
+	| { type: `elected`; candidates: ElectedCandidate[] }
+	| { type: `eliminated`; candidates: EliminatedCandidate[] }
 export const electionRoundOutcomeSelectors = selectorFamily<
 	ElectionRoundOutcome | Error,
 	ElectionRoundKey
@@ -30,37 +90,29 @@ export const electionRoundOutcomeSelectors = selectorFamily<
 					`Election round outcome could not be calculated because droopQuota calculation failed: ${droopQuota.message}`,
 				)
 			}
-			const droopQuotaRational = new Rational(droopQuota)
+
 			const winners = voteTotals
-				.filter(([, total]) => {
-					return !droopQuotaRational.isGreaterThan(total)
-				})
-				.map<[string, Rational]>(([key, total]) => {
-					const surplus = new Rational()
-					for (const [denominator, numerator] of total.entries()) {
-						surplus.add(numerator, denominator)
-					}
-					for (const [denominator, numerator] of droopQuotaRational.entries()) {
-						surplus.add(-numerator, denominator)
-					}
-					return [key, surplus]
+				.filter(({ total }) => !droopQuota.isGreaterThan(total))
+				.map<ElectedCandidate>(({ key, total }) => {
+					const surplus = new Rational().add(total).sub(droopQuota)
+					return { key, surplus, total }
 				})
 
 			if (winners.length > 0) {
 				return { type: `elected`, candidates: winners }
 			}
 
-			const losers: string[] = []
+			const losers: { key: string }[] = []
 			const loser = voteTotals.at(-1)
 			if (loser) {
-				losers.push(loser[0])
-				for (const [key, total] of voteTotals) {
-					if (key === loser[0]) {
+				losers.push({ key: loser.key })
+				for (const { key, total: otherTotal } of voteTotals) {
+					if (key === loser.key) {
 						continue
 					}
-					const isEqual = !total.isGreaterThan(loser[1]) && !loser[1].isGreaterThan(total)
+					const isEqual = !otherTotal.isGreaterThan(loser.total)
 					if (isEqual) {
-						losers.push(key)
+						losers.push({ key })
 					}
 				}
 			}

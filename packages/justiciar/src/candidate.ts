@@ -55,15 +55,8 @@ export const candidateStatusSelectors = selectorFamily<
 				if (outcome instanceof Error) {
 					return outcome
 				}
-				if (outcome.candidates.some(([candidate]) => candidate === keys.candidate)) {
-					switch (outcome.type) {
-						case `elected`:
-							status = `elected`
-							break
-						case `eliminated`:
-							status = `eliminated`
-							break
-					}
+				if (outcome.candidates.some(({ key }) => key === keys.candidate)) {
+					status = outcome.type
 				}
 			}
 			return status

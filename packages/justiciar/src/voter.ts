@@ -2,11 +2,11 @@ import type { CtorToolkit, MoleculeType } from "atom.io"
 import { moleculeFamily, selectorFamily } from "atom.io"
 import { findRelations } from "atom.io/data"
 
-import { candidateStatusSelectors, electionRoundCandidateMolecules } from "./candidate"
+import { candidateStatusSelectors } from "./candidate"
 import { electionMolecules, votes } from "./election"
 import type { ElectionRoundKey } from "./election-round"
-import { electionRoundMolecules } from "./election-round"
 import { Rational } from "./rational"
+import { need } from "./refinements"
 
 export type Voter = {
 	type: `voter`
@@ -34,8 +34,8 @@ export const voterCurrentFavoritesSelectors = selectorFamily<
 	get:
 		(keys) =>
 		({ get }) => {
-			const votedForCandidateKeys = get(findRelations(votes, keys.voter).candidateEntriesOfVoter)
-			const stillRunning = votedForCandidateKeys.filter(([candidateKey]) => {
+			const votedForCandidateEntries = get(findRelations(votes, keys.voter).candidateEntriesOfVoter)
+			const stillRunning = votedForCandidateEntries.filter(([candidateKey]) => {
 				const electionRoundCandidateKey = {
 					electionRound: keys.electionRound,
 					candidate: candidateKey,
@@ -68,10 +68,51 @@ export const voterCurrentFavoritesSelectors = selectorFamily<
 		},
 })
 
+export const voterRemainingEnergySelectors = selectorFamily<
+	Error | Rational,
+	ElectionRoundVoterKey
+>({
+	key: `voterRemainingEnergy`,
+	get:
+		(keys) =>
+		({ get }) => {
+			const remainingEnergy = new Rational(1n)
+			const election = get(electionMolecules, keys.electionRound.election)
+			// const votedForCandidateEntries = get(findRelations(votes, keys.voter).candidateEntriesOfVoter)
+			const previousElectionRounds = election.rounds.slice(0, keys.electionRound.round)
+			let roundNumber = -1
+			for (const round of previousElectionRounds) {
+				roundNumber++
+				const [voterFavoritesDuringRound] = get(voterCurrentFavoritesSelectors, {
+					electionRound: { election: keys.electionRound.election, round: roundNumber },
+					voter: keys.voter,
+				})
+				const numberOfFavoriteCandidates = BigInt(voterFavoritesDuringRound.length)
+				const outcome = get(need(round.state.outcome))
+				if (outcome instanceof Error) {
+					return outcome
+				}
+				if (outcome.type === `elected`) {
+					for (const electedCandidate of outcome.candidates) {
+						if (voterFavoritesDuringRound.includes(electedCandidate.key)) {
+							const refund = new Rational()
+								.add(electedCandidate.surplus)
+								.div(electedCandidate.total)
+								.div(numberOfFavoriteCandidates)
+							remainingEnergy.sub(1n, numberOfFavoriteCandidates).add(refund)
+						}
+					}
+				}
+			}
+			return remainingEnergy
+		},
+})
+
 export class ElectionRoundVoterState {
 	public constructor(
 		bond: CtorToolkit<ElectionRoundVoterKey>[`bond`],
 		public favorites = bond(voterCurrentFavoritesSelectors),
+		public remainingEnergy = bond(voterRemainingEnergySelectors),
 	) {}
 }
 export const electionRoundVoterMolecules = moleculeFamily({
@@ -89,53 +130,3 @@ export const electionRoundVoterMolecules = moleculeFamily({
 export type ElectionRoundVoterInstance = InstanceType<
 	MoleculeType<typeof electionRoundVoterMolecules>
 >
-
-export type ElectionRoundVoteTotal = [candidateId: string, voteTotal: Rational]
-export const electionRoundVoteTotalsSelectors = selectorFamily<
-	ElectionRoundVoteTotal[],
-	ElectionRoundKey
->({
-	key: `electionRoundVoteTotals`,
-	get:
-		(keys) =>
-		({ get }) => {
-			const election = get(electionMolecules, keys.election)
-			const electionRound = get(electionRoundMolecules, keys)
-
-			const candidates = get(election.state.candidates.relatedKeys)
-			const runningCandidates = candidates.filter((candidateKey) => {
-				const candidateRoundKey = {
-					electionRound: keys,
-					candidate: candidateKey,
-				}
-				const candidate = get(electionRoundCandidateMolecules, candidateRoundKey)
-				const status = get(candidate.state.status)
-				return status === `running`
-			})
-
-			const voteTotals = runningCandidates
-				.map<ElectionRoundVoteTotal>((candidateKey) => {
-					const candidateTotalVote = new Rational()
-					const candidateVoterKeys = get(findRelations(votes, candidateKey).voterKeysOfCandidate)
-
-					const myVoteDenominators = candidateVoterKeys
-						.map<bigint | null>((voterKey) => {
-							const voter = electionRound.voters.get(voterKey) ?? electionRound.spawnVoter(voterKey)
-							const [voterTopFavorites] = get(voter.state.favorites)
-							if (!voterTopFavorites.includes(candidateKey)) {
-								return null
-							}
-							const denominator = BigInt(voterTopFavorites.length)
-							return denominator
-						})
-						.filter((total) => total !== null)
-
-					for (const denominator of myVoteDenominators) {
-						candidateTotalVote.add(1n, denominator)
-					}
-					return [candidateKey, candidateTotalVote]
-				})
-				.sort(([, totalA], [, totalB]) => (totalA.isGreaterThan(totalB) ? -1 : 1))
-			return voteTotals
-		},
-})
