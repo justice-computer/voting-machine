@@ -8,7 +8,7 @@ import { useUserStore } from "../../lib/userStore"
 import type { ActualVote, ElectionData, ElectionState } from "../../types"
 import Admin from "../Admin/Admin"
 import List from "../list/List"
-import UserInfo from "../list/UserInfo/UserInfo"
+import UserBar from "../list/UserBar/UserBar"
 import SeeResults from "../SeeResults/SeeResults"
 import WaitForVoters from "../WaitForVoters/WaitForVoters"
 
@@ -72,7 +72,7 @@ function StateRouter(): JSX.Element {
 	console.log(`>>>`, userElectionState)
 	return (
 		<div className="stateRouter">
-			<UserInfo
+			<UserBar
 				turnOnAdminMode={() => {
 					setAdminMode(true)
 				}}
