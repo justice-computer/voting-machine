@@ -69,12 +69,11 @@ function StateRouter(): JSX.Element {
 		userElectionState = `voted`
 	}
 
-	console.log(`>>>`, userElectionState)
 	return (
 		<div className="stateRouter">
 			<UserBar
-				turnOnAdminMode={() => {
-					setAdminMode(true)
+				toggleAdminMode={() => {
+					setAdminMode(!adminMode)
 				}}
 			/>
 			{NextComponent(userElectionState, adminMode, setAdminMode)}
