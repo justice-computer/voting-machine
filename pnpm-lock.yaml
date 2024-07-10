@@ -93,6 +93,9 @@ importers:
       vite:
         specifier: ^5.2.0
         version: 5.2.0(@types/node@20.14.10)
+      vite-tsconfig-paths:
+        specifier: 4.3.2
+        version: 4.3.2(typescript@5.5.3)(vite@5.2.0(@types/node@20.14.10))
       vitest:
         specifier: ^2.0.0
         version: 2.0.2(@types/node@20.14.10)(@vitest/browser@2.0.2)(jsdom@24.1.0)

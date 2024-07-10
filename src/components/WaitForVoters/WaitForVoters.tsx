@@ -1,7 +1,10 @@
 import "./waitForVoters.css"
 
+import { useO } from "atom.io/react"
 import { doc, getDoc, onSnapshot, setDoc } from "firebase/firestore"
 import { useEffect, useState } from "react"
+
+import { currentElectionIdAtom } from "~/src/lib/atomStore"
 
 import { db } from "../../lib/firebase"
 import { useUserStore } from "../../lib/userStore"
@@ -15,9 +18,11 @@ function WaitForVoters({ targetState }: WaitForVotersProps): JSX.Element {
 	const { currentUser } = useUserStore()
 	const [voters, setVoters] = useState<SystemUser[]>()
 	const [finishedVoters, setFinishedVoters] = useState<string[]>([])
+	const currentElectionId = useO(currentElectionIdAtom)
 
 	useEffect(() => {
-		const unSub = onSnapshot(doc(db, `elections`, `current`), async (res) => {
+		if (currentElectionId == null) return
+		const unSub = onSnapshot(doc(db, `elections`, currentElectionId), async (res) => {
 			const electionData = res.data() as ElectionData
 			const promises = electionData.users.map(async (id) => {
 				const userDocRef = doc(db, `users`, id)
@@ -45,7 +50,7 @@ function WaitForVoters({ targetState }: WaitForVotersProps): JSX.Element {
 			})
 		})
 		return unSub
-	}, [currentUser?.id, targetState])
+	}, [currentUser?.id, targetState, currentElectionId])
 
 	const handleReturn = () => {
 		if (currentUser == null) return
@@ -53,14 +58,14 @@ function WaitForVoters({ targetState }: WaitForVotersProps): JSX.Element {
 	}
 
 	const handleJoin = async () => {
-		if (currentUser == null) return
+		if (currentUser == null || currentElectionId == null) return
 		await setDoc(doc(db, `votes`, currentUser.id), {
 			finished: false,
 			firstChoice: [],
 			secondChoice: [],
 			thirdChoice: [],
 		})
-		const electionDoc = doc(db, `elections`, `current`)
+		const electionDoc = doc(db, `elections`, currentElectionId)
 		const electionDocSnap = await getDoc(electionDoc)
 		const electionData = electionDocSnap.data() as ElectionData
 		const users = electionData.users

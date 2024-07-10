@@ -1,7 +1,13 @@
 import "./userBar.css"
 
-import { useState } from "react"
+import { useO } from "atom.io/react"
+import { doc, onSnapshot } from "firebase/firestore"
+import { useEffect, useState } from "react"
 
+import { db } from "~/src/lib/firebase"
+import type { ElectionData } from "~/src/types"
+
+import { currentElectionIdAtom } from "../../../lib/atomStore"
 import { useUserStore } from "../../../lib/userStore"
 import Logout from "../../Logout/Logout"
 
@@ -12,6 +18,17 @@ type UserBarProps = {
 function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 	const { currentUser, logout } = useUserStore()
 	const [showLogout, setShowLogout] = useState(false)
+	const currentElectionId = useO(currentElectionIdAtom)
+	const [currentElectionName, setCurrentElectionName] = useState<string | null>(null)
+
+	useEffect(() => {
+		if (currentElectionId == null) return
+		const unSub = onSnapshot(doc(db, `elections`, currentElectionId), (document) => {
+			const electionData = document.data() as ElectionData
+			setCurrentElectionName(electionData.name)
+		})
+		return unSub
+	}, [currentElectionId])
 
 	function handleLogout() {
 		logout()
@@ -35,6 +52,7 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 				<img src={currentUser?.avatar ?? `./avatar.png`} alt="avatar" />
 				<h2>{currentUser?.username}</h2>
 			</div>
+			{currentElectionName && <h2>{currentElectionName}</h2>}
 			<div className="icons">
 				<button
 					type="button"

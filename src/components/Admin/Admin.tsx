@@ -1,11 +1,13 @@
 import "./admin.css"
 
 import { faker } from "@faker-js/faker"
+import { useO } from "atom.io/react"
 import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, setDoc } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
-import { db } from "../../lib/firebase"
-import type { ActualVote, ElectionData, SystemUser } from "../../types"
+import { currentElectionIdAtom } from "~/src/lib/atomStore"
+import { db } from "~/src/lib/firebase"
+import type { ActualVote, ElectionData, SystemUser } from "~/src/types"
 
 type AdminProps = {
 	exitAdminMode: () => void
@@ -23,9 +25,11 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 	const [voters, setVoters] = useState<SystemUser[]>()
 	const [finishedVoters, setFinishedVoters] = useState<string[]>([])
 	const [currentState, setCurrentState] = useState<string>(`not-started`)
+	const currentElectionId = useO(currentElectionIdAtom)
 
 	useEffect(() => {
-		const unSub = onSnapshot(doc(db, `elections`, `current`), async (res) => {
+		if (currentElectionId == null) return
+		const unSub = onSnapshot(doc(db, `elections`, currentElectionId), async (res) => {
 			const electionData = res.data() as ElectionData
 			setCurrentState(electionData.state)
 
@@ -54,17 +58,20 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 			})
 		})
 		return unSub
-	}, [])
+	}, [currentElectionId])
 
 	function handleElectionReset() {
-		void setDoc(doc(db, `elections`, `current`), { state: `not-started`, users: [] })
+		if (currentElectionId == null) return
+		void setDoc(doc(db, `elections`, currentElectionId), { state: `not-started`, users: [] })
 	}
 
 	function handleStartTheElection() {
-		void setDoc(doc(db, `elections`, `current`), { state: `voting` }, { merge: true })
+		if (currentElectionId == null) return
+		void setDoc(doc(db, `elections`, currentElectionId), { state: `voting` }, { merge: true })
 	}
 
 	async function handleAddRandomVoter() {
+		if (currentElectionId == null) return
 		const newUser = {
 			username: faker.internet.userName(),
 			avatar: faker.image.avatar(),
@@ -80,11 +87,11 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 			secondChoice: [],
 			thirdChoice: [],
 		})
-		const electionDoc = doc(db, `elections`, `current`)
+		const electionDoc = doc(db, `elections`, currentElectionId)
 		const electionDocSnap = await getDoc(electionDoc)
 		const electionData = electionDocSnap.data() as ElectionData
 		await setDoc(
-			doc(db, `elections`, `current`),
+			doc(db, `elections`, currentElectionId),
 			{ users: [...electionData.users, user.id] },
 			{ merge: true },
 		)
@@ -101,7 +108,8 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 		})
 	}
 	async function handleFinishElection() {
-		await setDoc(doc(db, `elections`, `current`), { state: `closed` }, { merge: true })
+		if (currentElectionId == null) return
+		await setDoc(doc(db, `elections`, currentElectionId), { state: `closed` }, { merge: true })
 	}
 
 	// TODO: MAKE THESE BUTTONS NICER LOOKING
