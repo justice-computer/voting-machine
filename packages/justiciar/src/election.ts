@@ -1,5 +1,5 @@
 import type { CtorToolkit, MoleculeType } from "atom.io"
-import { atomFamily, moleculeFamily, transaction } from "atom.io"
+import { atomFamily, moleculeFamily, setState, transaction } from "atom.io"
 import { editRelations, join } from "atom.io/data"
 
 import { candidateMolecules } from "./candidate"
@@ -24,6 +24,11 @@ export type ElectionConfig = {
 export const electionConfigAtoms = atomFamily<ElectionConfig, string>({
 	key: `electionConfig`,
 	default: { numberOfWinners: 1n, votingTiers: [1n] },
+})
+
+export const electionRoundsLengthAtoms = atomFamily<number, string>({
+	key: `electionRoundsLength`,
+	default: 0,
 })
 
 export const votes = join(
@@ -53,6 +58,7 @@ export class ElectionState {
 	public constructor(
 		bond: CtorToolkit<string>[`bond`],
 		public config = bond(electionConfigAtoms),
+		public roundsLength = bond(electionRoundsLengthAtoms),
 		public droopQuota = bond(droopQuotaSelectors),
 		public phase = bond(electionPhaseAtoms),
 		public candidates = bond(electionCandidates, { as: `election` }),
@@ -210,6 +216,7 @@ export const electionMolecules = moleculeFamily({
 			const token = this.tools.spawn(electionRoundMolecules, keys, this)
 			const round = this.tools.get(token)
 			this.rounds.push(round)
+			setState(this.state.roundsLength, this.rounds.length)
 			round.setup()
 			return round
 		}

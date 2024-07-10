@@ -1,197 +1,252 @@
 import "./seeResults.css"
 
-import { makeMolecule, makeRootMolecule } from "atom.io"
-import { doc, getDoc } from "firebase/firestore"
+import type { AtomToken, ReadonlySelectorToken } from "atom.io"
+import {
+	atomFamily,
+	disposeState,
+	getState,
+	makeMolecule,
+	makeRootMolecule,
+	runTransaction,
+} from "atom.io"
+import { findState } from "atom.io/ephemeral"
+import { IMPLICIT } from "atom.io/internal"
+import { useO } from "atom.io/react"
+import { collection, doc, getDoc, getDocs } from "firebase/firestore"
 import { useEffect, useRef, useState } from "react"
 
-import { type ElectionInstance, electionMolecules } from "../../../packages/justiciar/src"
+import type {
+	Ballot,
+	CandidateStatus,
+	ElectionInstance,
+	ElectionRoundInstance,
+	ElectionRoundOutcome,
+} from "../../../packages/justiciar/src"
+import { electionMolecules } from "../../../packages/justiciar/src"
 import { db } from "../../lib/firebase"
-import { useUserStore } from "../../lib/userStore"
 import type { ActualVote, Candidate, ElectionData } from "../../types"
 
-type VoteSummary = {
-	[candidateKey: string]: {
-		firstChoice: number
-		secondChoice: number
-		thirdChoice: number
-		disqualified: boolean
+function actualVoteToBallot(actualVote: ActualVote): Ballot {
+	const ballot: Ballot = {
+		voterId: actualVote.voterId,
+		votes: {
+			election0: [actualVote.firstChoice, actualVote.secondChoice, actualVote.thirdChoice],
+		},
 	}
-}
-
-type CandidateLookup = {
-	[key: string]: Candidate
-}
-
-export function findWinningCandidateId(
-	voteSummary: VoteSummary,
-	eliminatedCandidateIds: string[],
-): string | null {
-	const activeCandidateIds = Object.keys(voteSummary).filter(
-		(candidateId) => !eliminatedCandidateIds.includes(candidateId),
-	)
-	const firstChoiceVotes = activeCandidateIds.map(
-		(candidateId) => voteSummary[candidateId].firstChoice,
-	)
-	const totalFirstChoiceVotes = firstChoiceVotes.reduce((acc, votes) => acc + votes, 0)
-	const maxVotes = Math.max(...firstChoiceVotes)
-	// A candidate wins if they have more than half of the total first choice votes
-	if (maxVotes > totalFirstChoiceVotes / 2) {
-		const winningCandidateId =
-			activeCandidateIds.find((candidateId) => voteSummary[candidateId].firstChoice === maxVotes) ??
-			null
-		return winningCandidateId
-	}
-	return null
-}
-
-export function eliminateCandidates(
-	voteSummary: VoteSummary,
-	eliminatedCandidateIds: string[],
-): string[] {
-	const newVoteSummary = { ...voteSummary }
-	const newEliminatedCandidateIds = [...eliminatedCandidateIds]
-	const candidateIds = Object.keys(newVoteSummary)
-	const firstChoiceVotes = candidateIds.map(
-		(candidateId) => newVoteSummary[candidateId].firstChoice,
-	)
-	const minVotes = Math.min(...firstChoiceVotes)
-	const minCandidateIds = candidateIds.filter(
-		(candidateId) => newVoteSummary[candidateId].firstChoice === minVotes,
-	)
-	for (const candidateId of minCandidateIds) {
-		newVoteSummary[candidateId].disqualified = true
-		newEliminatedCandidateIds.push(candidateId)
-	}
-	return newEliminatedCandidateIds
-}
-
-/**
- * when a candidate explodes, their votes go flying everywhere
- * @param votes
- * @param eliminatedCandidateIds
- * @returns
- */
-export function redistributeVotes(votes: ActualVote, eliminatedCandidateIds: string[]): ActualVote {
-	// take all the votes for the eliminated candidates and redistribute them to the next choice
-	const newVotes = { ...votes }
-
-	for (const eliminatedCandidateId of eliminatedCandidateIds) {
-		// 1. go through the votes for each user...
-
-		// 2. if the eliminated candidate is the second choice, make a third choice the second choice
-		let index = 0
-		for (const candidateId of votes.secondChoice) {
-			if (candidateId === eliminatedCandidateId) {
-				// we voted for a candidate for second choice that has been eliminated
-				const nextChoice = votes.thirdChoice[index] // FIXME: this could be problematic
-				if (nextChoice) {
-					newVotes.secondChoice[index] = nextChoice
-					// get rid of the third choice
-					newVotes.thirdChoice = newVotes.thirdChoice.filter((i: string) => i !== candidateId)
-				}
-			}
-			index++
-		}
-		// 3. if the eliminated candidate is the first choice, make a second choice the first choice
-		index = 0
-		for (const candidateId of votes.firstChoice) {
-			if (candidateId === eliminatedCandidateId) {
-				// we voted for a candidate for first choice that has been eliminated
-				const nextChoice = votes.secondChoice[index] // FIXME: this could be problematic
-				if (nextChoice) {
-					newVotes.firstChoice[index] = nextChoice
-					// get rid of the second choice
-					newVotes.secondChoice = newVotes.secondChoice.filter((i: string) => i !== candidateId)
-				}
-			}
-			index++
-		}
-	}
-	return newVotes
-}
-
-export async function getVoteSummary(
-	userId: string,
-	newVoteSummary: VoteSummary,
-	eliminatedCandidateIds: string[],
-): Promise<VoteSummary> {
-	const votesDocRef = doc(db, `votes`, userId)
-	const votesDocSnap = await getDoc(votesDocRef)
-	const votes = votesDocSnap.data() as ActualVote
-
-	const newVotes = redistributeVotes(votes, eliminatedCandidateIds)
-
-	for (const candidateId of newVotes.firstChoice) {
-		if (newVoteSummary[candidateId]) {
-			newVoteSummary[candidateId].firstChoice++
-		} else {
-			newVoteSummary[candidateId] = {
-				firstChoice: 1,
-				secondChoice: 0,
-				thirdChoice: 0,
-				disqualified: false,
-			}
-		}
-	}
-	for (const candidateId of newVotes.secondChoice) {
-		if (newVoteSummary[candidateId]) {
-			newVoteSummary[candidateId].secondChoice++
-		} else {
-			newVoteSummary[candidateId] = {
-				firstChoice: 0,
-				secondChoice: 1,
-				thirdChoice: 0,
-				disqualified: false,
-			}
-		}
-	}
-	for (const candidateId of newVotes.thirdChoice) {
-		if (newVoteSummary[candidateId]) {
-			newVoteSummary[candidateId].thirdChoice++
-		} else {
-			newVoteSummary[candidateId] = {
-				firstChoice: 0,
-				secondChoice: 0,
-				thirdChoice: 1,
-				disqualified: false,
-			}
-		}
-	}
-	return newVoteSummary
+	console.log(actualVote, ballot)
+	return ballot
 }
 
 const root = makeRootMolecule(`root`)
 
+export const STATUS_COLORS = {
+	running: `white`,
+	elected: `green`,
+	eliminated: `red`,
+}
+
+function CandidateView(props: {
+	candidate: AtomToken<Candidate>
+	status: CandidateStatus
+}): JSX.Element {
+	const { status } = props
+	const candidate = useO(props.candidate)
+	const color = STATUS_COLORS[status]
+	return (
+		<div style={{ color }}>
+			<h2>{candidate.name}</h2>
+			<p>{candidate.heading}</p>
+			<p>{candidate.details}</p>
+		</div>
+	)
+}
+
+function RoundOutcome(props: {
+	outcome: ReadonlySelectorToken<ElectionRoundOutcome | Error>
+}): JSX.Element {
+	const outcome = getState(props.outcome)
+	if (outcome instanceof Error) {
+		return <div>Error: {outcome.message}</div>
+	}
+
+	switch (outcome.type) {
+		case `elected`:
+			return (
+				<div>
+					<h2>Elected</h2>
+					<ul>
+						{outcome.candidates.map((candidate) => (
+							<li key={candidate.key}>
+								<CandidateView
+									candidate={findState(candidateAtoms, candidate.key)}
+									status="elected"
+								/>
+							</li>
+						))}
+					</ul>
+				</div>
+			)
+		case `eliminated`:
+			return (
+				<div>
+					<h2>Eliminated</h2>
+					<ul>
+						{outcome.candidates.map((candidate) => (
+							<li key={candidate.key}>
+								<CandidateView
+									candidate={findState(candidateAtoms, candidate.key)}
+									status="eliminated"
+								/>
+							</li>
+						))}
+					</ul>
+				</div>
+			)
+	}
+}
+
+function ElectionRound(props: {
+	election: ElectionInstance
+	idx: number
+	round: ElectionRoundInstance | null
+}): JSX.Element {
+	const { election, idx, round } = props
+	return (
+		<div>
+			<header>round {idx}</header>
+			{round ? (
+				<div>
+					<main>
+						{round.state.outcome ? <RoundOutcome outcome={round.state.outcome} /> : null}
+						{round.state.voteTotals ? null : null}
+					</main>
+				</div>
+			) : (
+				<button type="button" onClick={() => election.spawnRound()}>
+					Spawn Round
+				</button>
+			)}
+		</div>
+	)
+}
+
+function ElectionRounds(props: {
+	election: ElectionInstance
+}): JSX.Element {
+	const { election } = props
+	useO(election.state.roundsLength)
+	const currentPhase = useO(election.state.phase)
+	switch (currentPhase.name) {
+		case `registration`:
+		case `voting`:
+			return <div>Voting</div>
+		case `counting`:
+			return (
+				<div>
+					{election.rounds.map((round, index) => (
+						<ElectionRound key={index} election={election} idx={index} round={round} />
+					))}
+					<ElectionRound election={election} idx={election.rounds.length} round={null} />
+				</div>
+			)
+	}
+}
+
+export const candidateAtoms = atomFamily<Candidate, string>({
+	key: `candidates`,
+	default: (id) => ({
+		id,
+		type: `candidate`,
+		name: `NO_NAME`,
+		heading: `NO_HEADING`,
+		details: `NO_DETAILS`,
+		status: `running`,
+	}),
+	effects: (id) => [
+		({ setSelf }) => {
+			void getDoc(doc(db, `candidates`, id)).then((snapshot) => {
+				const candidate = snapshot.data() as Candidate
+				setSelf(candidate)
+			})
+		},
+	],
+})
+
 function SeeResults(): JSX.Element {
-	const { currentUser } = useUserStore()
 	const electionRef = useRef<ElectionInstance | null>(null)
 	const [actualVotes, setActualVotes] = useState<ActualVote[]>([])
+	const [candidates, setCandidates] = useState<Candidate[]>([])
 
 	useEffect(() => {
-		if (electionRef.current === null) {
-			electionRef.current = makeMolecule(root, electionMolecules, `election0`, {
-				numberOfWinners: 3n,
-				votingTiers: [3n, 3n, 3n],
-			})
-		}
-		void getDoc(doc(db, `elections`, `current`)).then(async (res) => {
-			const electionData = res.data() as ElectionData
+		const electionToken = makeMolecule(root, electionMolecules, `election0`, {
+			numberOfWinners: 3n,
+			votingTiers: [3n, 3n, 3n],
+		})
+		const election = getState(electionToken)
+		electionRef.current = election
+
+		void getDoc(doc(db, `elections`, `current`)).then(async (snapshot) => {
+			const electionData = snapshot.data() as ElectionData
 			console.log(electionData)
-			const votes = await Promise.all(
+			const votes = await Promise.all<ActualVote>(
 				electionData.users.map(async (userKey) => {
 					const actualVoteDocToken = doc(db, `votes`, userKey)
 					const actualVoteDocSnapshot = await getDoc(actualVoteDocToken)
-					const actualVote = actualVoteDocSnapshot.data() as ActualVote
-					return actualVote
+					const actualVote = actualVoteDocSnapshot.data() as Omit<ActualVote, `voterId`>
+					return { ...actualVote, voterId: userKey }
 				}),
 			)
 			setActualVotes(votes)
 		})
-	}, [currentUser?.id])
+		void getDocs(collection(db, `candidates`)).then((res) => {
+			const candidateSnapshots = res.docs
+			const candidateDocs = candidateSnapshots.map((snapshot) => {
+				return {
+					id: snapshot.id,
+					...snapshot.data(),
+				} as Candidate
+			})
+			setCandidates(candidateDocs)
+		})
 
-	console.log(actualVotes)
+		return () => {
+			disposeState(electionToken)
+		}
+	}, [])
 
-	return <div className="seeResults"></div>
+	const setupElection = () => {
+		const election = electionRef.current
+		if (!election) {
+			console.error(`No election found`)
+			return
+		}
+		console.log(IMPLICIT.STORE.valueMap)
+		for (const actualVote of actualVotes) {
+			runTransaction(election.registerVoter)(actualVote.voterId)
+		}
+		for (const candidate of candidates) {
+			const candidateId = candidate.id
+			if (!candidateId) {
+				console.error(`Candidate "${candidate.name}" has no ID`)
+				return
+			}
+			runTransaction(election.registerCandidate)(candidateId)
+		}
+		runTransaction(election.beginVoting)()
+		for (const actualVote of actualVotes) {
+			runTransaction(election.castBallot)(actualVoteToBallot(actualVote))
+		}
+		runTransaction(election.beginCounting)()
+	}
+
+	return (
+		<div className="seeResults">
+			<button type="button" onClick={setupElection}>
+				Setup Election
+			</button>
+			{electionRef.current ? <ElectionRounds election={electionRef.current} /> : null}
+		</div>
+	)
 }
 
 export default SeeResults
