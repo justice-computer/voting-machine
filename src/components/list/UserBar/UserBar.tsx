@@ -1,6 +1,9 @@
 import "./userBar.css"
 
+import { useState } from "react"
+
 import { useUserStore } from "../../../lib/userStore"
+import Logout from "../../Logout/Logout"
 
 type UserBarProps = {
 	toggleAdminMode: () => void
@@ -8,6 +11,7 @@ type UserBarProps = {
 
 function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 	const { currentUser, logout } = useUserStore()
+	const [showLogout, setShowLogout] = useState(false)
 
 	function handleLogout() {
 		logout()
@@ -19,12 +23,25 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 
 	return (
 		<div className="UserBar">
+			{showLogout ? (
+				<Logout
+					handleLogout={handleLogout}
+					cancelLogout={() => {
+						setShowLogout(false)
+					}}
+				/>
+			) : null}
 			<div className="user">
 				<img src={currentUser?.avatar ?? `./avatar.png`} alt="avatar" />
 				<h2>{currentUser?.username}</h2>
 			</div>
 			<div className="icons">
-				<button type="button" onClick={handleLogout}>
+				<button
+					type="button"
+					onClick={() => {
+						setShowLogout(true)
+					}}
+				>
 					<img src="./power-off-icon.svg" alt="logout" />
 				</button>
 				{currentUser?.admin && (
