@@ -64,7 +64,7 @@ export function eliminateCandidates(
 }
 
 /**
- * when a candiate explodes, their votes go flying everywhere
+ * when a candidate explodes, their votes go flying everywhere
  * @param votes
  * @param eliminatedCandidateIds
  * @returns

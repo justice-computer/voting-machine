@@ -74,7 +74,7 @@ function WaitForVoters({ targetState }: WaitForVotersProps): JSX.Element {
 		<div className="waitForVoters">
 			{voters?.length ? (
 				<div className="waiting">
-					<h1>Waiting for voters...{targetState}</h1>
+					<h1>Waiting for voters...</h1>
 					<h2 style={{ padding: `10px` }}>Current voters:</h2>
 					<ul>
 						{voters.map((voter) => (
