@@ -76,8 +76,8 @@ importers:
         specifier: ^4.3.1
         version: 4.3.1(vite@5.2.0(@types/node@20.14.9))
       atom.io:
-        specifier: 0.24.8
-        version: 0.24.8(@testing-library/react@16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.2.22)(@types/react@18.2.66)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
+        specifier: 0.25.3
+        version: 0.25.3(@testing-library/react@16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.2.22)(@types/react@18.2.66)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
       c8:
         specifier: 10.1.2
         version: 10.1.2
@@ -100,8 +100,8 @@ importers:
   packages/justiciar:
     dependencies:
       atom.io:
-        specifier: 0.25.2
-        version: 0.25.2(@testing-library/react@16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.2.22)(@types/react@18.2.66)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
+        specifier: 0.25.3
+        version: 0.25.3(@testing-library/react@16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.2.22)(@types/react@18.2.66)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@vitest/browser':
         specifier: 1.6.0
@@ -1307,34 +1307,8 @@ packages:
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
 
-  atom.io@0.24.8:
-    resolution: {integrity: sha512-pfP3r3wSqcxsr6uzwxRj7plZnN6g/IEVXsgbNjUCw4LrwA8lfKF6QnSNd2gBNg0R0cath2plo5VpjbAWbqDXeQ==}
-    peerDependencies:
-      '@floating-ui/react': '>=0.25.0'
-      '@floating-ui/react-dom': '>=2.0.0'
-      '@testing-library/react': '>=14.0.0'
-      framer-motion: '>=10.0.0'
-      react: '>=18.0.0'
-      socket.io: '>=4.0.0'
-      socket.io-client: '>=4.0.0'
-    peerDependenciesMeta:
-      '@floating-ui/react':
-        optional: true
-      '@floating-ui/react-dom':
-        optional: true
-      '@testing-library/react':
-        optional: true
-      framer-motion:
-        optional: true
-      react:
-        optional: true
-      socket.io:
-        optional: true
-      socket.io-client:
-        optional: true
-
-  atom.io@0.25.2:
-    resolution: {integrity: sha512-RRE+32ICVWKjwWSqAIn2B+p9KYTgmlKcy7HrJVA8/QS6VDGDhoZyP1GMTFIZvkXFsG5l0pwbLqjJjg4CFDdT/A==}
+  atom.io@0.25.3:
+    resolution: {integrity: sha512-S2a3W4RlPJCeKFmxaHHYpy5WK4QNTQJHao6d/4vFI2XtOXbOqZ49K4Wy41D55gvvCjGzS8zVvxem5H8qfegdCQ==}
     peerDependencies:
       '@floating-ui/react': '>=0.25.0'
       '@floating-ui/react-dom': '>=2.0.0'
@@ -5289,12 +5263,7 @@ snapshots:
 
   asynckit@0.4.0: {}
 
-  atom.io@0.24.8(@testing-library/react@16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.2.22)(@types/react@18.2.66)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0):
-    optionalDependencies:
-      '@testing-library/react': 16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.2.22)(@types/react@18.2.66)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      react: 18.2.0
-
-  atom.io@0.25.2(@testing-library/react@16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.2.22)(@types/react@18.2.66)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0):
+  atom.io@0.25.3(@testing-library/react@16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.2.22)(@types/react@18.2.66)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0):
     optionalDependencies:
       '@testing-library/react': 16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.2.22)(@types/react@18.2.66)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react: 18.2.0
