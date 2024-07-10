@@ -1,11 +1,13 @@
 import "./seeResults.css"
 
+import { useO } from "atom.io/react"
 import { doc, getDoc } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
 import { db } from "../../lib/firebase"
 import { useUserStore } from "../../lib/userStore"
 import type { ActualVote, Candidate, ElectionData } from "../../types"
+import { currentElectionIdAtom } from "../WaitForVoters/WaitForVoters"
 
 type VoteSummary = {
 	[key: string]: {
@@ -164,10 +166,11 @@ function SeeResults(): JSX.Element {
 	const [candidateLookup, setCandidateLookup] = useState<CandidateLookup>({})
 	const [eliminatedCandidateIds, setEliminatedCandidateIds] = useState<string[]>([])
 	const [winner, setWinner] = useState<string | null>(null)
+	const currentElectionId = useO(currentElectionIdAtom)
 
 	useEffect(() => {
 		const newVoteSummary = { ...voteSummary }
-		void getDoc(doc(db, `elections`, `current`)).then(async (res) => {
+		void getDoc(doc(db, `elections`, currentElectionId)).then(async (res) => {
 			const electionData = res.data() as ElectionData
 			const promises = electionData.users.map(async (id) => {
 				return getVoteSummary(id, newVoteSummary, eliminatedCandidateIds)

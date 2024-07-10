@@ -1,11 +1,13 @@
 import "./admin.css"
 
 import { faker } from "@faker-js/faker"
+import { useO } from "atom.io/react"
 import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, setDoc } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
 import { db } from "../../lib/firebase"
 import type { ActualVote, ElectionData, SystemUser } from "../../types"
+import { currentElectionIdAtom } from "../WaitForVoters/WaitForVoters"
 
 type AdminProps = {
 	exitAdminMode: () => void
@@ -23,9 +25,10 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 	const [voters, setVoters] = useState<SystemUser[]>()
 	const [finishedVoters, setFinishedVoters] = useState<string[]>([])
 	const [currentState, setCurrentState] = useState<string>(`not-started`)
+	const currentElectionId = useO(currentElectionIdAtom)
 
 	useEffect(() => {
-		const unSub = onSnapshot(doc(db, `elections`, `current`), async (res) => {
+		const unSub = onSnapshot(doc(db, `elections`, currentElectionId), async (res) => {
 			const electionData = res.data() as ElectionData
 			setCurrentState(electionData.state)
 
@@ -57,11 +60,11 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 	}, [])
 
 	function handleElectionReset() {
-		void setDoc(doc(db, `elections`, `current`), { state: `not-started`, users: [] })
+		void setDoc(doc(db, `elections`, currentElectionId), { state: `not-started`, users: [] })
 	}
 
 	function handleStartTheElection() {
-		void setDoc(doc(db, `elections`, `current`), { state: `voting` }, { merge: true })
+		void setDoc(doc(db, `elections`, currentElectionId), { state: `voting` }, { merge: true })
 	}
 
 	async function handleAddRandomVoter() {
@@ -80,11 +83,11 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 			secondChoice: [],
 			thirdChoice: [],
 		})
-		const electionDoc = doc(db, `elections`, `current`)
+		const electionDoc = doc(db, `elections`, currentElectionId)
 		const electionDocSnap = await getDoc(electionDoc)
 		const electionData = electionDocSnap.data() as ElectionData
 		await setDoc(
-			doc(db, `elections`, `current`),
+			doc(db, `elections`, currentElectionId),
 			{ users: [...electionData.users, user.id] },
 			{ merge: true },
 		)
@@ -101,7 +104,7 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 		})
 	}
 	async function handleFinishElection() {
-		await setDoc(doc(db, `elections`, `current`), { state: `closed` }, { merge: true })
+		await setDoc(doc(db, `elections`, currentElectionId), { state: `closed` }, { merge: true })
 	}
 
 	// TODO: MAKE THESE BUTTONS NICER LOOKING

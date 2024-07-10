@@ -1,5 +1,6 @@
 import "./stateRouter.css"
 
+import { useO } from "atom.io/react"
 import { doc, onSnapshot } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
@@ -10,7 +11,7 @@ import Admin from "../Admin/Admin"
 import List from "../list/List"
 import UserBar from "../list/UserBar/UserBar"
 import SeeResults from "../SeeResults/SeeResults"
-import WaitForVoters from "../WaitForVoters/WaitForVoters"
+import WaitForVoters, { currentElectionIdAtom } from "../WaitForVoters/WaitForVoters"
 
 function NextComponent(
 	userElectionState: ElectionState,
@@ -44,10 +45,11 @@ function StateRouter(): JSX.Element {
 	const [electionState, setElectionState] = useState<ElectionState>(`not-started`)
 	const [hasVoted, setHasVoted] = useState(false)
 	const [adminMode, setAdminMode] = useState(false)
+	const currentElectionId = useO(currentElectionIdAtom)
 
 	// Election state
 	useEffect(() => {
-		const unSub = onSnapshot(doc(db, `elections`, `current`), (document) => {
+		const unSub = onSnapshot(doc(db, `elections`, currentElectionId), (document) => {
 			const electionData = document.data() as ElectionData
 			setElectionState(electionData.state)
 		})
