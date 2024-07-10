@@ -1,17 +1,16 @@
 import "./seeResults.css"
 
-import { useO } from "atom.io/react"
+import { makeMolecule, makeRootMolecule } from "atom.io"
 import { doc, getDoc } from "firebase/firestore"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
-import { currentElectionIdAtom } from "~/src/lib/atomStore"
-
+import { type ElectionInstance, electionMolecules } from "../../../packages/justiciar/src"
 import { db } from "../../lib/firebase"
 import { useUserStore } from "../../lib/userStore"
 import type { ActualVote, Candidate, ElectionData } from "../../types"
 
 type VoteSummary = {
-	[key: string]: {
+	[candidateKey: string]: {
 		firstChoice: number
 		secondChoice: number
 		thirdChoice: number
@@ -161,74 +160,38 @@ export async function getVoteSummary(
 	return newVoteSummary
 }
 
+const root = makeRootMolecule(`root`)
+
 function SeeResults(): JSX.Element {
 	const { currentUser } = useUserStore()
-	const [voteSummary, setVoteSummary] = useState<VoteSummary>({})
-	const [candidateLookup, setCandidateLookup] = useState<CandidateLookup>({})
-	const [eliminatedCandidateIds, setEliminatedCandidateIds] = useState<string[]>([])
-	const [winner, setWinner] = useState<string | null>(null)
-	const currentElectionId = useO(currentElectionIdAtom)
+	const electionRef = useRef<ElectionInstance | null>(null)
+	const [actualVotes, setActualVotes] = useState<ActualVote[]>([])
 
 	useEffect(() => {
-		if (currentElectionId == null) return
-		const newVoteSummary = { ...voteSummary }
-		void getDoc(doc(db, `elections`, currentElectionId)).then(async (res) => {
-			const electionData = res.data() as ElectionData
-			const promises = electionData.users.map(async (id) => {
-				return getVoteSummary(id, newVoteSummary, eliminatedCandidateIds)
+		if (electionRef.current === null) {
+			electionRef.current = makeMolecule(root, electionMolecules, `election0`, {
+				numberOfWinners: 3n,
+				votingTiers: [3n, 3n, 3n],
 			})
-			await Promise.all(promises).then(async () => {
-				const cPromises = Object.keys(newVoteSummary).map(async (candidateId) => {
-					const result = await getDoc(doc(db, `candidates`, candidateId))
-					const candidate = result.data() as Candidate
-					return candidate
-				})
-				await Promise.all(cPromises).then((candidates) => {
-					const newCandidateLookup = candidates.reduce((acc, candidate) => {
-						if (!candidate.id) return acc
-						acc[candidate.id] = candidate
-						return acc
-					}, {} as CandidateLookup)
-					setCandidateLookup(newCandidateLookup)
-					setVoteSummary(newVoteSummary)
-				})
-			})
-		})
-	}, [currentUser?.id, eliminatedCandidateIds, currentElectionId])
-
-	useEffect(() => {
-		console.log(`determining winning candidate...`)
-		const winningCandidateId = findWinningCandidateId(voteSummary, eliminatedCandidateIds)
-		if (winningCandidateId) {
-			setWinner(winningCandidateId)
-			console.log(
-				`The winner is ${candidateLookup[winningCandidateId]?.name ?? winningCandidateId}`,
-			)
 		}
-	}, [voteSummary, eliminatedCandidateIds])
+		void getDoc(doc(db, `elections`, `current`)).then(async (res) => {
+			const electionData = res.data() as ElectionData
+			console.log(electionData)
+			const votes = await Promise.all(
+				electionData.users.map(async (userKey) => {
+					const actualVoteDocToken = doc(db, `votes`, userKey)
+					const actualVoteDocSnapshot = await getDoc(actualVoteDocToken)
+					const actualVote = actualVoteDocSnapshot.data() as ActualVote
+					return actualVote
+				}),
+			)
+			setActualVotes(votes)
+		})
+	}, [currentUser?.id])
 
-	function handleProcess() {
-		const newEliminatedCandidateIds = eliminateCandidates(voteSummary, eliminatedCandidateIds)
-		setEliminatedCandidateIds(newEliminatedCandidateIds)
-		console.log(`eliminating candidate...`, newEliminatedCandidateIds)
-	}
+	console.log(actualVotes)
 
-	return (
-		<div className="seeResults">
-			{winner && <h1>The winner is {candidateLookup[winner]?.name ?? winner} 🎉</h1>}
-			{Object.entries(voteSummary).map(([candidateId, votes]) => (
-				<div key={candidateId} className="candidate">
-					<h2>{candidateLookup[candidateId]?.name ?? candidateId}</h2>
-					<p>First choice: {votes.firstChoice}</p>
-					<p>Second choice: {votes.secondChoice}</p>
-					<p>Third choice: {votes.thirdChoice}</p>
-				</div>
-			))}
-			<button type="button" onClick={handleProcess}>
-				Process results
-			</button>
-		</div>
-	)
+	return <div className="seeResults"></div>
 }
 
 export default SeeResults
