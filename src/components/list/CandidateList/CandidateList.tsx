@@ -1,9 +1,11 @@
 import "./candidateList.css"
 
+import { useO } from "atom.io/react"
 import { collection, doc, onSnapshot, setDoc } from "firebase/firestore"
 import { useEffect, useState } from "react"
 import { toast } from "react-toastify"
 
+import { currentElectionIdAtom } from "../../../lib/atomStore"
 import { db } from "../../../lib/firebase"
 import { useUserStore } from "../../../lib/userStore"
 import type { ActualVote, Candidate } from "../../../types"
@@ -16,6 +18,7 @@ function CandidateList(): JSX.Element {
 	const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null)
 	const [votes, setVotes] = useState<ActualVote | null>(null)
 	const { currentUser } = useUserStore()
+	const currentElectionId = useO(currentElectionIdAtom)
 
 	// Candidates
 	useEffect(() => {
@@ -55,10 +58,11 @@ function CandidateList(): JSX.Element {
 
 	const handleVote = async (vote: number | null) => {
 		console.log(vote)
-		if (selectedCandidate?.id == null) return
+		if (selectedCandidate?.id == null || currentElectionId == null) return
 		if (currentUser == null) return
 		const newVotes: ActualVote = {
 			voterId: currentUser.id,
+			electionId: currentElectionId,
 			firstChoice: votes?.firstChoice ?? [],
 			secondChoice: votes?.secondChoice ?? [],
 			thirdChoice: votes?.thirdChoice ?? [],

@@ -6,9 +6,8 @@ import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, setDoc } from "fi
 import { useEffect, useState } from "react"
 
 import { currentElectionIdAtom } from "~/src/lib/atomStore"
-
-import { db } from "../../lib/firebase"
-import type { ActualVote, ElectionData, SystemUser } from "../../types"
+import { db } from "~/src/lib/firebase"
+import type { ActualVote, ElectionData, SystemUser } from "~/src/types"
 
 type AdminProps = {
 	exitAdminMode: () => void
@@ -29,6 +28,7 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 	const currentElectionId = useO(currentElectionIdAtom)
 
 	useEffect(() => {
+		if (currentElectionId == null) return
 		const unSub = onSnapshot(doc(db, `elections`, currentElectionId), async (res) => {
 			const electionData = res.data() as ElectionData
 			setCurrentState(electionData.state)
@@ -58,17 +58,20 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 			})
 		})
 		return unSub
-	}, [])
+	}, [currentElectionId])
 
 	function handleElectionReset() {
+		if (currentElectionId == null) return
 		void setDoc(doc(db, `elections`, currentElectionId), { state: `not-started`, users: [] })
 	}
 
 	function handleStartTheElection() {
+		if (currentElectionId == null) return
 		void setDoc(doc(db, `elections`, currentElectionId), { state: `voting` }, { merge: true })
 	}
 
 	async function handleAddRandomVoter() {
+		if (currentElectionId == null) return
 		const newUser = {
 			username: faker.internet.userName(),
 			avatar: faker.image.avatar(),
@@ -105,6 +108,7 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 		})
 	}
 	async function handleFinishElection() {
+		if (currentElectionId == null) return
 		await setDoc(doc(db, `elections`, currentElectionId), { state: `closed` }, { merge: true })
 	}
 

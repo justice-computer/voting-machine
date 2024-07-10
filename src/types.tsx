@@ -22,12 +22,16 @@ export type AvatarImage = {
 export type ElectionState = `closed` | `not-started` | `voted` | `voting`
 
 export type ElectionData = {
+	id: string
+	name: string
 	state: ElectionState
+	createdAt: Date
 	users: string[]
 }
 
 export type ActualVote = {
 	voterId: string
+	electionId: string
 	firstChoice: string[]
 	secondChoice: string[]
 	thirdChoice: string[]

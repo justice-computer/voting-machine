@@ -21,6 +21,7 @@ function WaitForVoters({ targetState }: WaitForVotersProps): JSX.Element {
 	const currentElectionId = useO(currentElectionIdAtom)
 
 	useEffect(() => {
+		if (currentElectionId == null) return
 		const unSub = onSnapshot(doc(db, `elections`, currentElectionId), async (res) => {
 			const electionData = res.data() as ElectionData
 			const promises = electionData.users.map(async (id) => {
@@ -49,7 +50,7 @@ function WaitForVoters({ targetState }: WaitForVotersProps): JSX.Element {
 			})
 		})
 		return unSub
-	}, [currentUser?.id, targetState])
+	}, [currentUser?.id, targetState, currentElectionId])
 
 	const handleReturn = () => {
 		if (currentUser == null) return
@@ -57,7 +58,7 @@ function WaitForVoters({ targetState }: WaitForVotersProps): JSX.Element {
 	}
 
 	const handleJoin = async () => {
-		if (currentUser == null) return
+		if (currentUser == null || currentElectionId == null) return
 		await setDoc(doc(db, `votes`, currentUser.id), {
 			finished: false,
 			firstChoice: [],

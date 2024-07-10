@@ -1,7 +1,7 @@
 import "./stateRouter.css"
 
-import { useO } from "atom.io/react"
-import { doc, onSnapshot } from "firebase/firestore"
+import { useI, useO } from "atom.io/react"
+import { collection, doc, getDocs, onSnapshot } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
 import { currentElectionIdAtom } from "~/src/lib/atomStore"
@@ -48,15 +48,36 @@ function StateRouter(): JSX.Element {
 	const [hasVoted, setHasVoted] = useState(false)
 	const [adminMode, setAdminMode] = useState(false)
 	const currentElectionId = useO(currentElectionIdAtom)
+	const setCurrentElectionId = useI(currentElectionIdAtom)
+
+	// Current elections
+	useEffect(() => {
+		getDocs(collection(db, `elections`))
+			.then((elections) => {
+				const electionsData = elections.docs.map((election) => ({
+					id: election.id,
+					createdAt: election.data().createdAt,
+					name: election.data().name,
+				}))
+				const sortedElections = electionsData.sort((a, b) => b.createdAt - a.createdAt)
+				// Pick the newest election
+				setCurrentElectionId(sortedElections[0].id)
+				console.log(`using election ${sortedElections[0].name}`)
+			})
+			.catch((error) => {
+				console.error(error)
+			})
+	}, [currentUser?.id])
 
 	// Election state
 	useEffect(() => {
+		if (currentElectionId == null) return
 		const unSub = onSnapshot(doc(db, `elections`, currentElectionId), (document) => {
 			const electionData = document.data() as ElectionData
 			setElectionState(electionData.state)
 		})
 		return unSub
-	}, [currentUser?.id])
+	}, [currentUser?.id, currentElectionId])
 
 	// Votes
 	useEffect(() => {

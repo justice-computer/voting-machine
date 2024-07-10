@@ -170,6 +170,7 @@ function SeeResults(): JSX.Element {
 	const currentElectionId = useO(currentElectionIdAtom)
 
 	useEffect(() => {
+		if (currentElectionId == null) return
 		const newVoteSummary = { ...voteSummary }
 		void getDoc(doc(db, `elections`, currentElectionId)).then(async (res) => {
 			const electionData = res.data() as ElectionData
@@ -193,7 +194,7 @@ function SeeResults(): JSX.Element {
 				})
 			})
 		})
-	}, [currentUser?.id, eliminatedCandidateIds])
+	}, [currentUser?.id, eliminatedCandidateIds, currentElectionId])
 
 	useEffect(() => {
 		console.log(`determining winning candidate...`)
