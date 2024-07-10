@@ -14,7 +14,7 @@
 	"devDependencies": {
 		"@vitest/browser": "2.0.2",
 		"@vitest/coverage-v8": "2.0.2",
-		"json-schema-to-zod": "2.1.1",
+		"json-schema-to-zod": "2.3.0",
 		"openai": "4.52.0",
 		"varmint": "0.2.0",
 		"vite-tsconfig-paths": "4.3.2",
