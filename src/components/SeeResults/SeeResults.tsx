@@ -10,7 +10,6 @@ import {
 	runTransaction,
 } from "atom.io"
 import { findState } from "atom.io/ephemeral"
-import { IMPLICIT } from "atom.io/internal"
 import { useO } from "atom.io/react"
 import { collection, doc, getDoc, getDocs } from "firebase/firestore"
 import type {
@@ -33,7 +32,6 @@ function actualVoteToBallot(actualVote: ActualVote): Ballot {
 			election0: [actualVote.firstChoice, actualVote.secondChoice, actualVote.thirdChoice],
 		},
 	}
-	console.log(actualVote, ballot)
 	return ballot
 }
 
@@ -187,7 +185,6 @@ function SeeResults(): JSX.Element {
 
 		void getDoc(doc(db, `elections`, `current`)).then(async (snapshot) => {
 			const electionData = snapshot.data() as ElectionData
-			console.log(electionData)
 			const votes = await Promise.all<ActualVote>(
 				electionData.users.map(async (userKey) => {
 					const actualVoteDocToken = doc(db, `votes`, userKey)
@@ -220,7 +217,6 @@ function SeeResults(): JSX.Element {
 			console.error(`No election found`)
 			return
 		}
-		console.log(IMPLICIT.STORE.valueMap)
 		for (const actualVote of actualVotes) {
 			runTransaction(election.registerVoter)(actualVote.voterId)
 		}
