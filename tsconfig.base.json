@@ -3,7 +3,11 @@
 	"compilerOptions": {
 		"esModuleInterop": true,
 		"jsx": "react-jsx",
-		"strict": true
+		"strict": true,
+		"baseUrl": "./",
+		"paths": {
+			"~/*": ["./*"]
+		}
 	},
 	"include": ["**/*.ts", "**/*.tsx", "**/*.d.ts"]
 }

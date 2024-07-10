@@ -5,9 +5,10 @@ import { useO } from "atom.io/react"
 import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, setDoc } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
+import { currentElectionIdAtom } from "~/src/lib/atomStore"
+
 import { db } from "../../lib/firebase"
 import type { ActualVote, ElectionData, SystemUser } from "../../types"
-import { currentElectionIdAtom } from "../WaitForVoters/WaitForVoters"
 
 type AdminProps = {
 	exitAdminMode: () => void

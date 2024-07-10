@@ -1,9 +1,10 @@
 import "./waitForVoters.css"
 
-import { atom } from "atom.io"
 import { useO } from "atom.io/react"
 import { doc, getDoc, onSnapshot, setDoc } from "firebase/firestore"
 import { useEffect, useState } from "react"
+
+import { currentElectionIdAtom } from "~/src/lib/atomStore"
 
 import { db } from "../../lib/firebase"
 import { useUserStore } from "../../lib/userStore"
@@ -12,11 +13,6 @@ import type { ActualVote, ElectionData, ElectionState, SystemUser } from "../../
 type WaitForVotersProps = {
 	targetState: ElectionState
 }
-
-export const currentElectionIdAtom = atom<string>({
-	key: `currentElectionId`,
-	default: `current`,
-})
 
 function WaitForVoters({ targetState }: WaitForVotersProps): JSX.Element {
 	const { currentUser } = useUserStore()

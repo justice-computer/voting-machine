@@ -4,10 +4,11 @@ import { useO } from "atom.io/react"
 import { doc, getDoc } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
+import { currentElectionIdAtom } from "~/src/lib/atomStore"
+
 import { db } from "../../lib/firebase"
 import { useUserStore } from "../../lib/userStore"
 import type { ActualVote, Candidate, ElectionData } from "../../types"
-import { currentElectionIdAtom } from "../WaitForVoters/WaitForVoters"
 
 type VoteSummary = {
 	[key: string]: {

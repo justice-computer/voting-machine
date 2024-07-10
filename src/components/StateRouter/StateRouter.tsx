@@ -4,6 +4,8 @@ import { useO } from "atom.io/react"
 import { doc, onSnapshot } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
+import { currentElectionIdAtom } from "~/src/lib/atomStore"
+
 import { db } from "../../lib/firebase"
 import { useUserStore } from "../../lib/userStore"
 import type { ActualVote, ElectionData, ElectionState } from "../../types"
@@ -11,7 +13,7 @@ import Admin from "../Admin/Admin"
 import List from "../list/List"
 import UserBar from "../list/UserBar/UserBar"
 import SeeResults from "../SeeResults/SeeResults"
-import WaitForVoters, { currentElectionIdAtom } from "../WaitForVoters/WaitForVoters"
+import WaitForVoters from "../WaitForVoters/WaitForVoters"
 
 function NextComponent(
 	userElectionState: ElectionState,
