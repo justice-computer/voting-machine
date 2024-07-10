@@ -3,10 +3,10 @@ import "./userBar.css"
 import { useUserStore } from "../../../lib/userStore"
 
 type UserBarProps = {
-	turnOnAdminMode: () => void
+	toggleAdminMode: () => void
 }
 
-function UserBar({ turnOnAdminMode }: UserBarProps): JSX.Element {
+function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 	const { currentUser, logout } = useUserStore()
 
 	function handleLogout() {
@@ -14,7 +14,7 @@ function UserBar({ turnOnAdminMode }: UserBarProps): JSX.Element {
 	}
 
 	function handleAdmin() {
-		turnOnAdminMode()
+		toggleAdminMode()
 	}
 
 	return (
@@ -32,7 +32,6 @@ function UserBar({ turnOnAdminMode }: UserBarProps): JSX.Element {
 						<img src="./gear-icon.svg" alt="admin" />
 					</button>
 				)}
-				<img src="./edit.png" alt="edit" />
 			</div>
 		</div>
 	)

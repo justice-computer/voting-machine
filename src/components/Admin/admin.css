@@ -1,0 +1,33 @@
+.admin {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: scroll;
+  width: 90%;
+  max-width: 377px;
+  min-width: 320px; /* or any minimum width you prefer */
+  margin: 0 auto;
+}
+
+.admin-button {
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+
+  img {
+    width: 35px;
+    height: 35px;
+    padding-right: 10px;
+  }
+}
+
+.admin-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}

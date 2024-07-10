@@ -104,6 +104,7 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 		await setDoc(doc(db, `elections`, `current`), { state: `closed` }, { merge: true })
 	}
 
+	// TODO: MAKE THESE BUTTONS NICER LOOKING
 	return (
 		<div className="admin">
 			<h1>Admin</h1>
@@ -116,11 +117,15 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 							<div className="UserBar" key={voter.id}>
 								<div className="user">
 									<img src={voter?.avatar ?? `./avatar.png`} alt="avatar" />
-									<h2>{voter?.username}</h2>
+									<p>{voter?.username}</p>
 									{finishedVoters.includes(voter.id) ? (
 										<p>✅</p>
 									) : (
-										<button type="button" onClick={() => handleAddVotes(voter.id)}>
+										<button
+											className="admin-button"
+											type="button"
+											onClick={() => handleAddVotes(voter.id)}
+										>
 											Add Votes
 										</button>
 									)}
@@ -135,33 +140,28 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 					<p>No voters yet</p>
 				</div>
 			)}
-			<ul>
-				<li>
-					<button type="button" onClick={handleElectionReset}>
-						Reset election
-					</button>
-				</li>
-				<li>
-					<button type="button" onClick={handleAddRandomVoter}>
-						Add random voter
-					</button>
-				</li>
-				<li>
-					<button type="button" onClick={handleStartTheElection}>
-						Start the election
-					</button>
-				</li>
-				<li>
-					<button type="button" onClick={handleFinishElection}>
-						Finish the election
-					</button>
-				</li>
-				<li>
-					<button type="button" onClick={exitAdminMode}>
-						EXIT ADMIN MODE
-					</button>
-				</li>
-			</ul>
+			<div className="admin-buttons">
+				<button className="admin-button" type="button" onClick={handleElectionReset}>
+					<img src="./reset-icon.svg" alt="reset" />
+					Reset election
+				</button>
+				<button className="admin-button" type="button" onClick={handleAddRandomVoter}>
+					<img src="./random-icon.svg" alt="add random" />
+					Add random voter
+				</button>
+				<button className="admin-button" type="button" onClick={handleStartTheElection}>
+					<img src="./play-icon.svg" alt="start" />
+					Start the election
+				</button>
+				<button className="admin-button" type="button" onClick={handleFinishElection}>
+					<img src="./finish-icon.svg" alt="finish" />
+					Finish the election
+				</button>
+				<button className="admin-button" type="button" onClick={exitAdminMode}>
+					<img src="./exit-icon.svg" alt="exit" />
+					EXIT ADMIN MODE
+				</button>
+			</div>
 		</div>
 	)
 }

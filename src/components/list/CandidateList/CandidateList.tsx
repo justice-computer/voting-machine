@@ -161,11 +161,17 @@ function CandidateList(): JSX.Element {
 						>
 							<img src={candidate.avatar ?? `./avatar.png`} alt="avatar" />
 							<div className="info">
-								<h2>{candidate.name}</h2>
+								<h3>{candidate.name}</h3>
 								<p>{candidate.heading}</p>
-								{votes?.firstChoice?.includes(candidate?.id ?? ``) ? <p>✅ VOTED 1️⃣</p> : null}
-								{votes?.secondChoice?.includes(candidate?.id ?? ``) ? <p>✅ VOTED 2️⃣</p> : null}
-								{votes?.thirdChoice?.includes(candidate?.id ?? ``) ? <p>✅ VOTED 3️⃣</p> : null}
+								{votes?.firstChoice?.includes(candidate?.id ?? ``) ? (
+									<img className="first" src="./one-icon.svg" alt="one" />
+								) : null}
+								{votes?.secondChoice?.includes(candidate?.id ?? ``) ? (
+									<img className="second" src="./two-icon.svg" alt="two" />
+								) : null}
+								{votes?.thirdChoice?.includes(candidate?.id ?? ``) ? (
+									<img className="third" src="./three-icon.svg" alt="three" />
+								) : null}
 							</div>
 						</div>
 					))}
@@ -182,6 +188,7 @@ function CandidateList(): JSX.Element {
 					}
 				}}
 			>
+				{/* TODO: Put this at the top of the page and require a confirmation and warning about unused votes */}
 				Finished Voting
 			</button>
 		</>

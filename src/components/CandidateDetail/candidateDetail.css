@@ -1,8 +1,7 @@
 .candidateDetail {
-  width: max-content;
   height: max-content;
   padding: 30px;
-  background-color: rgba(17, 25, 40, 0.781);
+  background-color: black;
   border-radius: 10px;
   position: absolute;
   top: 0;
@@ -21,6 +20,35 @@
     padding: 30px;
     gap: 20px;
     display: flex;
+    justify-content: space-between;
+
+    img {
+      padding: 10px;
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      width: 35px;
+      height: 35px;
+      padding-right: 10px;
+    }
+
+    .first {
+      background-color: #6ae491;
+    }
+
+    .second {
+      background-color: #7ee46a;
+    }
+
+    .third {
+      background-color: #9de46a;
+    }
+
+    .cancel {
+      background-color: #e46a6a;
+    }
 
     button {
       width: 20px;
@@ -29,23 +57,20 @@
       background-color: white;
     }
   }
-  
 
-
-
-  form{
+  form {
     display: flex;
     flex-direction: column;
     gap: 20px;
 
-    input{
+    input {
       padding: 20px;
       border-radius: 10px;
       border: none;
       outline: none;
     }
 
-    textarea{
+    textarea {
       padding: 20px;
       height: 150px;
       border-radius: 10px;
@@ -69,7 +94,7 @@
         opacity: 60%;
       }
     }
-    button{
+    button {
       padding: 20px;
       border-radius: 10px;
       background-color: #1a73e8;
@@ -79,18 +104,18 @@
     }
   }
 
-  .user{
+  .user {
     margin-top: 50px;
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    .detail{
+    .detail {
       display: flex;
       align-items: center;
       gap: 20px;
 
-      img{
+      img {
         width: 50px;
         height: 50px;
         border-radius: 50%;
@@ -98,7 +123,7 @@
       }
     }
 
-    button{
+    button {
       padding: 10px;
       border-radius: 10px;
       background-color: #1a73e8;

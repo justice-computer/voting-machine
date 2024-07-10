@@ -8,7 +8,6 @@ type CandidateDetailProps = {
 }
 
 function CandidateDetail({ candidate, handleVote }: CandidateDetailProps): JSX.Element {
-	console.log(candidate)
 	return (
 		<div className="candidateDetail">
 			<img src={candidate.avatar ?? `./avatar.png`} alt="avatar" />
@@ -24,7 +23,7 @@ function CandidateDetail({ candidate, handleVote }: CandidateDetailProps): JSX.E
 						handleVote(1)
 					}}
 				>
-					1️⃣
+					<img className="first" src="./one-icon.svg" alt="one" />
 				</button>
 				<button
 					type="button"
@@ -32,7 +31,7 @@ function CandidateDetail({ candidate, handleVote }: CandidateDetailProps): JSX.E
 						handleVote(2)
 					}}
 				>
-					2️⃣⃣
+					<img className="second" src="./two-icon.svg" alt="two" />
 				</button>
 				<button
 					type="button"
@@ -40,7 +39,7 @@ function CandidateDetail({ candidate, handleVote }: CandidateDetailProps): JSX.E
 						handleVote(3)
 					}}
 				>
-					3️⃣
+					<img className="third" src="./three-icon.svg" alt="three" />
 				</button>
 				<button
 					type="button"
@@ -48,7 +47,7 @@ function CandidateDetail({ candidate, handleVote }: CandidateDetailProps): JSX.E
 						handleVote(null)
 					}}
 				>
-					❌
+					<img className="cancel" src="./cancel-icon.svg" alt="cancel" />
 				</button>
 			</div>
 		</div>
