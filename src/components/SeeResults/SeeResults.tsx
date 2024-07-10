@@ -13,18 +13,18 @@ import { findState } from "atom.io/ephemeral"
 import { IMPLICIT } from "atom.io/internal"
 import { useO } from "atom.io/react"
 import { collection, doc, getDoc, getDocs } from "firebase/firestore"
-import { useEffect, useRef, useState } from "react"
-
 import type {
 	Ballot,
 	CandidateStatus,
 	ElectionInstance,
 	ElectionRoundInstance,
 	ElectionRoundOutcome,
-} from "../../../packages/justiciar/src"
-import { electionMolecules } from "../../../packages/justiciar/src"
-import { db } from "../../lib/firebase"
-import type { ActualVote, Candidate, ElectionData } from "../../types"
+} from "justiciar"
+import { electionMolecules } from "justiciar"
+import { useEffect, useRef, useState } from "react"
+
+import { db } from "~/src/lib/firebase"
+import type { ActualVote, Candidate, ElectionData } from "~/src/types"
 
 function actualVoteToBallot(actualVote: ActualVote): Ballot {
 	const ballot: Ballot = {

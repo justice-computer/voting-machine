@@ -6,7 +6,8 @@
 		"strict": true,
 		"baseUrl": "./",
 		"paths": {
-			"~/*": ["./*"]
+			"~/*": ["./*"],
+			"justiciar": ["./packages/justiciar/src"]
 		}
 	},
 	"include": ["**/*.ts", "**/*.tsx", "**/*.d.ts"]
