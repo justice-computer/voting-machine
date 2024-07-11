@@ -60,9 +60,22 @@ function StateRouter(): JSX.Element {
 					name: election.data().name,
 				}))
 				const sortedElections = electionsData.sort((a, b) => b.createdAt - a.createdAt)
-				// Pick the newest election
-				setCurrentElectionId(sortedElections[0].id)
-				console.log(`using election ${sortedElections[0].name}`)
+
+				// Pick the newest election, unless there is one stored in localStorage
+				const storedElectionId = localStorage.getItem(`electionId`)
+				if (storedElectionId) {
+					const storedElection = sortedElections.find(
+						(election) => election.id === storedElectionId,
+					)
+					if (storedElection) {
+						setCurrentElectionId(storedElection.id)
+						console.log(`using stored election ${sortedElections[0].name}`)
+					}
+				} else {
+					setCurrentElectionId(sortedElections[0].id)
+					localStorage.setItem(`electionId`, sortedElections[0].id)
+					console.log(`auto-selecting election ${sortedElections[0].name}`)
+				}
 			})
 			.catch((error) => {
 				console.error(error)
