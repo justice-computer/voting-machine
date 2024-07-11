@@ -26,6 +26,7 @@ export type ElectionData = {
 	name: string
 	state: ElectionState
 	createdAt: Date
+	createdBy: string
 	users: string[]
 }
 

@@ -1,12 +1,15 @@
 import "./admin.css"
 
 import { faker } from "@faker-js/faker"
-import { useO } from "atom.io/react"
+import { useI, useO } from "atom.io/react"
 import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, setDoc } from "firebase/firestore"
 import { useEffect, useState } from "react"
+import { toast } from "react-toastify"
 
+import NewElection from "~/src/components/NewElection/NewElection"
 import { currentElectionIdAtom } from "~/src/lib/atomStore"
 import { db } from "~/src/lib/firebase"
+import { useUserStore } from "~/src/lib/userStore"
 import type { ActualVote, ElectionData, SystemUser } from "~/src/types"
 
 type AdminProps = {
@@ -25,7 +28,10 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 	const [voters, setVoters] = useState<SystemUser[]>()
 	const [finishedVoters, setFinishedVoters] = useState<string[]>([])
 	const [currentState, setCurrentState] = useState<string>(`not-started`)
+	const [showNewElection, setShowNewElection] = useState(false)
 	const currentElectionId = useO(currentElectionIdAtom)
+	const setCurrentElectionId = useI(currentElectionIdAtom)
+	const { currentUser } = useUserStore()
 
 	useEffect(() => {
 		if (currentElectionId == null) return
@@ -83,6 +89,7 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 			name: faker.person.fullName(),
 		}
 		const user = await addDoc(collection(db, `users`), newUser)
+
 		// Add the ID back in
 		await setDoc(doc(db, `users`, user.id), { id: user.id }, { merge: true })
 		await setDoc(doc(db, `votes`, user.id), {
@@ -101,6 +108,25 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 		)
 	}
 
+	async function handleNewElection(name: string) {
+		if (!currentUser) return
+		try {
+			const newElection: Omit<ElectionData, `id`> = {
+				name,
+				createdBy: currentUser?.id,
+				state: `not-started`,
+				createdAt: new Date(),
+				users: [],
+			}
+			const election = await addDoc(collection(db, `elections`), newElection)
+			setCurrentElectionId(election.id)
+			setShowNewElection(false)
+		} catch (error: any) {
+			console.error(error)
+			toast.error(`Error creating election ${error.message}`)
+		}
+	}
+
 	async function handleAddVotes(voterId: string) {
 		const candidates = await getDocs(collection(db, `candidates`))
 		const ids = shuffleArray(candidates.docs.map((document) => document.id))
@@ -111,14 +137,22 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 			thirdChoice: ids.slice(6, 9),
 		})
 	}
+
 	async function handleFinishElection() {
 		if (currentElectionId == null) return
 		await setDoc(doc(db, `elections`, currentElectionId), { state: `closed` }, { merge: true })
 	}
 
-	// TODO: MAKE THESE BUTTONS NICER LOOKING
 	return (
 		<div className="admin">
+			{showNewElection ? (
+				<NewElection
+					close={() => {
+						setShowNewElection(!showNewElection)
+					}}
+					handleNewElection={handleNewElection}
+				/>
+			) : null}
 			<h1>Admin</h1>
 			<p>Current state: {currentState}</p>
 			<p>Current voters:</p>
@@ -153,6 +187,16 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 				</div>
 			)}
 			<div className="admin-buttons">
+				<button
+					className="admin-button"
+					type="button"
+					onClick={() => {
+						setShowNewElection(true)
+					}}
+				>
+					<img src="./new-icon.svg" alt="new" />
+					Create new election
+				</button>
 				<button className="admin-button" type="button" onClick={handleElectionReset}>
 					<img src="./reset-icon.svg" alt="reset" />
 					Reset election
