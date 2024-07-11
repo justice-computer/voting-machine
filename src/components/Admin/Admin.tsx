@@ -136,6 +136,7 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 			secondChoice: ids.slice(3, 6),
 			thirdChoice: ids.slice(6, 9),
 		})
+		setFinishedVoters((prev) => [...prev, voterId])
 	}
 
 	async function handleFinishElection() {

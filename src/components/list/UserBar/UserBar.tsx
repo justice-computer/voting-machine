@@ -162,7 +162,7 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 					}}
 				>
 					<img src="./switch-icon.svg" alt="change" />
-					{currentElectionName && <h2>{currentElectionName}</h2>}
+					{currentElectionName && <p>{currentElectionName}</p>}
 				</button>
 				<button
 					type="button"
@@ -171,12 +171,10 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 					}}
 				>
 					<img src="./power-off-icon.svg" alt="logout" />
-					Log off
 				</button>
 				{currentUser?.admin && (
 					<button type="button" onClick={handleAdmin}>
 						<img src="./gear-icon.svg" alt="admin" />
-						Admin
 					</button>
 				)}
 			</div>
