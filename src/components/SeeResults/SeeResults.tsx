@@ -7,6 +7,7 @@ import {
 	makeMolecule,
 	makeRootMolecule,
 	runTransaction,
+	selector,
 	transaction,
 } from "atom.io"
 import { findState } from "atom.io/ephemeral"
@@ -71,6 +72,27 @@ const resultsViewAtom = atom<ResultsViewState<ResultsViewPhase>>({
 		frame: [`show_candidates`, null],
 	} satisfies ResultsViewState<`winner_selection`>,
 })
+const viewLocationSelector = selector<`beginning` | `end` | `middle`>({
+	key: `viewLocation`,
+	get: ({ get }) => {
+		const view = get(resultsViewAtom)
+		if (
+			view.round === 0 &&
+			view.phase === `winner_selection` &&
+			view.frame[0] === `show_candidates`
+		) {
+			return `beginning`
+		}
+		if (
+			view.round === Number.POSITIVE_INFINITY &&
+			view.phase === `done` &&
+			view.frame[0] === `done`
+		) {
+			return `end`
+		}
+		return `middle`
+	},
+})
 
 const changeFrameTX = transaction<(direction: `next` | `prev`) => void>({
 	key: `nextFrame`,
@@ -103,14 +125,22 @@ const changeFrameTX = transaction<(direction: `next` | `prev`) => void>({
 						break
 				}
 			} else if (newPhase === undefined) {
-				if (direction === `prev`) {
+				switch (direction) {
+					case `next`:
+						newRound = state.round + 1
+						newPhase = `surplus_allocation`
+						newFrame = [`show_surplus_ratio`, null]
+						break
+					case `prev`:
+						newRound = state.round - 1
+						newPhase = `done`
+						newFrame = [`done`, null]
+						break
+				}
+				if (newRound === -1) {
 					console.error(`You are at the beginning and cannot go back!`)
 					return
 				}
-				newRound = state.round + 1
-				newPhase = RESULTS_VIEW_PHASES[0]
-				const newPhaseFrames = RESULTS_VIEW_KEYFRAMES[newPhase]
-				newFrame = newPhaseFrames[0]
 			}
 		}
 		set(resultsViewAtom, {
@@ -267,6 +297,8 @@ export const candidateAtoms = atomFamily<Candidate, string>({
 })
 
 function SeeResults(): JSX.Element {
+	const resultsView = useO(resultsViewAtom)
+	const viewLocation = useO(viewLocationSelector)
 	const electionRef = useRef<ElectionInstance | null>(null)
 	const [actualVotes, setActualVotes] = useState<ActualVote[]>([])
 	const [candidates, setCandidates] = useState<Candidate[]>([])
@@ -337,12 +369,45 @@ function SeeResults(): JSX.Element {
 			}
 			console.log(ballots)
 			runTransaction(election.beginCounting)()
+			election.spawnRound()
 		}
 	}, [actualVotes, candidates])
 
+	useEffect(() => {
+		if (electionRef.current && getState(electionRef.current.state.phase).name === `counting`) {
+			let safety = 15
+			while (resultsView.round > electionRef.current.rounds.length - 1 && safety > 0) {
+				electionRef.current.spawnRound()
+				safety--
+			}
+		}
+	}, [resultsView.round])
+
+	const changeFrame = runTransaction(changeFrameTX)
 	return (
 		<div className={scss.class}>
 			{electionRef.current ? <ElectionRounds election={electionRef.current} /> : null}
+			<div>{resultsView.round}</div>
+			<div>{resultsView.phase}</div>
+			<div>{resultsView.frame}</div>
+			<button
+				type="button"
+				disabled={viewLocation === `beginning`}
+				onClick={() => {
+					changeFrame(`prev`)
+				}}
+			>
+				prev
+			</button>
+			<button
+				type="button"
+				disabled={viewLocation === `end`}
+				onClick={() => {
+					changeFrame(`next`)
+				}}
+			>
+				next
+			</button>
 		</div>
 	)
 }
