@@ -1,7 +1,6 @@
 import "./userBar.css"
 
 import { useI, useO } from "atom.io/react"
-import type { Timestamp } from "firebase/firestore"
 import { collection, doc, getDoc, getDocs, onSnapshot } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
@@ -55,10 +54,10 @@ function ChangeElection({ handleChangeElection, close }: ChangeElectionProps): J
 						formattedCreatedAt,
 					}
 				})
+
 				Promise.all(electionsPromises)
 					.then((electionsData) => {
 						const sortedElections = electionsData.sort((a, b) => b.createdAt - a.createdAt)
-						console.log(`>>>>>>>>>>>>>>>>>>>>>>>>>>`, sortedElections)
 						setElectionData(sortedElections)
 					})
 					.catch((error) => {
@@ -129,6 +128,7 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 
 	function handleChangeElection(id: string) {
 		setCurrentElectionId(id)
+		localStorage.setItem(`electionId`, id)
 		setShowChangeElection(false)
 	}
 
@@ -162,7 +162,7 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 					}}
 				>
 					<img src="./switch-icon.svg" alt="change" />
-					{currentElectionName && <p>{currentElectionName}</p>}
+					{currentElectionName && <p style={{ marginLeft: `10px` }}>{currentElectionName}</p>}
 				</button>
 				<button
 					type="button"
