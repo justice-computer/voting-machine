@@ -1,11 +1,14 @@
 import type { AtomToken, ReadonlySelectorToken } from "atom.io"
 import {
+	atom,
 	atomFamily,
 	disposeState,
 	getState,
 	makeMolecule,
 	makeRootMolecule,
 	runTransaction,
+	selector,
+	transaction,
 } from "atom.io"
 import { findState } from "atom.io/ephemeral"
 import { useO } from "atom.io/react"
@@ -24,6 +27,129 @@ import { db } from "~/src/lib/firebase"
 import type { ActualVote, Candidate, ElectionData } from "~/src/types"
 
 import scss from "./SeeResults.module.scss"
+
+const RESULTS_VIEW_PHASES = [
+	`surplus_allocation`,
+	`winner_selection`,
+	`loser_selection`,
+	`done`,
+] as const
+type ResultsViewPhase = (typeof RESULTS_VIEW_PHASES)[number]
+const RESULTS_VIEW_KEYFRAMES = {
+	surplus_allocation: [
+		[`show_surplus_ratio`, null],
+		[`show_alternative_consensus`, null],
+		[`compress_alternative_consensus`, null],
+		[`distribute_surplus`, null],
+	],
+	winner_selection: [
+		[`show_candidates`, null],
+		[`sort_candidates`, null],
+		[`draw_quota_line`, null],
+		[`highlight_winners`, null],
+	],
+	loser_selection: [
+		[`show_candidates`, null],
+		[`sort_candidates`, null],
+		[`highlight_losers`, null],
+	],
+	done: [[`done`, null]],
+} as const satisfies Record<ResultsViewPhase, [name: string, state: unknown][]>
+type ResultsViewKeyframe<Phase extends ResultsViewPhase> =
+	(typeof RESULTS_VIEW_KEYFRAMES)[Phase][number]
+
+type ResultsViewState<Phase extends ResultsViewPhase> = {
+	round: number
+	phase: Phase
+	frame: ResultsViewKeyframe<Phase>
+}
+
+const resultsViewAtom = atom<ResultsViewState<ResultsViewPhase>>({
+	key: `resultsView`,
+	default: {
+		round: 0,
+		phase: `winner_selection`,
+		frame: [`show_candidates`, null],
+	} satisfies ResultsViewState<`winner_selection`>,
+})
+const viewLocationSelector = selector<`beginning` | `end` | `middle`>({
+	key: `viewLocation`,
+	get: ({ get }) => {
+		const view = get(resultsViewAtom)
+		if (
+			view.round === 0 &&
+			view.phase === `winner_selection` &&
+			view.frame[0] === `show_candidates`
+		) {
+			return `beginning`
+		}
+		if (
+			view.round === Number.POSITIVE_INFINITY &&
+			view.phase === `done` &&
+			view.frame[0] === `done`
+		) {
+			return `end`
+		}
+		return `middle`
+	},
+})
+
+const changeFrameTX = transaction<(direction: `next` | `prev`) => void>({
+	key: `nextFrame`,
+	do: ({ get, set }, direction) => {
+		const state = get(resultsViewAtom)
+		let newRound = state.round
+		let newPhase: ResultsViewPhase = state.phase
+		let newFrame: ResultsViewKeyframe<ResultsViewPhase>
+		const currentPhaseFrames = RESULTS_VIEW_KEYFRAMES[state.phase]
+		const currentIndex = currentPhaseFrames.findIndex((frame) => frame[0] === state.frame[0])
+		const newIndex = currentIndex + (direction === `next` ? 1 : -1)
+		newFrame = currentPhaseFrames[newIndex]
+		if (!newFrame) {
+			switch (direction) {
+				case `next`:
+					newPhase = RESULTS_VIEW_PHASES[RESULTS_VIEW_PHASES.indexOf(state.phase) + 1]
+					break
+				case `prev`:
+					newPhase = RESULTS_VIEW_PHASES[RESULTS_VIEW_PHASES.indexOf(state.phase) - 1]
+					break
+			}
+			if (newPhase) {
+				const newPhaseFrames = RESULTS_VIEW_KEYFRAMES[newPhase]
+				switch (direction) {
+					case `next`:
+						newFrame = newPhaseFrames[0]
+						break
+					case `prev`:
+						newFrame = newPhaseFrames[newPhaseFrames.length - 1]
+						break
+				}
+			} else if (newPhase === undefined) {
+				switch (direction) {
+					case `next`:
+						newRound = state.round + 1
+						newPhase = `surplus_allocation`
+						newFrame = [`show_surplus_ratio`, null]
+						break
+					case `prev`:
+						newRound = state.round - 1
+						newPhase = `done`
+						newFrame = [`done`, null]
+						break
+				}
+				if (newRound === -1) {
+					console.error(`You are at the beginning and cannot go back!`)
+					return
+				}
+			}
+		}
+		set(resultsViewAtom, {
+			round: newRound,
+			phase: newPhase,
+			frame: newFrame,
+		})
+	},
+})
 
 function actualVoteToBallot(actualVote: ActualVote): Ballot {
 	const ballot: Ballot = {
@@ -171,6 +297,8 @@ export const candidateAtoms = atomFamily<Candidate, string>({
 })
 
 function SeeResults(): JSX.Element {
+	const resultsView = useO(resultsViewAtom)
+	const viewLocation = useO(viewLocationSelector)
 	const electionRef = useRef<ElectionInstance | null>(null)
 	const [actualVotes, setActualVotes] = useState<ActualVote[]>([])
 	const [candidates, setCandidates] = useState<Candidate[]>([])
@@ -241,12 +369,45 @@ function SeeResults(): JSX.Element {
 			}
 			console.log(ballots)
 			runTransaction(election.beginCounting)()
+			election.spawnRound()
 		}
 	}, [actualVotes, candidates])
 
+	useEffect(() => {
+		if (electionRef.current && getState(electionRef.current.state.phase).name === `counting`) {
+			let safety = 15
+			while (resultsView.round > electionRef.current.rounds.length - 1 && safety > 0) {
+				electionRef.current.spawnRound()
+				safety--
+			}
+		}
+	}, [resultsView.round])
+
+	const changeFrame = runTransaction(changeFrameTX)
 	return (
 		<div className={scss.class}>
 			{electionRef.current ? <ElectionRounds election={electionRef.current} /> : null}
+			<div>{resultsView.round}</div>
+			<div>{resultsView.phase}</div>
+			<div>{resultsView.frame}</div>
+			<button
+				type="button"
+				disabled={viewLocation === `beginning`}
+				onClick={() => {
+					changeFrame(`prev`)
+				}}
+			>
+				prev
+			</button>
+			<button
+				type="button"
+				disabled={viewLocation === `end`}
+				onClick={() => {
+					changeFrame(`next`)
+				}}
+			>
+				next
+			</button>
 		</div>
 	)
 }
