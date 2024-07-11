@@ -62,7 +62,11 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 
 	function handleElectionReset() {
 		if (currentElectionId == null) return
-		void setDoc(doc(db, `elections`, currentElectionId), { state: `not-started`, users: [] })
+		void setDoc(
+			doc(db, `elections`, currentElectionId),
+			{ state: `not-started`, users: [] },
+			{ merge: true },
+		)
 	}
 
 	function handleStartTheElection() {
