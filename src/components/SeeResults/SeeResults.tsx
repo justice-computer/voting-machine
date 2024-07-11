@@ -1,5 +1,3 @@
-import "./seeResults.css"
-
 import type { AtomToken, ReadonlySelectorToken } from "atom.io"
 import {
 	atomFamily,
@@ -24,6 +22,8 @@ import { useEffect, useRef, useState } from "react"
 
 import { db } from "~/src/lib/firebase"
 import type { ActualVote, Candidate, ElectionData } from "~/src/types"
+
+import scss from "./SeeResults.module.scss"
 
 function actualVoteToBallot(actualVote: ActualVote): Ballot {
 	const ballot: Ballot = {
@@ -207,39 +207,45 @@ function SeeResults(): JSX.Element {
 		})
 
 		return () => {
-			disposeState(electionToken)
+			if (import.meta.env.PROD) {
+				disposeState(electionToken)
+			}
 		}
 	}, [])
 
-	const setupElection = () => {
+	useEffect(() => {
+		if (actualVotes.length === 0 || candidates.length === 0) return
 		const election = electionRef.current
 		if (!election) {
 			console.error(`No election found`)
 			return
 		}
-		for (const actualVote of actualVotes) {
-			runTransaction(election.registerVoter)(actualVote.voterId)
-		}
-		for (const candidate of candidates) {
-			const candidateId = candidate.id
-			if (!candidateId) {
-				console.error(`Candidate "${candidate.name}" has no ID`)
-				return
+		if (getState(election.state.phase).name === `registration`) {
+			for (const actualVote of actualVotes) {
+				runTransaction(election.registerVoter)(actualVote.voterId)
 			}
-			runTransaction(election.registerCandidate)(candidateId)
+			for (const candidate of candidates) {
+				const candidateId = candidate.id
+				if (!candidateId) {
+					console.error(`Candidate "${candidate.name}" has no ID`)
+					return
+				}
+				runTransaction(election.registerCandidate)(candidateId)
+			}
+			runTransaction(election.beginVoting)()
+			const ballots: Ballot[] = actualVotes.map(actualVoteToBallot)
+			for (const actualVote of actualVotes) {
+				const ballot = actualVoteToBallot(actualVote)
+				ballots.push(ballot)
+				runTransaction(election.castBallot)(ballot)
+			}
+			console.log(ballots)
+			runTransaction(election.beginCounting)()
 		}
-		runTransaction(election.beginVoting)()
-		for (const actualVote of actualVotes) {
-			runTransaction(election.castBallot)(actualVoteToBallot(actualVote))
-		}
-		runTransaction(election.beginCounting)()
-	}
+	}, [actualVotes, candidates])
 
 	return (
-		<div className="seeResults">
-			<button type="button" onClick={setupElection}>
-				Setup Election
-			</button>
+		<div className={scss.class}>
 			{electionRef.current ? <ElectionRounds election={electionRef.current} /> : null}
 		</div>
 	)
