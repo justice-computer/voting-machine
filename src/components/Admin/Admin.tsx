@@ -80,7 +80,7 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 		}
 		const user = await addDoc(collection(db, `users`), newUser)
 		// Add the ID back in
-		await setDoc(doc(db, `user`, user.id), { id: user.id }, { merge: true })
+		await setDoc(doc(db, `users`, user.id), { id: user.id }, { merge: true })
 		await setDoc(doc(db, `votes`, user.id), {
 			finished: false,
 			firstChoice: [],
