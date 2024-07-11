@@ -15,7 +15,19 @@
       border-radius: 50%;
       object-fit: cover;
     }
+
+    button {
+      padding: 10px;
+      border-radius: 10px;
+      background-color: transparent;
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
   }
+
   .icons {
     gap: 20px;
     display: flex;

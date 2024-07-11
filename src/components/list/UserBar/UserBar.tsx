@@ -49,6 +49,22 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 
 	return (
 		<div className="UserBar">
+			<div className="icons">
+				<button
+					type="button"
+					onClick={() => {
+						setShowChangeElection(true)
+					}}
+				>
+					<img src="./switch-icon.svg" alt="change" />
+					{currentElectionName && <p style={{ marginLeft: `10px` }}>{currentElectionName}</p>}
+				</button>
+				{currentUser?.admin && (
+					<button type="button" onClick={handleAdmin}>
+						<img src="./gear-icon.svg" alt="admin" />
+					</button>
+				)}
+			</div>
 			{showLogout ? (
 				<Logout
 					handleLogout={handleLogout}
@@ -66,32 +82,15 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 				/>
 			) : null}
 			<div className="user">
-				<img src={currentUser?.avatar ?? `./avatar.png`} alt="avatar" />
 				<h2>{currentUser?.username}</h2>
-			</div>
-			<div className="icons">
-				<button
-					type="button"
-					onClick={() => {
-						setShowChangeElection(true)
-					}}
-				>
-					<img src="./switch-icon.svg" alt="change" />
-					{currentElectionName && <p style={{ marginLeft: `10px` }}>{currentElectionName}</p>}
-				</button>
 				<button
 					type="button"
 					onClick={() => {
 						setShowLogout(true)
 					}}
 				>
-					<img src="./power-off-icon.svg" alt="logout" />
+					<img src={currentUser?.avatar ?? `./avatar.png`} alt="avatar" />
 				</button>
-				{currentUser?.admin && (
-					<button type="button" onClick={handleAdmin}>
-						<img src="./gear-icon.svg" alt="admin" />
-					</button>
-				)}
 			</div>
 		</div>
 	)
