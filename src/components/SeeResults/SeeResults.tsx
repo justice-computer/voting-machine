@@ -21,6 +21,7 @@ import type {
 	ElectionRoundOutcome,
 } from "justiciar"
 import { electionMolecules } from "justiciar"
+import type { FunctionComponent, ReactNode } from "react"
 import { useEffect, useRef, useState } from "react"
 
 import { db } from "~/src/lib/firebase"
@@ -55,6 +56,7 @@ const RESULTS_VIEW_KEYFRAMES = {
 	],
 	done: [[`done`, null]],
 } as const satisfies Record<ResultsViewPhase, [name: string, state: unknown][]>
+
 type ResultsViewKeyframe<Phase extends ResultsViewPhase> =
 	(typeof RESULTS_VIEW_KEYFRAMES)[Phase][number]
 
@@ -384,32 +386,137 @@ function SeeResults(): JSX.Element {
 	}, [resultsView.round])
 
 	const changeFrame = runTransaction(changeFrameTX)
+	const Phase = Phases[resultsView.phase]
+	const Keyframe = Keyframes[resultsView.frame[0]]
+	const state = resultsView.frame[1]
 	return (
 		<div className={scss.class}>
-			{electionRef.current ? <ElectionRounds election={electionRef.current} /> : null}
-			<div>{resultsView.round}</div>
-			<div>{resultsView.phase}</div>
-			<div>{resultsView.frame}</div>
-			<button
-				type="button"
-				disabled={viewLocation === `beginning`}
-				onClick={() => {
-					changeFrame(`prev`)
-				}}
-			>
-				prev
-			</button>
-			<button
-				type="button"
-				disabled={viewLocation === `end`}
-				onClick={() => {
-					changeFrame(`next`)
-				}}
-			>
-				next
-			</button>
+			<main>
+				<header>{resultsView.round}</header>
+				<main>
+					<Phase>
+						{electionRef.current ? (
+							<Keyframe state={state} election={electionRef.current} />
+						) : (
+							<div data-keyframe="loading">
+								<header>loading</header>
+							</div>
+						)}
+					</Phase>
+				</main>
+			</main>
+			<nav>
+				<button
+					type="button"
+					disabled={viewLocation === `beginning`}
+					onClick={() => {
+						changeFrame(`prev`)
+					}}
+				>
+					prev
+				</button>
+				<button
+					type="button"
+					disabled={viewLocation === `end`}
+					onClick={() => {
+						changeFrame(`next`)
+					}}
+				>
+					next
+				</button>
+			</nav>
+			<aside>
+				{electionRef.current ? <ElectionRounds election={electionRef.current} /> : null}
+			</aside>
 		</div>
 	)
 }
+
+export const Phases = {
+	surplus_allocation: ({ children }) => (
+		<div data-phase="surplus_allocation">
+			<header>surplus allocation</header>
+			<main>{children}</main>
+		</div>
+	),
+	winner_selection: ({ children }) => (
+		<div data-phase="winner_selection">
+			<header>winner selection</header>
+			<main>{children}</main>
+		</div>
+	),
+	loser_selection: ({ children }) => (
+		<div data-phase="loser_selection">
+			<header>loser selection</header>
+			<main>{children}</main>
+		</div>
+	),
+	done: ({ children }) => (
+		<div data-phase="done">
+			<header>done</header>
+			<main>{children}</main>
+		</div>
+	),
+} satisfies Record<ResultsViewPhase, FunctionComponent<{ children: ReactNode }>>
+
+export const Keyframes = {
+	// surplus_allocation
+	show_surplus_ratio: (_) => (
+		<div data-keyframe="show_surplus_ratio">
+			<header>show surplus ratio</header>
+		</div>
+	),
+	show_alternative_consensus: (_) => (
+		<div data-keyframe="show_alternative_consensus">
+			<header>show alternative consensus</header>
+		</div>
+	),
+	compress_alternative_consensus: (_) => (
+		<div data-keyframe="compress_alternative_consensus">
+			<header>compress alternative consensus</header>
+		</div>
+	),
+	distribute_surplus: (_) => (
+		<div data-keyframe="distribute_surplus">
+			<header>distribute surplus</header>
+		</div>
+	),
+	// winner_selection
+	show_candidates: (_) => (
+		<div data-keyframe="show_candidates">
+			<header>show candidates</header>
+		</div>
+	),
+	sort_candidates: (_) => (
+		<div data-keyframe="sort_candidates">
+			<header>sort candidates</header>
+		</div>
+	),
+	draw_quota_line: (_) => (
+		<div data-keyframe="draw_quota_line">
+			<header>draw quota line</header>
+		</div>
+	),
+	highlight_winners: (_) => (
+		<div data-keyframe="highlight_winners">
+			<header>highlight winners</header>
+		</div>
+	),
+	// loser_selection
+	highlight_losers: (_) => (
+		<div data-keyframe="highlight_losers">
+			<header>highlight losers</header>
+		</div>
+	),
+	// done
+	done: (_) => (
+		<div data-keyframe="done">
+			<header>done</header>
+		</div>
+	),
+} satisfies Record<
+	ResultsViewKeyframe<ResultsViewPhase>[0],
+	FunctionComponent<{ state: ResultsViewKeyframe<ResultsViewPhase>[1]; election: ElectionInstance }>
+>
 
 export default SeeResults
