@@ -20,7 +20,6 @@ import type {
 	ElectionInstance,
 	ElectionRoundInstance,
 	ElectionRoundOutcome,
-	ElectionRoundVoteTotal,
 	Rational,
 } from "justiciar"
 import { electionMolecules } from "justiciar"
