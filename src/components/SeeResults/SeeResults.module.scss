@@ -1,24 +1,20 @@
 .class {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  flex: 1;
-  main {
-    height: 100%;
-    width: 100%;
-    display: flex;
-    position: relative;
-  }
+  flex-shrink: 1;
+  flex-grow: 1;
+  overflow-y: scroll;
   > main {
-    header {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      text-align: center;
-    }
+    position: relative;
+    display: flex;
+    width: 100%;
     > header {
+      position: fixed;
+      top: 10vh;
+      left: 0;
+      width: 100vw;
+      text-align: center;
+      pointer-events: none;
       align-content: center;
       font-size: 100vmin;
       padding: 20px;
@@ -26,31 +22,97 @@
       background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    > main > div[data-phase] {
+    > main {
+      position: relative;
       display: flex;
       height: 100%;
       width: 100%;
-      > header {
-        font-size: 36px;
-        color: #444;
-      }
-      > main > div[data-keyframe] {
+      > div[data-phase] {
         display: flex;
         height: 100%;
         width: 100%;
         > header {
-          font-size: 24px;
-          color: #222;
-          align-content: flex-end;
+          position: fixed;
+          top: 120px;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          text-align: center;
+          pointer-events: none;
+          font-size: 36px;
+          color: #444;
+        }
+        > main {
+          position: relative;
+          display: flex;
+          height: 100%;
+          width: 100%;
+          > div[data-keyframe] {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            > header {
+              position: fixed;
+              top: 150px;
+              width: 100%;
+              text-align: center;
+              font-size: 24px;
+              color: #777;
+              flex-shrink: 0;
+            }
+            > main {
+              display: flex;
+              width: 100%;
+              overflow-y: scroll;
+              justify-content: center;
+            }
+            &[data-keyframe="show_candidates"],
+            &[data-keyframe="draw_quota_line"] {
+              height: 100%;
+              justify-content: center;
+              display: flex;
+              > main > ol {
+                z-index: 1;
+                padding: 210px 0 60px;
+                list-style-type: none;
+                display: flex;
+                flex-direction: column;
+                flex-shrink: 0;
+                max-width: calc(100% - 20px);
+                min-width: 50vw;
+                gap: 5px;
+                > li[data-candidate-total] {
+                  > header {
+                    font-size: 16px;
+                    color: #777;
+                    > span:first-child {
+                      font-weight: bold;
+                    }
+                  }
+                  > main {
+                    gap: 10px;
+                    display: flex;
+                    > data {
+                      display: flex;
+                      flex-flow: row wrap;
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }
   }
   > nav {
     width: 100%;
+    position: fixed;
     display: flex;
     justify-content: space-between;
     bottom: 0;
+    padding: 20px;
     button {
       background: none;
       border: 1px solid white;
@@ -59,8 +121,10 @@
     }
   }
   > aside {
+    height: 100svh;
+    overflow: hidden;
     pointer-events: none;
-    opacity: 0.1;
+    opacity: 0.001;
     position: absolute;
     right: 0;
     bottom: 0;

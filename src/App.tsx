@@ -20,13 +20,25 @@ const App = (): JSX.Element => {
 	if (isLoading) return <div className="loading">Loading...</div>
 
 	return (
-		<div className="container">
-			<SystemErrorBoundary>
-				{currentUser ? <StateRouter /> : <Login />}
-				<Notification />
-			</SystemErrorBoundary>
-		</div>
+		<SystemErrorBoundary>
+			{currentUser ? <StateRouter /> : <Login />}
+			<Notification />
+		</SystemErrorBoundary>
 	)
 }
 
 export default App
+
+// CACHE IMAGES IN SERVICE WORKER
+if (`serviceWorker` in navigator) {
+	window.addEventListener(`load`, () => {
+		navigator.serviceWorker.register(`/image-caching-worker.js`).then(
+			(registration) => {
+				console.log(`ServiceWorker registration successful with scope: `, registration.scope)
+			},
+			(error) => {
+				console.log(`ServiceWorker registration failed: `, error)
+			},
+		)
+	})
+}

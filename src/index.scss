@@ -7,42 +7,20 @@
 }
 
 body {
-  background-blend-mode: soft-light;
   background-color: #222;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  height: 100svh;
   color: white;
-  &::before {
-    pointer-events: none;
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
+  width: 100svw;
+  min-height: 100svh;
+  > #root {
+    background-color: #222;
     width: 100%;
-    height: 100%;
-    background: url(/noise.svg) repeat;
-    background-size: 1024px;
-    background-position: center;
-    opacity: 1;
-    mix-blend-mode: soft-light;
-    @media (prefers-color-scheme: light) {
-      mix-blend-mode: multiply;
-      opacity: 0.5;
-    }
+    position: relative;
+    display: flex;
+    flex-direction: column;
   }
-}
-
-.container {
-  width: calc(100vw - 20px);
-  height: calc(100svh - 20px);
-  /* background: rgba(17, 25, 40, 0.75); */
-  /* backdrop-filter: blur(19px) saturate(180%); */
-  /* border: 1px solid rgba(255, 255, 255, 0.125); */
-  /* border-radius: 12px; */
-  display: flex;
-  overflow-y: scroll;
 }
 
 .loading {

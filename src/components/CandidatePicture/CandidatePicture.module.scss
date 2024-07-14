@@ -1,0 +1,24 @@
+.class {
+  --max: 10vmin;
+  --min: 120px;
+  --basis: max(var(--max), var(--min));
+  --height-numerator: 1;
+  --height-denominator: 1;
+  --width-numerator: 1;
+  --width-denominator: 1;
+  height: calc(
+    (var(--height-numerator) / var(--height-denominator) * var(--basis)) - 1px
+  );
+  width: calc(
+    (var(--width-numerator) / var(--width-denominator) * var(--basis)) - 1px
+  );
+  margin-right: 1px;
+  margin-bottom: 1px;
+  display: flex;
+  img {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+    border-radius: 2px;
+  }
+}

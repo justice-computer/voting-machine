@@ -13,20 +13,24 @@ import {
 import { findState } from "atom.io/ephemeral"
 import { useO } from "atom.io/react"
 import { collection, doc, getDoc, getDocs } from "firebase/firestore"
+import { LayoutGroup, motion } from "framer-motion"
 import type {
 	Ballot,
 	CandidateStatus,
 	ElectionInstance,
 	ElectionRoundInstance,
 	ElectionRoundOutcome,
+	ElectionRoundVoteTotal,
+	Rational,
 } from "justiciar"
 import { electionMolecules } from "justiciar"
 import type { FunctionComponent, ReactNode } from "react"
-import { useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 
 import { db } from "~/src/lib/firebase"
 import type { ActualVote, Candidate, ElectionData } from "~/src/types"
 
+import { CandidatePicture } from "../CandidatePicture/CandidatePicture"
 import scss from "./SeeResults.module.scss"
 
 const RESULTS_VIEW_PHASES = [
@@ -45,13 +49,11 @@ const RESULTS_VIEW_KEYFRAMES = {
 	],
 	winner_selection: [
 		[`show_candidates`, null],
-		[`sort_candidates`, null],
 		[`draw_quota_line`, null],
 		[`highlight_winners`, null],
 	],
 	loser_selection: [
 		[`show_candidates`, null],
-		[`sort_candidates`, null],
 		[`highlight_losers`, null],
 	],
 	done: [[`done`, null]],
@@ -278,7 +280,10 @@ function ElectionRounds(props: {
 	}
 }
 
-export const candidateAtoms = atomFamily<Candidate, string>({
+export const candidateAtoms = atomFamily<
+	Candidate & { loadedAvatar?: InstanceType<typeof Image> },
+	string
+>({
 	key: `candidates`,
 	default: (id) => ({
 		id,
@@ -292,7 +297,9 @@ export const candidateAtoms = atomFamily<Candidate, string>({
 		({ setSelf }) => {
 			void getDoc(doc(db, `candidates`, id)).then((snapshot) => {
 				const candidate = snapshot.data() as Candidate
-				setSelf(candidate)
+				const loadedAvatar = new Image()
+				loadedAvatar.src = candidate.avatar ?? `./avatar.png`
+				setSelf({ ...candidate, loadedAvatar })
 			})
 		},
 	],
@@ -369,7 +376,6 @@ function SeeResults(): JSX.Element {
 				ballots.push(ballot)
 				runTransaction(election.castBallot)(ballot)
 			}
-			console.log(ballots)
 			runTransaction(election.beginCounting)()
 			election.spawnRound()
 		}
@@ -394,15 +400,17 @@ function SeeResults(): JSX.Element {
 			<main>
 				<header>{resultsView.round}</header>
 				<main>
-					<Phase>
+					<LayoutGroup>
 						{electionRef.current ? (
-							<Keyframe state={state} election={electionRef.current} />
+							<Phase election={electionRef.current}>
+								<Keyframe state={state} election={electionRef.current} />
+							</Phase>
 						) : (
 							<div data-keyframe="loading">
 								<header>loading</header>
 							</div>
 						)}
-					</Phase>
+					</LayoutGroup>
 				</main>
 			</main>
 			<nav>
@@ -433,90 +441,211 @@ function SeeResults(): JSX.Element {
 }
 
 export const Phases = {
-	surplus_allocation: ({ children }) => (
-		<div data-phase="surplus_allocation">
-			<header>surplus allocation</header>
-			<main>{children}</main>
-		</div>
-	),
-	winner_selection: ({ children }) => (
-		<div data-phase="winner_selection">
-			<header>winner selection</header>
-			<main>{children}</main>
-		</div>
-	),
-	loser_selection: ({ children }) => (
-		<div data-phase="loser_selection">
-			<header>loser selection</header>
-			<main>{children}</main>
-		</div>
-	),
-	done: ({ children }) => (
-		<div data-phase="done">
-			<header>done</header>
-			<main>{children}</main>
-		</div>
-	),
-} satisfies Record<ResultsViewPhase, FunctionComponent<{ children: ReactNode }>>
+	surplus_allocation({ children }) {
+		return (
+			<div data-phase="surplus_allocation">
+				<header>surplus allocation</header>
+				<main>{children}</main>
+			</div>
+		)
+	},
+	winner_selection({ children, election }) {
+		const roundsLength = useO(election.state.roundsLength)
+		return (
+			<motion.div layoutId="phase" data-phase="winner_selection">
+				<header>winner selection</header>
+				<main>{roundsLength > 0 ? children : null}</main>
+			</motion.div>
+		)
+	},
+	loser_selection({ children }) {
+		return (
+			<motion.div layoutId="phase" data-phase="loser_selection">
+				<header>loser selection</header>
+				<main>{children}</main>
+			</motion.div>
+		)
+	},
+	done({ children }) {
+		return (
+			<motion.div layoutId="phase" data-phase="done">
+				<header>done</header>
+				<main>{children}</main>
+			</motion.div>
+		)
+	},
+} satisfies Record<
+	ResultsViewPhase,
+	FunctionComponent<{ children: ReactNode; election: ElectionInstance }>
+>
 
 export const Keyframes = {
 	// surplus_allocation
-	show_surplus_ratio: (_) => (
-		<div data-keyframe="show_surplus_ratio">
-			<header>show surplus ratio</header>
-		</div>
-	),
-	show_alternative_consensus: (_) => (
-		<div data-keyframe="show_alternative_consensus">
-			<header>show alternative consensus</header>
-		</div>
-	),
-	compress_alternative_consensus: (_) => (
-		<div data-keyframe="compress_alternative_consensus">
-			<header>compress alternative consensus</header>
-		</div>
-	),
-	distribute_surplus: (_) => (
-		<div data-keyframe="distribute_surplus">
-			<header>distribute surplus</header>
-		</div>
-	),
+	show_surplus_ratio(_) {
+		return (
+			<motion.div layoutId="keyframe" data-keyframe="show_surplus_ratio">
+				<header>show surplus ratio</header>
+			</motion.div>
+		)
+	},
+	show_alternative_consensus(_) {
+		return (
+			<motion.div layoutId="keyframe" data-keyframe="show_alternative_consensus">
+				<header>show alternative consensus</header>
+			</motion.div>
+		)
+	},
+	compress_alternative_consensus(_) {
+		return (
+			<motion.div layoutId="keyframe" data-keyframe="compress_alternative_consensus">
+				<header>compress alternative consensus</header>
+			</motion.div>
+		)
+	},
+	distribute_surplus(_) {
+		return (
+			<motion.div layoutId="keyframe" data-keyframe="distribute_surplus">
+				<header>distribute surplus</header>
+			</motion.div>
+		)
+	},
 	// winner_selection
-	show_candidates: (_) => (
-		<div data-keyframe="show_candidates">
-			<header>show candidates</header>
-		</div>
-	),
-	sort_candidates: (_) => (
-		<div data-keyframe="sort_candidates">
-			<header>sort candidates</header>
-		</div>
-	),
-	draw_quota_line: (_) => (
-		<div data-keyframe="draw_quota_line">
-			<header>draw quota line</header>
-		</div>
-	),
-	highlight_winners: (_) => (
-		<div data-keyframe="highlight_winners">
-			<header>highlight winners</header>
-		</div>
-	),
+	show_candidates({ election }) {
+		const view = useO(resultsViewAtom)
+		const currentRound = election.rounds[view.round]
+		// biome-ignore lint/style/noNonNullAssertion: we swag this
+		const voteTotals = getState(currentRound.state.voteTotals!)
+		return (
+			<motion.div layoutId="keyframe" data-keyframe="show_candidates">
+				<header>show candidates</header>
+				<main>
+					<ol>
+						{voteTotals.map(({ total, key }, idx) => {
+							return (
+								<CandidateTotal
+									key={idx}
+									candidate={findState(candidateAtoms, key)}
+									total={total}
+								/>
+							)
+						})}
+					</ol>
+				</main>
+			</motion.div>
+		)
+	},
+
+	draw_quota_line({ election }) {
+		const view = useO(resultsViewAtom)
+		const currentRound = election.rounds[view.round]
+		// biome-ignore lint/style/noNonNullAssertion: we swag this
+		const voteTotals = getState(currentRound.state.voteTotals!)
+		const droopQuota = getState(election.state.droopQuota)
+		if (droopQuota instanceof Error) {
+			return <div>Error: {droopQuota.message}</div>
+		}
+		const indexOfFirstNonWinner = voteTotals.findIndex(({ total }) =>
+			droopQuota.isGreaterThan(total),
+		)
+		console.log(indexOfFirstNonWinner)
+		return (
+			<motion.div layoutId="keyframe" data-keyframe="draw_quota_line">
+				<header>draw quota line</header>
+				<main>
+					<ol>
+						{voteTotals.map(({ total, key }, idx) => {
+							return (
+								<React.Fragment key={idx}>
+									{idx === indexOfFirstNonWinner ? (
+										<motion.div
+											// layoutId="quota-line"
+											variants={{
+												initial: { y: 10, opacity: 0 },
+												animate: { y: 0, opacity: 1 },
+											}}
+											transition={{ duration: 1.5 }}
+										>
+											droop quota
+											<hr data-keyframe="quota-line" />
+										</motion.div>
+									) : null}
+									<CandidateTotal candidate={findState(candidateAtoms, key)} total={total} />
+								</React.Fragment>
+							)
+						})}
+					</ol>
+				</main>
+			</motion.div>
+		)
+	},
+	highlight_winners(_) {
+		return (
+			<motion.div layoutId="keyframe" data-keyframe="highlight_winners">
+				<header>highlight winners</header>
+			</motion.div>
+		)
+	},
 	// loser_selection
-	highlight_losers: (_) => (
-		<div data-keyframe="highlight_losers">
-			<header>highlight losers</header>
-		</div>
-	),
+	highlight_losers(_) {
+		return (
+			<motion.div layoutId="keyframe" data-keyframe="highlight_losers">
+				<header>highlight losers</header>
+			</motion.div>
+		)
+	},
 	// done
-	done: (_) => (
-		<div data-keyframe="done">
-			<header>done</header>
-		</div>
-	),
+	done(_) {
+		return (
+			<motion.div layoutId="keyframe" data-keyframe="done">
+				<header>done</header>
+			</motion.div>
+		)
+	},
 } satisfies Record<
 	ResultsViewKeyframe<ResultsViewPhase>[0],
 	FunctionComponent<{ state: ResultsViewKeyframe<ResultsViewPhase>[1]; election: ElectionInstance }>
 >
 
 export default SeeResults
+
+function CandidateTotal(props: {
+	candidate: AtomToken<Candidate>
+	total: Rational
+}): JSX.Element {
+	const candidate = useO(props.candidate)
+	const simplified = props.total.simplify()
+	const numerator = simplified[0]
+	const denominator = simplified[1]
+	return (
+		<motion.li layoutId={candidate.id} data-candidate-total>
+			<header>
+				<span>{candidate.name}</span>
+				{` `}
+				<span>
+					{numerator.toString()}/{denominator.toString()}
+				</span>
+			</header>
+			<main>
+				<CandidatePicture
+					candidate={props.candidate}
+					size="medium"
+					height={[100n, 100n]}
+					width={[100n, 100n]}
+				/>
+				<data>
+					{Array.from(props.total.entries()).flatMap(([d, n]) => {
+						return Array.from({ length: Number(n) }, (_, i) => (
+							<CandidatePicture
+								key={`${d.toString()}_${i}_${n.toString()}`}
+								candidate={props.candidate}
+								size="small"
+								height={[1n, 1n]}
+								width={[1n, d]}
+							/>
+						))
+					})}
+				</data>
+			</main>
+		</motion.li>
+	)
+}

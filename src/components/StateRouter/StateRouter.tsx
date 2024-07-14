@@ -1,5 +1,3 @@
-import "./stateRouter.css"
-
 import { useI, useO } from "atom.io/react"
 import { collection, doc, getDocs, onSnapshot } from "firebase/firestore"
 import { useEffect, useState } from "react"
@@ -108,14 +106,14 @@ function StateRouter(): JSX.Element {
 	}
 
 	return (
-		<div className="stateRouter">
+		<>
 			<UserBar
 				toggleAdminMode={() => {
 					setAdminMode(!adminMode)
 				}}
 			/>
 			{NextComponent(userElectionState, adminMode, setAdminMode)}
-		</div>
+		</>
 	)
 }
 
