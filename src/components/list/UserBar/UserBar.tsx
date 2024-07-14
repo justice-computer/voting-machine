@@ -38,6 +38,7 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 	}
 
 	function handleAdmin() {
+		setShowChangeElection(false)
 		toggleAdminMode()
 	}
 
@@ -59,11 +60,6 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 					<img src="./switch-icon.svg" alt="change" />
 					{currentElectionName && <p style={{ marginLeft: `10px` }}>{currentElectionName}</p>}
 				</button>
-				{currentUser?.admin && (
-					<button type="button" onClick={handleAdmin}>
-						<img src="./gear-icon.svg" alt="admin" />
-					</button>
-				)}
 			</div>
 			{showLogout ? (
 				<Logout
@@ -76,6 +72,7 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 			{showChangeElection ? (
 				<ChangeElection
 					handleChangeElection={handleChangeElection}
+					handleAdmin={handleAdmin}
 					close={() => {
 						setShowChangeElection(false)
 					}}

@@ -4,10 +4,12 @@ import { collection, doc, getDoc, getDocs } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
 import { db } from "~/src/lib/firebase"
+import { useUserStore } from "~/src/lib/userStore"
 import type { ElectionData } from "~/src/types"
 
 type ChangeElectionProps = {
 	handleChangeElection: (id: string) => void
+	handleAdmin: () => void
 	close: () => void
 }
 
@@ -15,8 +17,13 @@ type ElectionInfo = ElectionData & {
 	userName: string
 	formattedCreatedAt: string
 }
-function ChangeElection({ handleChangeElection, close }: ChangeElectionProps): JSX.Element {
+function ChangeElection({
+	handleChangeElection,
+	handleAdmin,
+	close,
+}: ChangeElectionProps): JSX.Element {
 	const [electionData, setElectionData] = useState<ElectionInfo[]>([])
+	const { currentUser, logout } = useUserStore()
 
 	useEffect(() => {
 		getDocs(collection(db, `elections`))
@@ -61,7 +68,7 @@ function ChangeElection({ handleChangeElection, close }: ChangeElectionProps): J
 
 	return (
 		<div className="change-election">
-			<h1>Change Election</h1>
+			<h1>Election</h1>
 			<div className="election-list">
 				<ul>
 					{electionData.map((election) => (
@@ -81,7 +88,17 @@ function ChangeElection({ handleChangeElection, close }: ChangeElectionProps): J
 					))}
 				</ul>
 			</div>
-			<div className="icons">
+			<div className="change-icons">
+				{currentUser?.admin && (
+					<button type="button" onClick={handleAdmin}>
+						<img src="./gear-icon.svg" alt="admin" />
+						Manage Election
+					</button>
+				)}
+				<button type="button" onClick={close}>
+					<img src="./finish-icon.svg" alt="cancel" />
+					Finish Voting
+				</button>
 				<button type="button" onClick={close}>
 					<img src="./cancel-icon.svg" alt="cancel" />
 					Cancel
