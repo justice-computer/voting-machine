@@ -69,7 +69,20 @@ function ElectionManager({
 
 	return (
 		<div className="change-election">
-			<Accordion title="Elections">
+			<div className="change-icons">
+				{currentUser?.admin && (
+					<button type="button" onClick={handleAdmin}>
+						<img src="./gear-icon.svg" alt="admin" />
+						Manage
+					</button>
+				)}
+				{/* FIXME: Implement finish voting */}
+				<button type="button" onClick={close}>
+					<img src="./finish-icon.svg" alt="cancel" />
+					Finish Voting
+				</button>
+			</div>
+			<Accordion title="Change Election">
 				<div className="election-list">
 					<table>
 						<tbody>
@@ -94,19 +107,6 @@ function ElectionManager({
 					</table>
 				</div>
 			</Accordion>
-			<div className="change-icons">
-				{currentUser?.admin && (
-					<button type="button" onClick={handleAdmin}>
-						<img src="./gear-icon.svg" alt="admin" />
-						Manage Election
-					</button>
-				)}
-				{/* FIXME: Implement finish voting */}
-				<button type="button" onClick={close}>
-					<img src="./finish-icon.svg" alt="cancel" />
-					Finish Voting
-				</button>
-			</div>
 		</div>
 	)
 }

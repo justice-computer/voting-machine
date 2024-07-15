@@ -8,6 +8,7 @@
   .change-icons {
     gap: 20px;
     display: flex;
+    flex-direction: column;
 
     img {
       width: 35px;
