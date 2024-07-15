@@ -3,6 +3,7 @@ import "./changeElection.css"
 import { collection, doc, getDoc, getDocs } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
+import Accordion from "~/src/components/Accordion/Accordion"
 import { db } from "~/src/lib/firebase"
 import { useUserStore } from "~/src/lib/userStore"
 import type { ElectionData } from "~/src/types"
@@ -68,26 +69,31 @@ function ChangeElection({
 
 	return (
 		<div className="change-election">
-			<h1>Election</h1>
-			<div className="election-list">
-				<ul>
-					{electionData.map((election) => (
-						<li key={election.id}>
-							<button
-								type="button"
-								onClick={() => {
-									handleChangeElection(election.id)
-								}}
-							>
-								select
-							</button>
-							<p>{election.name}</p>
-							<p>{election.userName}</p>
-							<p>{election.formattedCreatedAt}</p>
-						</li>
-					))}
-				</ul>
-			</div>
+			<Accordion title="Elections">
+				<div className="election-list">
+					<table>
+						<tbody>
+							{electionData.map((election) => (
+								<tr key={election.id}>
+									<td>
+										<button
+											type="button"
+											onClick={() => {
+												handleChangeElection(election.id)
+											}}
+										>
+											select
+										</button>
+									</td>
+									<td>{election.name}</td>
+									<td>{election.userName}</td>
+									<td>{election.formattedCreatedAt}</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
+			</Accordion>
 			<div className="change-icons">
 				{currentUser?.admin && (
 					<button type="button" onClick={handleAdmin}>
@@ -95,13 +101,10 @@ function ChangeElection({
 						Manage Election
 					</button>
 				)}
+				{/* FIXME: Implement finish voting */}
 				<button type="button" onClick={close}>
 					<img src="./finish-icon.svg" alt="cancel" />
 					Finish Voting
-				</button>
-				<button type="button" onClick={close}>
-					<img src="./cancel-icon.svg" alt="cancel" />
-					Cancel
 				</button>
 			</div>
 		</div>

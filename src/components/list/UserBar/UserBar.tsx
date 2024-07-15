@@ -5,6 +5,7 @@ import { doc, onSnapshot } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
 import ChangeElection from "~/src/components/ChangeElection/ChangeElection"
+import Modal from "~/src/components/Modal/Modal"
 import { currentElectionIdAtom } from "~/src/lib/atomStore"
 import { db } from "~/src/lib/firebase"
 import { useUserStore } from "~/src/lib/userStore"
@@ -61,15 +62,27 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 					{currentElectionName && <p style={{ marginLeft: `10px` }}>{currentElectionName}</p>}
 				</button>
 			</div>
-			{showLogout ? (
+			<Modal
+				isOpen={showLogout}
+				onClose={() => {
+					setShowLogout(false)
+				}}
+				title="Logout"
+			>
 				<Logout
 					handleLogout={handleLogout}
 					cancelLogout={() => {
 						setShowLogout(false)
 					}}
 				/>
-			) : null}
-			{showChangeElection ? (
+			</Modal>
+			<Modal
+				isOpen={showChangeElection}
+				onClose={() => {
+					setShowChangeElection(false)
+				}}
+				title="Election"
+			>
 				<ChangeElection
 					handleChangeElection={handleChangeElection}
 					handleAdmin={handleAdmin}
@@ -77,7 +90,7 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 						setShowChangeElection(false)
 					}}
 				/>
-			) : null}
+			</Modal>
 			<div className="user">
 				<h2>{currentUser?.username}</h2>
 				<button
