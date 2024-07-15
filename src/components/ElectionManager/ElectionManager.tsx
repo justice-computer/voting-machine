@@ -1,6 +1,6 @@
 import "./electionManager.css"
 
-import { collection, doc, getDoc, getDocs } from "firebase/firestore"
+import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
 import Accordion from "~/src/components/Accordion/Accordion"
@@ -67,6 +67,12 @@ function ElectionManager({
 			})
 	}, [])
 
+	const handleFinished = async () => {
+		if (currentUser == null) return
+		await setDoc(doc(db, `votes`, currentUser.id), { finished: true }, { merge: true })
+		close()
+	}
+
 	return (
 		<div className="change-election">
 			<div className="change-icons">
@@ -77,7 +83,7 @@ function ElectionManager({
 					</button>
 				)}
 				{/* FIXME: Implement finish voting */}
-				<button type="button" onClick={close}>
+				<button type="button" onClick={handleFinished}>
 					<img src="./finish-icon.svg" alt="cancel" />
 					Finish Voting
 				</button>
