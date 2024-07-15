@@ -1,4 +1,4 @@
-import "./changeElection.css"
+import "./electionManager.css"
 
 import { collection, doc, getDoc, getDocs } from "firebase/firestore"
 import { useEffect, useState } from "react"
@@ -8,7 +8,7 @@ import { db } from "~/src/lib/firebase"
 import { useUserStore } from "~/src/lib/userStore"
 import type { ElectionData } from "~/src/types"
 
-type ChangeElectionProps = {
+type ElectionManagerProps = {
 	handleChangeElection: (id: string) => void
 	handleAdmin: () => void
 	close: () => void
@@ -18,13 +18,13 @@ type ElectionInfo = ElectionData & {
 	userName: string
 	formattedCreatedAt: string
 }
-function ChangeElection({
+function ElectionManager({
 	handleChangeElection,
 	handleAdmin,
 	close,
-}: ChangeElectionProps): JSX.Element {
+}: ElectionManagerProps): JSX.Element {
 	const [electionData, setElectionData] = useState<ElectionInfo[]>([])
-	const { currentUser, logout } = useUserStore()
+	const { currentUser } = useUserStore()
 
 	useEffect(() => {
 		getDocs(collection(db, `elections`))
@@ -111,4 +111,4 @@ function ChangeElection({
 	)
 }
 
-export default ChangeElection
+export default ElectionManager

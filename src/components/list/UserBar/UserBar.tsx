@@ -4,7 +4,7 @@ import { useI, useO } from "atom.io/react"
 import { doc, onSnapshot } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
-import ChangeElection from "~/src/components/ChangeElection/ChangeElection"
+import ElectionManager from "~/src/components/ElectionManager/ElectionManager"
 import Modal from "~/src/components/Modal/Modal"
 import { currentElectionIdAtom } from "~/src/lib/atomStore"
 import { db } from "~/src/lib/firebase"
@@ -20,7 +20,7 @@ type UserBarProps = {
 function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 	const { currentUser, logout } = useUserStore()
 	const [showLogout, setShowLogout] = useState(false)
-	const [showChangeElection, setShowChangeElection] = useState(false)
+	const [showElectionManager, setShowElectionManager] = useState(false)
 	const [currentElectionName, setCurrentElectionName] = useState<string | null>(null)
 	const currentElectionId = useO(currentElectionIdAtom)
 	const setCurrentElectionId = useI(currentElectionIdAtom)
@@ -39,14 +39,14 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 	}
 
 	function handleAdmin() {
-		setShowChangeElection(false)
+		setShowElectionManager(false)
 		toggleAdminMode()
 	}
 
 	function handleChangeElection(id: string) {
 		setCurrentElectionId(id)
 		localStorage.setItem(`electionId`, id)
-		setShowChangeElection(false)
+		setShowElectionManager(false)
 	}
 
 	return (
@@ -55,7 +55,7 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 				<button
 					type="button"
 					onClick={() => {
-						setShowChangeElection(true)
+						setShowElectionManager(true)
 					}}
 				>
 					<img src="./switch-icon.svg" alt="change" />
@@ -77,17 +77,17 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 				/>
 			</Modal>
 			<Modal
-				isOpen={showChangeElection}
+				isOpen={showElectionManager}
 				onClose={() => {
-					setShowChangeElection(false)
+					setShowElectionManager(false)
 				}}
-				title="Election"
+				title={`Election` + (currentElectionName ? `: ${currentElectionName}` : ``)}
 			>
-				<ChangeElection
+				<ElectionManager
 					handleChangeElection={handleChangeElection}
 					handleAdmin={handleAdmin}
 					close={() => {
-						setShowChangeElection(false)
+						setShowElectionManager(false)
 					}}
 				/>
 			</Modal>
