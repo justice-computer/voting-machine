@@ -18,7 +18,8 @@
 		"run": "serve",
 		"preview": "vite preview",
 		"test": "vitest",
-		"test:watch": "vitest --watch"
+		"test:watch": "vitest --watch",
+		"nuke": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' + && rm pnpm-lock.yaml"
 	},
 	"dependencies": {
 		"concurrently": "8.2.2",
@@ -51,7 +52,7 @@
 		"jsdom": "24.1.0",
 		"sass": "1.77.8",
 		"typescript": "5.5.3",
-		"vite": "5.3.3",
+		"vite": "5.3.4",
 		"vite-tsconfig-paths": "4.3.2",
 		"vitest": "2.0.3"
 	},
