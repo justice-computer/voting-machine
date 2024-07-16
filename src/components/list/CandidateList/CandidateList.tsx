@@ -117,12 +117,6 @@ function CandidateList(): JSX.Element {
 		setSelectedCandidate(null)
 	}
 
-	const handleFinished = async () => {
-		if (currentUser == null) return
-		if (votes == null) return
-		await setDoc(doc(db, `votes`, currentUser.id), { finished: true }, { merge: true })
-	}
-
 	return (
 		<>
 			<div className="candidateList">
@@ -181,20 +175,6 @@ function CandidateList(): JSX.Element {
 					))}
 				</div>
 			</div>
-			<button
-				type="button"
-				disabled={votes == null}
-				className="finished"
-				onClick={() => handleFinished()}
-				onKeyDown={(e) => {
-					if (e.key === `Enter`) {
-						void handleFinished()
-					}
-				}}
-			>
-				{/* TODO: Put this at the top of the page and require a confirmation and warning about unused votes */}
-				Finished Voting
-			</button>
 		</>
 	)
 }

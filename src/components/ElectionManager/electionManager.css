@@ -1,0 +1,67 @@
+.change-election {
+  img {
+    width: 35px;
+    height: 35px;
+    padding-right: 10px;
+  }
+
+  .change-icons {
+    gap: 20px;
+    display: flex;
+    flex-direction: column;
+
+    img {
+      width: 35px;
+      height: 35px;
+      cursor: pointer;
+    }
+    button {
+      padding: 10px;
+      height: 40px;
+      border-radius: 10px;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .election-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+    gap: 20px;
+    width: 100%;
+
+    tr {
+      padding: 20px;
+      border-radius: 10px;
+      background-color: #f7f7f7;
+      color: rgba(17, 25, 40, 0.6);
+      /* color: white; */
+      border: none;
+      cursor: pointer;
+      list-style-type: none;
+      gap: 20px;
+      width: 100%;
+
+      td {
+        padding-top: 20px;
+        align-items: center;
+        padding-right: 20px;
+      }
+
+      button {
+        padding: 10px;
+        border-radius: 10px;
+        background-color: #1a73e8;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+    }
+  }
+}
