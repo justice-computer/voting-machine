@@ -18,7 +18,8 @@
 		"run": "serve",
 		"preview": "vite preview",
 		"test": "vitest",
-		"test:watch": "vitest --watch"
+		"test:watch": "vitest --watch",
+		"nuke": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' + && rm pnpm-lock.yaml"
 	},
 	"dependencies": {
 		"concurrently": "8.2.2",
