@@ -550,7 +550,6 @@ export const Keyframes = {
 			</motion.div>
 		)
 	},
-
 	draw_quota_line({ election }) {
 		const view = useO(resultsViewAtom)
 		const currentRound = election.rounds[view.round]

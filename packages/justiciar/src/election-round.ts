@@ -1,4 +1,4 @@
-import type { CtorToolkit, MoleculeType, ReadonlySelectorToken, TokenType } from "atom.io"
+import type { CtorToolkit, MoleculeType, ReadonlySelectorToken } from "atom.io"
 import { moleculeFamily, selectorFamily } from "atom.io"
 import { findRelations } from "atom.io/data"
 
