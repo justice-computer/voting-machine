@@ -1,7 +1,8 @@
-import type { CtorToolkit, MoleculeType, ReadonlySelectorToken } from "atom.io"
+import type { CtorToolkit, MoleculeType, ReadonlySelectorToken, TokenType } from "atom.io"
 import { moleculeFamily, selectorFamily } from "atom.io"
 import { findRelations } from "atom.io/data"
 
+import type { ElectionRoundCandidateKey } from "./candidate"
 import { electionRoundCandidateMolecules } from "./candidate"
 import { type ElectionInstance, electionMolecules, votes } from "./election"
 import { Rational } from "./rational"
@@ -10,6 +11,59 @@ import type { ElectionRoundVoterInstance } from "./voter"
 import { electionRoundVoterMolecules, voterRemainingEnergySelectors } from "./voter"
 
 export type ElectionRoundKey = { election: string; round: number }
+
+export type CandidatesByStatus = {
+	running: ElectionRoundCandidateKey[]
+	elected: ElectionRoundCandidateKey[]
+	eliminated: ElectionRoundCandidateKey[]
+}
+export const electionRoundCandidatesByStatusSelectors = selectorFamily<
+	CandidatesByStatus,
+	ElectionRoundKey
+>({
+	key: `electionRoundCandidatesByStatus`,
+	get:
+		(keys) =>
+		({ get }) => {
+			const running: ElectionRoundCandidateKey[] = []
+			const elected: ElectionRoundCandidateKey[] = []
+			const eliminated: ElectionRoundCandidateKey[] = []
+
+			const election = get(electionMolecules, keys.election)
+			const candidates = get(election.state.candidates.relatedKeys)
+
+			const runningCandidates = candidates.map(
+				(candidateKey) =>
+					({
+						electionRound: keys,
+						candidate: candidateKey,
+					}) satisfies ElectionRoundCandidateKey,
+			)
+			for (const candidate of runningCandidates) {
+				const candidateRoundCandidateKey = {
+					electionRound: keys,
+					candidate: candidate.candidate,
+				}
+				const candidateRoundCandidate = get(
+					electionRoundCandidateMolecules,
+					candidateRoundCandidateKey,
+				)
+				const status = get(candidateRoundCandidate.state.status)
+				switch (status) {
+					case `running`:
+						running.push(candidate)
+						break
+					case `elected`:
+						elected.push(candidate)
+						break
+					case `eliminated`:
+						eliminated.push(candidate)
+						break
+				}
+			}
+			return { running, elected, eliminated }
+		},
+})
 
 export type ElectionRoundVoteTotal = { key: string; total: Rational }
 export const electionRoundVoteTotalsSelectors = selectorFamily<
@@ -25,11 +79,11 @@ export const electionRoundVoteTotalsSelectors = selectorFamily<
 
 			const candidates = get(election.state.candidates.relatedKeys)
 			const runningCandidates = candidates.filter((candidateKey) => {
-				const candidateRoundKey = {
+				const candidateRoundCandidateKey = {
 					electionRound: keys,
 					candidate: candidateKey,
 				}
-				const candidate = get(electionRoundCandidateMolecules, candidateRoundKey)
+				const candidate = get(electionRoundCandidateMolecules, candidateRoundCandidateKey)
 				const status = get(candidate.state.status)
 				return status === `running`
 			})
@@ -121,12 +175,14 @@ export const electionRoundOutcomeSelectors = selectorFamily<
 })
 
 export class ElectionRoundState {
+	public candidatesByStatus?: ReadonlySelectorToken<CandidatesByStatus>
 	public voteTotals?: ReadonlySelectorToken<ElectionRoundVoteTotal[]>
 	public outcome?: ReadonlySelectorToken<ElectionRoundOutcome | Error>
 	public constructor(private bond: CtorToolkit<ElectionRoundKey>[`bond`]) {}
 	public setup(): void {
 		this.voteTotals = this.bond(electionRoundVoteTotalsSelectors)
 		this.outcome = this.bond(electionRoundOutcomeSelectors)
+		this.candidatesByStatus = this.bond(electionRoundCandidatesByStatusSelectors)
 	}
 }
 export const electionRoundMolecules = moleculeFamily({
