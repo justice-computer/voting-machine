@@ -97,62 +97,96 @@ const viewLocationSelector = selector<`beginning` | `end` | `middle`>({
 	},
 })
 
-const changeFrameTX = transaction<(direction: `next` | `prev`) => void>({
-	key: `nextFrame`,
-	do: ({ get, set }, direction) => {
-		const state = get(resultsViewAtom)
-		let newRound = state.round
-		let newPhase: ResultsViewPhase = state.phase
-		let newFrame: ResultsViewKeyframe<ResultsViewPhase>
-		const currentPhaseFrames = RESULTS_VIEW_KEYFRAMES[state.phase]
-		const currentIndex = currentPhaseFrames.findIndex((frame) => frame[0] === state.frame[0])
-		const newIndex = currentIndex + (direction === `next` ? 1 : -1)
-		newFrame = currentPhaseFrames[newIndex]
-		if (!newFrame) {
+const changeFrameTX = transaction<(direction: `next` | `prev`, election: ElectionInstance) => void>(
+	{
+		key: `nextFrame`,
+		do: ({ get, set }, direction) => {
+			const state = get(resultsViewAtom)
+			let newRound = state.round
+			let newPhase: ResultsViewPhase = state.phase
+			let newFrame: ResultsViewKeyframe<ResultsViewPhase>
+			const currentPhaseFrames = RESULTS_VIEW_KEYFRAMES[state.phase]
+			const currentIndex = currentPhaseFrames.findIndex((frame) => frame[0] === state.frame[0])
+			const newIndex = currentIndex + (direction === `next` ? 1 : -1)
+			newFrame = currentPhaseFrames[newIndex]
+			if (!newFrame) {
+				switch (direction) {
+					case `next`:
+						newPhase = RESULTS_VIEW_PHASES[RESULTS_VIEW_PHASES.indexOf(state.phase) + 1]
+						break
+					case `prev`:
+						newPhase = RESULTS_VIEW_PHASES[RESULTS_VIEW_PHASES.indexOf(state.phase) - 1]
+						break
+				}
+				if (newPhase) {
+					const newPhaseFrames = RESULTS_VIEW_KEYFRAMES[newPhase]
+					switch (direction) {
+						case `next`:
+							newFrame = newPhaseFrames[0]
+							break
+						case `prev`:
+							newFrame = newPhaseFrames[newPhaseFrames.length - 1]
+							break
+					}
+				} else if (newPhase === undefined) {
+					switch (direction) {
+						case `next`:
+							newRound = state.round + 1
+							newPhase = `surplus_allocation`
+							newFrame = [`show_surplus_ratio`, null]
+							break
+						case `prev`:
+							newRound = state.round - 1
+							newPhase = `done`
+							newFrame = [`done`, null]
+							break
+					}
+					if (newRound === -1) {
+						console.error(`You are at the beginning and cannot go back!`)
+						return
+					}
+				}
+			}
+			/* 🚧 ABRIDGED 🚧 */
 			switch (direction) {
 				case `next`:
-					newPhase = RESULTS_VIEW_PHASES[RESULTS_VIEW_PHASES.indexOf(state.phase) + 1]
+					switch (newPhase) {
+						case `surplus_allocation`:
+							newPhase = `winner_selection`
+							newFrame = [`show_candidates`, null]
+							break
+						case `winner_selection`:
+							if (newFrame[0] === `highlight_winners`) {
+								newPhase = `done`
+								newFrame = [`done`, null]
+							}
+							break
+					}
 					break
 				case `prev`:
-					newPhase = RESULTS_VIEW_PHASES[RESULTS_VIEW_PHASES.indexOf(state.phase) - 1]
+					switch (newPhase) {
+						case `loser_selection`:
+							newPhase = `winner_selection`
+							newFrame = [`draw_quota_line`, null]
+							break
+						case `surplus_allocation`:
+							newRound = state.round - 1
+							newPhase = `done`
+							newFrame = [`done`, null]
+							break
+					}
 					break
 			}
-			if (newPhase) {
-				const newPhaseFrames = RESULTS_VIEW_KEYFRAMES[newPhase]
-				switch (direction) {
-					case `next`:
-						newFrame = newPhaseFrames[0]
-						break
-					case `prev`:
-						newFrame = newPhaseFrames[newPhaseFrames.length - 1]
-						break
-				}
-			} else if (newPhase === undefined) {
-				switch (direction) {
-					case `next`:
-						newRound = state.round + 1
-						newPhase = `surplus_allocation`
-						newFrame = [`show_surplus_ratio`, null]
-						break
-					case `prev`:
-						newRound = state.round - 1
-						newPhase = `done`
-						newFrame = [`done`, null]
-						break
-				}
-				if (newRound === -1) {
-					console.error(`You are at the beginning and cannot go back!`)
-					return
-				}
-			}
-		}
-		set(resultsViewAtom, {
-			round: newRound,
-			phase: newPhase,
-			frame: newFrame,
-		})
+			/* 🚧 ABRIDGED 🚧 */
+
+			set(resultsViewAtom, {
+				round: newRound,
+				phase: newPhase,
+				frame: newFrame,
+			})
+		},
 	},
-})
+)
 
 function actualVoteToBallot(actualVote: ActualVote): Ballot {
 	const ballot: Ballot = {
@@ -381,12 +415,13 @@ function SeeResults(): JSX.Element {
 	useEffect(() => {
 		if (electionRef.current && getState(electionRef.current.state.phase).name === `counting`) {
 			let safety = 15
-			while (resultsView.round > electionRef.current.rounds.length - 1 && safety > 0) {
+			while (resultsView.round > electionRef.current.rounds.length - 2 && safety > 0) {
+				console.log(`spawning round ${15 - safety}`)
 				electionRef.current.spawnRound()
 				safety--
 			}
 		}
-	}, [resultsView.round])
+	}, [resultsView.round, resultsView.phase])
 
 	const changeFrame = runTransaction(changeFrameTX)
 	const Phase = Phases[resultsView.phase]
@@ -420,7 +455,9 @@ function SeeResults(): JSX.Element {
 						type="button"
 						disabled={viewLocation === `beginning`}
 						onClick={() => {
-							changeFrame(`prev`)
+							if (electionRef.current) {
+								changeFrame(`prev`, electionRef.current)
+							}
 						}}
 					>
 						prev
@@ -429,7 +466,9 @@ function SeeResults(): JSX.Element {
 						type="button"
 						disabled={viewLocation === `end`}
 						onClick={() => {
-							changeFrame(`next`)
+							if (electionRef.current) {
+								changeFrame(`next`, electionRef.current)
+							}
 						}}
 					>
 						next
