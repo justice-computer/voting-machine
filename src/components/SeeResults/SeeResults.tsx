@@ -431,13 +431,7 @@ function SeeResults(): JSX.Element {
 		<LayoutGroup>
 			<div className={scss.class}>
 				<main>
-					<motion.header
-						initial={{ opacity: 0, y: -100 }}
-						animate={{ opacity: 1, y: 0 }}
-						exit={{ opacity: 0, y: 100 }}
-					>
-						{resultsView.round}
-					</motion.header>
+					<header>{resultsView.round}</header>
 					<main>
 						{electionRef.current ? (
 							<Phase election={electionRef.current}>
@@ -485,35 +479,35 @@ function SeeResults(): JSX.Element {
 export const Phases = {
 	surplus_allocation({ children }) {
 		return (
-			<motion.div layoutId="phase" data-phase="surplus_allocation">
-				<motion.header layoutId="phase-header">surplus allocation</motion.header>
-				<motion.main layoutId="phase-main">{children}</motion.main>
-			</motion.div>
+			<div data-phase="surplus_allocation">
+				<header>surplus allocation</header>
+				<main>{children}</main>
+			</div>
 		)
 	},
 	winner_selection({ children, election }) {
 		const roundsLength = useO(election.state.roundsLength)
 		return (
-			<motion.div layoutId="phase" data-phase="winner_selection">
-				<motion.header layoutId="phase-header">winner selection</motion.header>
-				<motion.main layoutId="phase-main">{roundsLength > 0 ? children : null}</motion.main>
-			</motion.div>
+			<div data-phase="winner_selection">
+				<header>winner selection</header>
+				<main>{roundsLength > 0 ? children : null}</main>
+			</div>
 		)
 	},
 	loser_selection({ children }) {
 		return (
-			<motion.div layoutId="phase" data-phase="loser_selection">
-				<motion.header layoutId="phase-header">loser selection</motion.header>
-				<motion.main layoutId="phase-main">{children}</motion.main>
-			</motion.div>
+			<div data-phase="loser_selection">
+				<header>loser selection</header>
+				<main>{children}</main>
+			</div>
 		)
 	},
 	done({ children }) {
 		return (
-			<motion.div layoutId="phase" data-phase="done">
-				<motion.header layoutId="phase-header">done</motion.header>
-				<motion.main layoutId="phase-main">{children}</motion.main>
-			</motion.div>
+			<div data-phase="done">
+				<header>done</header>
+				<main>{children}</main>
+			</div>
 		)
 	},
 } satisfies Record<
@@ -525,30 +519,30 @@ export const Keyframes = {
 	// surplus_allocation
 	show_surplus_ratio(_) {
 		return (
-			<motion.div layoutId="keyframe" data-keyframe="show_surplus_ratio">
-				<motion.header layoutId="keyframe-header">show surplus ratio</motion.header>
-			</motion.div>
+			<div data-keyframe="show_surplus_ratio">
+				<header>show surplus ratio</header>
+			</div>
 		)
 	},
 	show_alternative_consensus(_) {
 		return (
-			<motion.div layoutId="keyframe" data-keyframe="show_alternative_consensus">
-				<motion.header layoutId="keyframe-header">show alternative consensus</motion.header>
-			</motion.div>
+			<div data-keyframe="show_alternative_consensus">
+				<header>show alternative consensus</header>
+			</div>
 		)
 	},
 	compress_alternative_consensus(_) {
 		return (
-			<motion.div layoutId="keyframe" data-keyframe="compress_alternative_consensus">
-				<motion.header layoutId="keyframe-header">compress alternative consensus</motion.header>
-			</motion.div>
+			<div data-keyframe="compress_alternative_consensus">
+				<header>compress alternative consensus</header>
+			</div>
 		)
 	},
 	distribute_surplus(_) {
 		return (
-			<motion.div layoutId="keyframe" data-keyframe="distribute_surplus">
-				<motion.header layoutId="keyframe-header">distribute surplus</motion.header>
-			</motion.div>
+			<div data-keyframe="distribute_surplus">
+				<header>distribute surplus</header>
+			</div>
 		)
 	},
 	// winner_selection
@@ -560,8 +554,8 @@ export const Keyframes = {
 		// biome-ignore lint/style/noNonNullAssertion: INTERDEPENDENCY_ISSUE
 		const candidatesByStatus = getState(currentRound.state.candidatesByStatus!)
 		return (
-			<motion.div layoutId="keyframe" data-keyframe="show_candidates">
-				<motion.header layoutId="keyframe-header">
+			<div data-keyframe="show_candidates">
+				<header>
 					<span>show candidates</span>
 
 					<CandidateStatusBar
@@ -573,9 +567,9 @@ export const Keyframes = {
 							findState(candidateAtoms, candidate.candidate),
 						)}
 					/>
-				</motion.header>
-				<motion.main layoutId="keyframe-main">
-					<motion.ol layoutId="candidates">
+				</header>
+				<main>
+					<ol>
 						{voteTotals.map(({ total, key }, idx) => {
 							return (
 								<CandidateTotal
@@ -585,9 +579,9 @@ export const Keyframes = {
 								/>
 							)
 						})}
-					</motion.ol>
-				</motion.main>
-			</motion.div>
+					</ol>
+				</main>
+			</div>
 		)
 	},
 	draw_quota_line({ election }) {
@@ -600,14 +594,16 @@ export const Keyframes = {
 		if (droopQuota instanceof Error) {
 			return <div>Error: {droopQuota.message}</div>
 		}
+		const droopQuotaSimple = droopQuota.simplify()
+		const droopQuotaApprox = Number(droopQuotaSimple[0]) / Number(droopQuotaSimple[1])
 		const indexOfFirstNonWinner = voteTotals.findIndex(({ total }) =>
 			droopQuota.isGreaterThan(total),
 		)
 		// biome-ignore lint/style/noNonNullAssertion: INTERDEPENDENCY_ISSUE
 		const candidatesByStatus = getState(currentRound.state.candidatesByStatus!)
 		return (
-			<motion.div layoutId="keyframe" data-keyframe="draw_quota_line">
-				<motion.header layoutId="keyframe-header">
+			<div data-keyframe="draw_quota_line">
+				<header>
 					<span>draw quota line</span>
 					<CandidateStatusBar
 						running={[]}
@@ -618,15 +614,15 @@ export const Keyframes = {
 							findState(candidateAtoms, candidate.candidate),
 						)}
 					/>
-				</motion.header>
-				<motion.main layoutId="keyframe-main">
+				</header>
+				<main>
 					<ol>
 						{voteTotals.map(({ total, key }, idx) => {
 							return (
 								<React.Fragment key={idx}>
 									{idx === indexOfFirstNonWinner ? (
 										<motion.div layoutId="quota-line" transition={{ duration: 2.5 }}>
-											droop quota
+											droop quota ({droopQuotaApprox})
 											<hr data-keyframe="quota-line" />
 										</motion.div>
 									) : null}
@@ -635,8 +631,8 @@ export const Keyframes = {
 							)
 						})}
 					</ol>
-				</motion.main>
-			</motion.div>
+				</main>
+			</div>
 		)
 	},
 	highlight_winners({ election }) {
@@ -652,8 +648,8 @@ export const Keyframes = {
 			return <div>Error: {roundOutcome.message}</div>
 		}
 		return (
-			<motion.div layoutId="keyframe" data-keyframe="highlight_winners">
-				<motion.header layoutId="keyframe-header">
+			<div data-keyframe="highlight_winners">
+				<header>
 					<span>highlight winners</span>
 					<CandidateStatusBar
 						running={candidatesByStatus.running
@@ -672,8 +668,8 @@ export const Keyframes = {
 							findState(candidateAtoms, candidate.candidate),
 						)}
 					/>
-				</motion.header>
-				<motion.main layoutId="keyframe-main">
+				</header>
+				<main>
 					<ol>
 						{voteTotals
 							.filter(
@@ -695,8 +691,8 @@ export const Keyframes = {
 							<hr data-keyframe-quota-line />
 						</motion.div>
 					</ol>
-				</motion.main>
-			</motion.div>
+				</main>
+			</div>
 		)
 	},
 	// loser_selection
@@ -712,8 +708,8 @@ export const Keyframes = {
 		// biome-ignore lint/style/noNonNullAssertion: INTERDEPENDENCY_ISSUE
 		const candidatesByStatus = getState(currentRound.state.candidatesByStatus!)
 		return (
-			<motion.div layoutId="keyframe" data-keyframe="highlight_losers">
-				<motion.header layoutId="keyframe-header">
+			<div data-keyframe="highlight_losers">
+				<header>
 					<span>highlight losers</span>
 					<CandidateStatusBar
 						running={candidatesByStatus.running.map((candidate) =>
@@ -726,16 +722,39 @@ export const Keyframes = {
 							findState(candidateAtoms, candidate.candidate),
 						)}
 					/>
-				</motion.header>
-			</motion.div>
+				</header>
+			</div>
 		)
 	},
 	// done
-	done(_) {
+	done({ election }) {
+		const view = useO(resultsViewAtom)
+		const currentRound = election.rounds[view.round]
+		const droopQuota = getState(election.state.droopQuota)
+
+		if (droopQuota instanceof Error) {
+			return <div>Error: {droopQuota.message}</div>
+		}
+
+		// biome-ignore lint/style/noNonNullAssertion: INTERDEPENDENCY_ISSUE
+		const candidatesByStatus = getState(currentRound.state.candidatesByStatus!)
 		return (
-			<motion.div layoutId="keyframe" data-keyframe="done">
-				<motion.header layoutId="keyframe-header">done</motion.header>
-			</motion.div>
+			<div data-keyframe="done">
+				<header>
+					<span>done</span>
+					<CandidateStatusBar
+						running={candidatesByStatus.running.map((candidate) =>
+							findState(candidateAtoms, candidate.candidate),
+						)}
+						elected={candidatesByStatus.elected.map((candidate) =>
+							findState(candidateAtoms, candidate.candidate),
+						)}
+						eliminated={candidatesByStatus.eliminated.map((candidate) =>
+							findState(candidateAtoms, candidate.candidate),
+						)}
+					/>
+				</header>
+			</div>
 		)
 	},
 } satisfies Record<
@@ -753,14 +772,15 @@ function CandidateTotal(props: {
 	const simplified = props.total.simplify()
 	const numerator = simplified[0]
 	const denominator = simplified[1]
+	const total = (Number(numerator) / Number(denominator)).toString()
+	const decimalIdx = total.indexOf(`.`)
+	const totalApprox = decimalIdx === -1 ? total : total.slice(0, decimalIdx + 4)
 	return (
 		<motion.li layoutId={props.candidate.key} data-candidate-total>
 			<header>
 				<span>{candidate.name}</span>
 				{` `}
-				<span>
-					{numerator.toString()}/{denominator.toString()}
-				</span>
+				<span>{totalApprox === total ? total : `~${totalApprox}…`}</span>
 			</header>
 			<main>
 				<CandidatePicture
