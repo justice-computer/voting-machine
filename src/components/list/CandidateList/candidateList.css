@@ -9,6 +9,25 @@
   cursor: pointer;
 }
 
+.candidateList table {
+  .c-name {
+    width: 140px;
+    overflow: hidden;
+  }
+
+  border-collapse: collapse;
+  table-layout: fixed; /* Ensure fixed layout */
+
+  th,
+  td {
+    padding: 8px;
+    text-align: left;
+  }
+  th {
+    background-color: #f2f2f2;
+  }
+}
+
 .candidateList {
   flex: 1;
 
@@ -62,8 +81,8 @@
     padding: 20px;
 
     img {
-      width: 50px;
-      height: 50px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       object-fit: cover;
     }
@@ -93,18 +112,27 @@
         height: 35px;
         padding-right: 10px;
       }
-
-      .first {
-        background-color: #6ae491;
-      }
-
-      .second {
-        background-color: #7ee46a;
-      }
-
-      .third {
-        background-color: #9de46a;
-      }
     }
   }
+}
+
+.vote button {
+  padding: 2px;
+  padding-top: 5px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  background-color: #82b6fa;
+}
+
+.vote button.first {
+  background-color: #6ae491;
+}
+
+.vote button.second {
+  background-color: #7ee46a;
+}
+
+.vote button.third {
+  background-color: #9de46a;
 }
