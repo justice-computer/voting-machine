@@ -19,6 +19,8 @@ type AddCandidateProps = {
 
 function AddCandidate({ close }: AddCandidateProps): JSX.Element {
 	const [avatarImage, setAvatarImage] = useState(initialImage)
+	// TODO: get the label from the election
+	const [label] = useState(`district-2`)
 	async function handleAdd(e: any) {
 		e.preventDefault()
 		const { name, heading, details } = e.target.elements
@@ -26,6 +28,7 @@ function AddCandidate({ close }: AddCandidateProps): JSX.Element {
 			name: name.value,
 			heading: heading.value,
 			details: details.value,
+			label,
 		}
 		console.log(newCandidate)
 		const candidate = await addDoc(collection(db, `candidates`), newCandidate)

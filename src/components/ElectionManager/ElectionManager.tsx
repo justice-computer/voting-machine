@@ -50,6 +50,7 @@ function ElectionManager({
 						state: election.data().state,
 						userName: user.data()?.username || `unknown`,
 						formattedCreatedAt,
+						label: election.data().label,
 					}
 				})
 

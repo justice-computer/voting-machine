@@ -4,12 +4,13 @@ import { useState } from "react"
 import { toast } from "react-toastify"
 
 type NewElectionProps = {
-	handleNewElection: (name: string) => void
+	handleNewElection: (name: string, label: string) => void
 	close: () => void
 }
 
 function NewElection({ handleNewElection, close }: NewElectionProps): JSX.Element {
 	const [electionName, setElectionName] = useState(``)
+	const [electionLabel, setElectionLabel] = useState(``)
 
 	return (
 		<div className="new-election">
@@ -21,7 +22,7 @@ function NewElection({ handleNewElection, close }: NewElectionProps): JSX.Elemen
 						toast.error(`Election name cannot be empty`)
 						return
 					}
-					handleNewElection(electionName)
+					handleNewElection(electionName, electionLabel)
 				}}
 			>
 				<label htmlFor="election-name">Election Name</label>
@@ -32,6 +33,16 @@ function NewElection({ handleNewElection, close }: NewElectionProps): JSX.Elemen
 					placeholder="Election Name"
 					onChange={(e) => {
 						setElectionName(e.target.value)
+					}}
+				/>
+				<label htmlFor="election-label">Label</label>
+				<input
+					id="election-label"
+					type="text"
+					value={electionLabel}
+					placeholder="Label"
+					onChange={(e) => {
+						setElectionLabel(e.target.value)
 					}}
 				/>
 				<div className="icons">

@@ -108,7 +108,7 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 		)
 	}
 
-	async function handleNewElection(name: string) {
+	async function handleNewElection(name: string, label: string) {
 		if (!currentUser) return
 		try {
 			const newElection: Omit<ElectionData, `id`> = {
@@ -117,6 +117,7 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 				state: `not-started`,
 				createdAt: new Date(),
 				users: [],
+				label,
 			}
 			const election = await addDoc(collection(db, `elections`), newElection)
 			setCurrentElectionId(election.id)

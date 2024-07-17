@@ -12,6 +12,7 @@ export type Candidate = {
 	avatar?: string
 	heading: string
 	details: string
+	label: string
 }
 
 export type AvatarImage = {
@@ -28,6 +29,7 @@ export type ElectionData = {
 	createdAt: Date
 	createdBy: string
 	users: string[]
+	label: string
 }
 
 export type ActualVote = {
