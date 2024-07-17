@@ -3,11 +3,12 @@ import "./candidateDetail.css"
 import type { Candidate } from "../../types"
 
 type CandidateDetailProps = {
-	candidate: Candidate
+	candidate: Candidate | null
 	handleVote: (vote: number | null) => void
 }
 
-function CandidateDetail({ candidate, handleVote }: CandidateDetailProps): JSX.Element {
+function CandidateDetail({ candidate, handleVote }: CandidateDetailProps): JSX.Element | null {
+	if (candidate == null) return null
 	return (
 		<div className="candidateDetail">
 			<img src={candidate.avatar ?? `./avatar.png`} alt="avatar" />

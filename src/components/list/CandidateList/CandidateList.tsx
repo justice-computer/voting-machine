@@ -148,9 +148,14 @@ function CandidateList(): JSX.Element {
 					<Modal title="Add Candidate" isOpen={editState} onClose={handleClose}>
 						<AddCandidate close={handleClose} />
 					</Modal>
-					{selectedCandidate ? (
+					<Modal
+						isOpen={selectedCandidate != null}
+						onClose={() => {
+							setSelectedCandidate(null)
+						}}
+					>
 						<CandidateDetail candidate={selectedCandidate} handleVote={handleVote} />
-					) : null}
+					</Modal>
 					{candidates.map((candidate) => (
 						<div
 							className="item"
