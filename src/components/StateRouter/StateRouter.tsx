@@ -2,7 +2,7 @@ import { useI, useO } from "atom.io/react"
 import { collection, doc, getDocs, onSnapshot } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
-import { currentElectionIdAtom } from "~/src/lib/atomStore"
+import { currentElectionIdAtom, currentElectionLabelAtom } from "~/src/lib/atomStore"
 
 import { db } from "../../lib/firebase"
 import { useUserStore } from "../../lib/userStore"
@@ -47,6 +47,7 @@ function StateRouter(): JSX.Element {
 	const [adminMode, setAdminMode] = useState(false)
 	const currentElectionId = useO(currentElectionIdAtom)
 	const setCurrentElectionId = useI(currentElectionIdAtom)
+	const setCurrentElectionLabel = useI(currentElectionLabelAtom)
 
 	// Current elections
 	useEffect(() => {
@@ -56,6 +57,7 @@ function StateRouter(): JSX.Element {
 					id: election.id,
 					createdAt: election.data().createdAt,
 					name: election.data().name,
+					label: election.data().label,
 				}))
 				const sortedElections = electionsData.sort((a, b) => b.createdAt - a.createdAt)
 
@@ -67,10 +69,12 @@ function StateRouter(): JSX.Element {
 					)
 					if (storedElection) {
 						setCurrentElectionId(storedElection.id)
-						console.log(`using stored election ${sortedElections[0].name}`)
+						setCurrentElectionLabel(storedElection.label)
+						console.log(`using stored election ${storedElection.id}`)
 					}
 				} else {
 					setCurrentElectionId(sortedElections[0].id)
+					setCurrentElectionLabel(sortedElections[0].label)
 					localStorage.setItem(`electionId`, sortedElections[0].id)
 					console.log(`auto-selecting election ${sortedElections[0].name}`)
 				}

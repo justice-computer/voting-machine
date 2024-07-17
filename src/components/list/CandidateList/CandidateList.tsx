@@ -5,7 +5,9 @@ import { collection, doc, onSnapshot, setDoc } from "firebase/firestore"
 import { useEffect, useState } from "react"
 import { toast } from "react-toastify"
 
-import { currentElectionIdAtom } from "../../../lib/atomStore"
+import Modal from "~/src/components/Modal/Modal"
+
+import { currentElectionIdAtom, currentElectionLabelAtom } from "../../../lib/atomStore"
 import { db } from "../../../lib/firebase"
 import { useUserStore } from "../../../lib/userStore"
 import type { ActualVote, Candidate } from "../../../types"
@@ -19,16 +21,19 @@ function CandidateList(): JSX.Element {
 	const [votes, setVotes] = useState<ActualVote | null>(null)
 	const { currentUser } = useUserStore()
 	const currentElectionId = useO(currentElectionIdAtom)
+	const currentElectionLabel = useO(currentElectionLabelAtom)
 
 	// Candidates
 	useEffect(() => {
 		const unSub = onSnapshot(collection(db, `candidates`), (snapshot) => {
-			const newCandidates: Candidate[] = snapshot?.docs.map((d) => {
-				return {
-					id: d.id,
-					...d.data(),
-				} as Candidate
-			})
+			const newCandidates: Candidate[] = snapshot?.docs
+				.map((d) => {
+					return {
+						id: d.id,
+						...d.data(),
+					} as Candidate
+				})
+				.filter((candidate) => candidate.label === currentElectionLabel)
 			setCandidates(newCandidates)
 		})
 		return unSub
@@ -140,7 +145,9 @@ function CandidateList(): JSX.Element {
 					/>
 				</div>
 				<div>
-					{editState ? <AddCandidate close={handleClose} /> : null}
+					<Modal title="Add Candidate" isOpen={editState} onClose={handleClose}>
+						<AddCandidate close={handleClose} />
+					</Modal>
 					{selectedCandidate ? (
 						<CandidateDetail candidate={selectedCandidate} handleVote={handleVote} />
 					) : null}

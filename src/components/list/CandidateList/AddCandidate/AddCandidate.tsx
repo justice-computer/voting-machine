@@ -1,12 +1,14 @@
 import "./addCandidate.css"
 
+import { useO } from "atom.io/react"
 import { addDoc, collection, doc, setDoc } from "firebase/firestore"
 import type { ChangeEvent } from "react"
 import { useState } from "react"
 
-import { db } from "../../../../lib/firebase"
-import { uploadImage } from "../../../../lib/upload"
-import type { AvatarImage, Candidate } from "../../../../types"
+import { db } from "~/src//lib/firebase"
+import { currentElectionLabelAtom } from "~/src/lib/atomStore"
+import { uploadImage } from "~/src/lib/upload"
+import type { AvatarImage, Candidate } from "~/src/types"
 
 const initialImage: AvatarImage = {
 	file: null,
@@ -20,10 +22,13 @@ type AddCandidateProps = {
 function AddCandidate({ close }: AddCandidateProps): JSX.Element {
 	const [avatarImage, setAvatarImage] = useState(initialImage)
 	// TODO: get the label from the election
-	const [label] = useState(`district-2`)
+	const currentElectionLabel = useO(currentElectionLabelAtom)
+
 	async function handleAdd(e: any) {
 		e.preventDefault()
 		const { name, heading, details } = e.target.elements
+		console.log(currentElectionLabel)
+		const label = currentElectionLabel as string
 		const newCandidate: Candidate = {
 			name: name.value,
 			heading: heading.value,
