@@ -13,7 +13,8 @@
 			"**/metafile-*",
 			"coverage",
 			"projects",
-			".varmint"
+			".varmint",
+			"src/components/list/CandidateList/CandidateList.tsx"
 		]
 	},
 	"javascript": {

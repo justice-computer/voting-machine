@@ -37,7 +37,7 @@ function CandidateList(): JSX.Element {
 			setCandidates(newCandidates)
 		})
 		return unSub
-	}, [])
+	}, [currentElectionLabel])
 
 	// Votes
 	useEffect(() => {
@@ -47,7 +47,7 @@ function CandidateList(): JSX.Element {
 			setVotes(newVotes)
 		})
 		return unSub
-	}, [currentUser?.id])
+	}, [currentUser?.id, currentElectionLabel, currentElectionId])
 
 	const handleClose = () => {
 		setEditState(false)
@@ -61,9 +61,10 @@ function CandidateList(): JSX.Element {
 		}
 	}
 
-	const handleVote = async (vote: number | null) => {
-		console.log(vote)
-		if (selectedCandidate?.id == null || currentElectionId == null) return
+	const handleVote = async (vote: number | null, candidateId: string | undefined) => {
+		console.log(vote, candidateId)
+		candidateId = candidateId ?? selectedCandidate?.id
+		if (candidateId == null || currentElectionId == null) return
 		if (currentUser == null) return
 		const newVotes: ActualVote = {
 			voterId: currentUser.id,
@@ -73,51 +74,50 @@ function CandidateList(): JSX.Element {
 			thirdChoice: votes?.thirdChoice ?? [],
 			finished: false,
 		}
-		if (
-			newVotes.firstChoice
-				.concat(newVotes.secondChoice, newVotes.thirdChoice)
-				.includes(selectedCandidate.id)
-		) {
-			if (vote == null) {
-				if (votes?.firstChoice.includes(selectedCandidate.id)) {
-					newVotes.firstChoice = newVotes.firstChoice.filter((id) => id !== selectedCandidate.id)
-				}
-				if (votes?.secondChoice.includes(selectedCandidate.id)) {
-					newVotes.secondChoice = newVotes.secondChoice.filter((id) => id !== selectedCandidate.id)
-				}
-				if (votes?.thirdChoice.includes(selectedCandidate.id)) {
-					newVotes.thirdChoice = newVotes.thirdChoice.filter((id) => id !== selectedCandidate.id)
-				}
-			} else {
-				toast.error(`Already voted for this candidate`)
-			}
-		} else {
-			switch (vote) {
-				case 1:
-					if (votes?.firstChoice && votes?.firstChoice?.length > 2) {
-						toast.error(`Already used up first choice votes`)
-						break
-					}
-					newVotes.firstChoice.push(selectedCandidate.id)
-					break
-				case 2:
-					if (votes?.secondChoice && votes?.secondChoice?.length > 2) {
-						toast.error(`Already used up second choice votes`)
-						break
-					}
-					newVotes.secondChoice.push(selectedCandidate.id)
-					break
-				case 3:
-					if (votes?.thirdChoice && votes?.thirdChoice?.length > 2) {
-						toast.error(`Already used up third choice votes`)
-						break
-					}
-					newVotes.thirdChoice.push(selectedCandidate.id)
-					break
-				default:
-					break
-			}
-		}
+
+		const alreadyVotedForThisCandidate =newVotes.firstChoice.concat(newVotes.secondChoice, newVotes.thirdChoice).includes(candidateId)
+    let oldVote = null
+		if (alreadyVotedForThisCandidate) {
+      // first, clear the existing vote
+      if (votes?.firstChoice.includes(candidateId)) {
+        newVotes.firstChoice = newVotes.firstChoice.filter((id) => id !== candidateId)
+        oldVote = 1;
+      }
+      if (votes?.secondChoice.includes(candidateId)) {
+        newVotes.secondChoice = newVotes.secondChoice.filter((id) => id !== candidateId)
+        oldVote = 2;
+      }
+      if (votes?.thirdChoice.includes(candidateId)) {
+        newVotes.thirdChoice = newVotes.thirdChoice.filter((id) => id !== candidateId)
+        oldVote = 3;
+      }
+    }
+    switch (vote) {
+      case 1:
+        if (newVotes?.firstChoice && newVotes?.firstChoice?.length > 2) {
+          toast.error(`Already used up first choice votes`)
+          break
+        }
+        if (oldVote !== 1) newVotes.firstChoice.push(candidateId)
+        break
+      case 2:
+        if (newVotes?.secondChoice && newVotes?.secondChoice?.length > 2) {
+          toast.error(`Already used up second choice votes`)
+          break
+        }
+        if (oldVote !== 2) newVotes.secondChoice.push(candidateId)
+        break
+      case 3:
+        if (newVotes?.thirdChoice && newVotes?.thirdChoice?.length > 2) {
+          toast.error(`Already used up third choice votes`)
+          break
+        }
+        if (oldVote !== 3) newVotes.thirdChoice.push(candidateId)
+        break
+      default:
+        console.log(`Unknown vote`, vote)
+        break
+    }
 		await setDoc(doc(db, `votes`, currentUser.id), newVotes)
 		setSelectedCandidate(null)
 	}
@@ -154,37 +154,51 @@ function CandidateList(): JSX.Element {
 							setSelectedCandidate(null)
 						}}
 					>
-						<CandidateDetail candidate={selectedCandidate} handleVote={handleVote} />
+						<CandidateDetail candidate={selectedCandidate} />
 					</Modal>
-					{candidates.map((candidate) => (
-						<div
-							className="item"
-							key={candidate.id}
-							onClick={() => {
-								selectCandidate(candidate?.id)
-							}}
-							onKeyDown={(e) => {
-								if (e.key === `Enter`) {
-									selectCandidate(candidate?.id)
-								}
-							}}
-						>
-							<img src={candidate.avatar ?? `./avatar.png`} alt="avatar" />
-							<div className="info">
-								<h3>{candidate.name}</h3>
-								<p>{candidate.heading}</p>
-								{votes?.firstChoice?.includes(candidate?.id ?? ``) ? (
-									<img className="first" src="./one-icon.svg" alt="one" />
-								) : null}
-								{votes?.secondChoice?.includes(candidate?.id ?? ``) ? (
-									<img className="second" src="./two-icon.svg" alt="two" />
-								) : null}
-								{votes?.thirdChoice?.includes(candidate?.id ?? ``) ? (
-									<img className="third" src="./three-icon.svg" alt="three" />
-								) : null}
-							</div>
-						</div>
-					))}
+					<table>
+						<tbody>
+							{candidates.map((candidate) => (
+								<tr key={candidate.id} className="item">
+									<td className="c-name"
+										onClick={() => {
+											selectCandidate(candidate?.id)
+										}}
+									>
+										<img src={candidate.avatar ?? `./avatar.png`} alt="avatar" />
+										<h3>{candidate.name}</h3>
+									</td>
+									<td className="vote">
+										<button
+											className={votes?.firstChoice?.includes(candidate?.id ?? ``) ? `first` : ``}
+											type="button"
+											onClick={() => handleVote(1, candidate.id)}
+										>
+											<img src="./one-icon.svg" alt="one" />
+										</button>
+									</td>
+									<td className="vote">
+										<button
+											className={votes?.secondChoice?.includes(candidate?.id ?? ``) ? `second` : ``}
+											type="button"
+											onClick={() => handleVote(2, candidate.id)}
+										>
+											<img src="./two-icon.svg" alt="two" />
+										</button>
+									</td>
+									<td className="vote">
+										<button
+											className={votes?.thirdChoice?.includes(candidate?.id ?? ``) ? `third` : ``}
+											type="button"
+											onClick={() => handleVote(3, candidate.id)}
+										>
+											<img src="./three-icon.svg" alt="three" />
+										</button>
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
 				</div>
 			</div>
 		</>
