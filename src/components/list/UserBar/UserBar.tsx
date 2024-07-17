@@ -1,7 +1,7 @@
 import "./userBar.css"
 
 import { useI, useO } from "atom.io/react"
-import { doc, onSnapshot } from "firebase/firestore"
+import { deleteDoc, doc, onSnapshot } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
 import ElectionManager from "~/src/components/ElectionManager/ElectionManager"
@@ -44,9 +44,17 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 	}
 
 	function handleChangeElection(id: string) {
+		if (currentUser == null) return
 		setCurrentElectionId(id)
 		localStorage.setItem(`electionId`, id)
-		setShowElectionManager(false)
+		const docRef = doc(db, `votes`, currentUser?.id)
+		deleteDoc(docRef)
+			.then(() => {
+				setShowElectionManager(false)
+			})
+			.catch((error) => {
+				console.error(error)
+			})
 	}
 
 	return (

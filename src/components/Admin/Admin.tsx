@@ -2,7 +2,16 @@ import "./admin.css"
 
 import { faker } from "@faker-js/faker"
 import { useI, useO } from "atom.io/react"
-import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, setDoc } from "firebase/firestore"
+import {
+	addDoc,
+	collection,
+	deleteDoc,
+	doc,
+	getDoc,
+	getDocs,
+	onSnapshot,
+	setDoc,
+} from "firebase/firestore"
 import { useEffect, useState } from "react"
 import { toast } from "react-toastify"
 
@@ -122,6 +131,9 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 			}
 			const election = await addDoc(collection(db, `elections`), newElection)
 			setCurrentElectionId(election.id)
+			localStorage.setItem(`electionId`, election.id)
+			const docRef = doc(db, `votes`, currentUser?.id)
+			await deleteDoc(docRef)
 			setShowNewElection(false)
 		} catch (error: any) {
 			console.error(error)

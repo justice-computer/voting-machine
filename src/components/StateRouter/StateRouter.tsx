@@ -82,7 +82,7 @@ function StateRouter(): JSX.Element {
 			.catch((error) => {
 				console.error(error)
 			})
-	}, [currentUser?.id])
+	}, [currentUser?.id, currentElectionId])
 
 	// Election state
 	useEffect(() => {
@@ -99,10 +99,12 @@ function StateRouter(): JSX.Element {
 		if (currentUser == null) return
 		const unSub = onSnapshot(doc(db, `votes`, currentUser?.id), (res) => {
 			const newVotes: ActualVote = res.data() as ActualVote
-			setHasVoted(newVotes.finished)
+			if (newVotes) {
+				setHasVoted(newVotes.finished)
+			}
 		})
 		return unSub
-	}, [currentUser?.id])
+	}, [currentUser?.id, currentElectionId])
 
 	let userElectionState = electionState
 	if (userElectionState === `voting` && hasVoted) {

@@ -37,7 +37,7 @@ function CandidateList(): JSX.Element {
 			setCandidates(newCandidates)
 		})
 		return unSub
-	}, [])
+	}, [currentElectionLabel])
 
 	// Votes
 	useEffect(() => {
@@ -47,7 +47,7 @@ function CandidateList(): JSX.Element {
 			setVotes(newVotes)
 		})
 		return unSub
-	}, [currentUser?.id])
+	}, [currentUser?.id, currentElectionLabel, currentElectionId])
 
 	const handleClose = () => {
 		setEditState(false)
