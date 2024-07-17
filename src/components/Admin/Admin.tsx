@@ -6,6 +6,7 @@ import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, setDoc } from "fi
 import { useEffect, useState } from "react"
 import { toast } from "react-toastify"
 
+import Modal from "~/src/components/Modal/Modal"
 import NewElection from "~/src/components/NewElection/NewElection"
 import { currentElectionIdAtom } from "~/src/lib/atomStore"
 import { db } from "~/src/lib/firebase"
@@ -108,7 +109,7 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 		)
 	}
 
-	async function handleNewElection(name: string) {
+	async function handleNewElection(name: string, label: string) {
 		if (!currentUser) return
 		try {
 			const newElection: Omit<ElectionData, `id`> = {
@@ -117,6 +118,7 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 				state: `not-started`,
 				createdAt: new Date(),
 				users: [],
+				label,
 			}
 			const election = await addDoc(collection(db, `elections`), newElection)
 			setCurrentElectionId(election.id)
@@ -146,14 +148,19 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 
 	return (
 		<div className="admin">
-			{showNewElection ? (
+			<Modal
+				isOpen={showNewElection}
+				onClose={() => {
+					setShowNewElection(false)
+				}}
+			>
 				<NewElection
 					close={() => {
 						setShowNewElection(!showNewElection)
 					}}
 					handleNewElection={handleNewElection}
 				/>
-			) : null}
+			</Modal>
 			<h1>Admin</h1>
 			<p>Current state: {currentState}</p>
 			<p>Current voters:</p>

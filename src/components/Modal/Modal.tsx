@@ -1,6 +1,7 @@
 import "./modal.css" // We'll define this later for styling
 
 import React from "react"
+import ReactDOM from "react-dom"
 
 interface ModalProps {
 	title?: string
@@ -12,7 +13,7 @@ interface ModalProps {
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
 	if (!isOpen) return null
 	const titleElement = title ? <h1 className="modal-title">{title}</h1> : null
-	return (
+	return ReactDOM.createPortal(
 		<div className="modal-overlay">
 			<div className="modal-content">
 				{titleElement}
@@ -21,7 +22,8 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
 				</button>
 				{children}
 			</div>
-		</div>
+		</div>,
+		document.getElementById(`modal-root`) as HTMLElement,
 	)
 }
 

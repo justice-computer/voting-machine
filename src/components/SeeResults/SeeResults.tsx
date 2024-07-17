@@ -287,6 +287,7 @@ export const candidateAtoms = atomFamily<Candidate, string>({
 		name: `NO_NAME`,
 		heading: `NO_HEADING`,
 		details: `NO_DETAILS`,
+		label: `NO_LABEL`,
 		status: `running`,
 	}),
 	effects: (id) => [
