@@ -26,6 +26,7 @@ import { electionMolecules } from "justiciar"
 import type { FunctionComponent, ReactNode } from "react"
 import React, { useEffect, useRef, useState } from "react"
 
+import { currentElectionIdAtom, currentElectionLabelAtom } from "~/src/lib/atomStore"
 import { db } from "~/src/lib/firebase"
 import type { ActualVote, Candidate, ElectionData } from "~/src/types"
 
@@ -339,11 +340,17 @@ export const candidateAtoms = atomFamily<Candidate, string>({
 function SeeResults(): JSX.Element {
 	const resultsView = useO(resultsViewAtom)
 	const viewLocation = useO(viewLocationSelector)
+	const currentElectionId = useO(currentElectionIdAtom)
+	const currentElectionLabel = useO(currentElectionLabelAtom)
 	const electionRef = useRef<ElectionInstance | null>(null)
 	const [actualVotes, setActualVotes] = useState<ActualVote[]>([])
 	const [candidates, setCandidates] = useState<Candidate[]>([])
 
+	console.log(currentElectionLabel)
 	useEffect(() => {
+		if (currentElectionId === null) {
+			return
+		}
 		const electionToken = makeMolecule(root, electionMolecules, `election0`, {
 			numberOfWinners: 3n,
 			votingTiers: [3n, 3n, 3n],
@@ -351,8 +358,9 @@ function SeeResults(): JSX.Element {
 		const election = getState(electionToken)
 		electionRef.current = election
 
-		void getDoc(doc(db, `elections`, `current`)).then(async (snapshot) => {
+		void getDoc(doc(db, `elections`, currentElectionId)).then(async (snapshot) => {
 			const electionData = snapshot.data() as ElectionData
+			console.log({ electionData })
 			const votes = await Promise.all<ActualVote>(
 				electionData.users.map(async (userKey) => {
 					const actualVoteDocToken = doc(db, `votes`, userKey)
@@ -361,16 +369,19 @@ function SeeResults(): JSX.Element {
 					return { ...actualVote, voterId: userKey }
 				}),
 			)
+			console.log(votes)
 			setActualVotes(votes)
 		})
 		void getDocs(collection(db, `candidates`)).then((res) => {
 			const candidateSnapshots = res.docs
-			const candidateDocs = candidateSnapshots.map((snapshot) => {
-				return {
-					id: snapshot.id,
-					...snapshot.data(),
-				} as Candidate
-			})
+			const candidateDocs = candidateSnapshots
+				.map((snapshot) => {
+					return {
+						id: snapshot.id,
+						...snapshot.data(),
+					} as Candidate
+				})
+				.filter((candidate) => candidate.label === currentElectionLabel)
 			setCandidates(candidateDocs)
 		})
 
@@ -403,6 +414,7 @@ function SeeResults(): JSX.Element {
 			runTransaction(election.beginVoting)()
 			const ballots: Ballot[] = actualVotes.map(actualVoteToBallot)
 			for (const actualVote of actualVotes) {
+				console.log(actualVote)
 				const ballot = actualVoteToBallot(actualVote)
 				ballots.push(ballot)
 				runTransaction(election.castBallot)(ballot)
