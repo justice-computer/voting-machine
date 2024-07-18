@@ -135,6 +135,7 @@ export const electionMolecules = moleculeFamily({
 				editRelations(votes, (relations) => {
 					let idx = 0
 					while (idx < votesByTier.length) {
+						// TODO: Handle invalid ballots
 						const tier = votesByTier[idx]
 						const tierMax = electionConfig.votingTiers[idx]
 						if (tier.length > tierMax) {
