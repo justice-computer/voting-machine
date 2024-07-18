@@ -97,62 +97,96 @@ const viewLocationSelector = selector<`beginning` | `end` | `middle`>({
 	},
 })
 
-const changeFrameTX = transaction<(direction: `next` | `prev`) => void>({
-	key: `nextFrame`,
-	do: ({ get, set }, direction) => {
-		const state = get(resultsViewAtom)
-		let newRound = state.round
-		let newPhase: ResultsViewPhase = state.phase
-		let newFrame: ResultsViewKeyframe<ResultsViewPhase>
-		const currentPhaseFrames = RESULTS_VIEW_KEYFRAMES[state.phase]
-		const currentIndex = currentPhaseFrames.findIndex((frame) => frame[0] === state.frame[0])
-		const newIndex = currentIndex + (direction === `next` ? 1 : -1)
-		newFrame = currentPhaseFrames[newIndex]
-		if (!newFrame) {
+const changeFrameTX = transaction<(direction: `next` | `prev`, election: ElectionInstance) => void>(
+	{
+		key: `nextFrame`,
+		do: ({ get, set }, direction) => {
+			const state = get(resultsViewAtom)
+			let newRound = state.round
+			let newPhase: ResultsViewPhase = state.phase
+			let newFrame: ResultsViewKeyframe<ResultsViewPhase>
+			const currentPhaseFrames = RESULTS_VIEW_KEYFRAMES[state.phase]
+			const currentIndex = currentPhaseFrames.findIndex((frame) => frame[0] === state.frame[0])
+			const newIndex = currentIndex + (direction === `next` ? 1 : -1)
+			newFrame = currentPhaseFrames[newIndex]
+			if (!newFrame) {
+				switch (direction) {
+					case `next`:
+						newPhase = RESULTS_VIEW_PHASES[RESULTS_VIEW_PHASES.indexOf(state.phase) + 1]
+						break
+					case `prev`:
+						newPhase = RESULTS_VIEW_PHASES[RESULTS_VIEW_PHASES.indexOf(state.phase) - 1]
+						break
+				}
+				if (newPhase) {
+					const newPhaseFrames = RESULTS_VIEW_KEYFRAMES[newPhase]
+					switch (direction) {
+						case `next`:
+							newFrame = newPhaseFrames[0]
+							break
+						case `prev`:
+							newFrame = newPhaseFrames[newPhaseFrames.length - 1]
+							break
+					}
+				} else if (newPhase === undefined) {
+					switch (direction) {
+						case `next`:
+							newRound = state.round + 1
+							newPhase = `surplus_allocation`
+							newFrame = [`show_surplus_ratio`, null]
+							break
+						case `prev`:
+							newRound = state.round - 1
+							newPhase = `done`
+							newFrame = [`done`, null]
+							break
+					}
+					if (newRound === -1) {
+						console.error(`You are at the beginning and cannot go back!`)
+						return
+					}
+				}
+			}
+			/* 🚧 ABRIDGED 🚧 */
 			switch (direction) {
 				case `next`:
-					newPhase = RESULTS_VIEW_PHASES[RESULTS_VIEW_PHASES.indexOf(state.phase) + 1]
+					switch (newPhase) {
+						case `surplus_allocation`:
+							newPhase = `winner_selection`
+							newFrame = [`show_candidates`, null]
+							break
+						case `winner_selection`:
+							if (newFrame[0] === `highlight_winners`) {
+								newPhase = `done`
+								newFrame = [`done`, null]
+							}
+							break
+					}
 					break
 				case `prev`:
-					newPhase = RESULTS_VIEW_PHASES[RESULTS_VIEW_PHASES.indexOf(state.phase) - 1]
+					switch (newPhase) {
+						case `loser_selection`:
+							newPhase = `winner_selection`
+							newFrame = [`draw_quota_line`, null]
+							break
+						case `surplus_allocation`:
+							newRound = state.round - 1
+							newPhase = `done`
+							newFrame = [`done`, null]
+							break
+					}
 					break
 			}
-			if (newPhase) {
-				const newPhaseFrames = RESULTS_VIEW_KEYFRAMES[newPhase]
-				switch (direction) {
-					case `next`:
-						newFrame = newPhaseFrames[0]
-						break
-					case `prev`:
-						newFrame = newPhaseFrames[newPhaseFrames.length - 1]
-						break
-				}
-			} else if (newPhase === undefined) {
-				switch (direction) {
-					case `next`:
-						newRound = state.round + 1
-						newPhase = `surplus_allocation`
-						newFrame = [`show_surplus_ratio`, null]
-						break
-					case `prev`:
-						newRound = state.round - 1
-						newPhase = `done`
-						newFrame = [`done`, null]
-						break
-				}
-				if (newRound === -1) {
-					console.error(`You are at the beginning and cannot go back!`)
-					return
-				}
-			}
-		}
-		set(resultsViewAtom, {
-			round: newRound,
-			phase: newPhase,
-			frame: newFrame,
-		})
+			/* 🚧 ABRIDGED 🚧 */
+
+			set(resultsViewAtom, {
+				round: newRound,
+				phase: newPhase,
+				frame: newFrame,
+			})
+		},
 	},
-})
+)
 
 function actualVoteToBallot(actualVote: ActualVote): Ballot {
 	const ballot: Ballot = {
@@ -381,12 +415,13 @@ function SeeResults(): JSX.Element {
 	useEffect(() => {
 		if (electionRef.current && getState(electionRef.current.state.phase).name === `counting`) {
 			let safety = 15
-			while (resultsView.round > electionRef.current.rounds.length - 1 && safety > 0) {
+			while (resultsView.round > electionRef.current.rounds.length - 2 && safety > 0) {
+				console.log(`spawning round ${15 - safety}`)
 				electionRef.current.spawnRound()
 				safety--
 			}
 		}
-	}, [resultsView.round])
+	}, [resultsView.round, resultsView.phase])
 
 	const changeFrame = runTransaction(changeFrameTX)
 	const Phase = Phases[resultsView.phase]
@@ -396,13 +431,7 @@ function SeeResults(): JSX.Element {
 		<LayoutGroup>
 			<div className={scss.class}>
 				<main>
-					<motion.header
-						initial={{ opacity: 0, y: -100 }}
-						animate={{ opacity: 1, y: 0 }}
-						exit={{ opacity: 0, y: 100 }}
-					>
-						{resultsView.round}
-					</motion.header>
+					<header>{resultsView.round}</header>
 					<main>
 						{electionRef.current ? (
 							<Phase election={electionRef.current}>
@@ -420,7 +449,9 @@ function SeeResults(): JSX.Element {
 						type="button"
 						disabled={viewLocation === `beginning`}
 						onClick={() => {
-							changeFrame(`prev`)
+							if (electionRef.current) {
+								changeFrame(`prev`, electionRef.current)
+							}
 						}}
 					>
 						prev
@@ -429,7 +460,9 @@ function SeeResults(): JSX.Element {
 						type="button"
 						disabled={viewLocation === `end`}
 						onClick={() => {
-							changeFrame(`next`)
+							if (electionRef.current) {
+								changeFrame(`next`, electionRef.current)
+							}
 						}}
 					>
 						next
@@ -446,35 +479,35 @@ function SeeResults(): JSX.Element {
 export const Phases = {
 	surplus_allocation({ children }) {
 		return (
-			<motion.div layoutId="phase" data-phase="surplus_allocation">
-				<motion.header layoutId="phase-header">surplus allocation</motion.header>
-				<motion.main layoutId="phase-main">{children}</motion.main>
-			</motion.div>
+			<div data-phase="surplus_allocation">
+				<header>surplus allocation</header>
+				<main>{children}</main>
+			</div>
 		)
 	},
 	winner_selection({ children, election }) {
 		const roundsLength = useO(election.state.roundsLength)
 		return (
-			<motion.div layoutId="phase" data-phase="winner_selection">
-				<motion.header layoutId="phase-header">winner selection</motion.header>
-				<motion.main layoutId="phase-main">{roundsLength > 0 ? children : null}</motion.main>
-			</motion.div>
+			<div data-phase="winner_selection">
+				<header>winner selection</header>
+				<main>{roundsLength > 0 ? children : null}</main>
+			</div>
 		)
 	},
 	loser_selection({ children }) {
 		return (
-			<motion.div layoutId="phase" data-phase="loser_selection">
-				<motion.header layoutId="phase-header">loser selection</motion.header>
-				<motion.main layoutId="phase-main">{children}</motion.main>
-			</motion.div>
+			<div data-phase="loser_selection">
+				<header>loser selection</header>
+				<main>{children}</main>
+			</div>
 		)
 	},
 	done({ children }) {
 		return (
-			<motion.div layoutId="phase" data-phase="done">
-				<motion.header layoutId="phase-header">done</motion.header>
-				<motion.main layoutId="phase-main">{children}</motion.main>
-			</motion.div>
+			<div data-phase="done">
+				<header>done</header>
+				<main>{children}</main>
+			</div>
 		)
 	},
 } satisfies Record<
@@ -486,30 +519,30 @@ export const Keyframes = {
 	// surplus_allocation
 	show_surplus_ratio(_) {
 		return (
-			<motion.div layoutId="keyframe" data-keyframe="show_surplus_ratio">
-				<motion.header layoutId="keyframe-header">show surplus ratio</motion.header>
-			</motion.div>
+			<div data-keyframe="show_surplus_ratio">
+				<header>show surplus ratio</header>
+			</div>
 		)
 	},
 	show_alternative_consensus(_) {
 		return (
-			<motion.div layoutId="keyframe" data-keyframe="show_alternative_consensus">
-				<motion.header layoutId="keyframe-header">show alternative consensus</motion.header>
-			</motion.div>
+			<div data-keyframe="show_alternative_consensus">
+				<header>show alternative consensus</header>
+			</div>
 		)
 	},
 	compress_alternative_consensus(_) {
 		return (
-			<motion.div layoutId="keyframe" data-keyframe="compress_alternative_consensus">
-				<motion.header layoutId="keyframe-header">compress alternative consensus</motion.header>
-			</motion.div>
+			<div data-keyframe="compress_alternative_consensus">
+				<header>compress alternative consensus</header>
+			</div>
 		)
 	},
 	distribute_surplus(_) {
 		return (
-			<motion.div layoutId="keyframe" data-keyframe="distribute_surplus">
-				<motion.header layoutId="keyframe-header">distribute surplus</motion.header>
-			</motion.div>
+			<div data-keyframe="distribute_surplus">
+				<header>distribute surplus</header>
+			</div>
 		)
 	},
 	// winner_selection
@@ -521,8 +554,8 @@ export const Keyframes = {
 		// biome-ignore lint/style/noNonNullAssertion: INTERDEPENDENCY_ISSUE
 		const candidatesByStatus = getState(currentRound.state.candidatesByStatus!)
 		return (
-			<motion.div layoutId="keyframe" data-keyframe="show_candidates">
-				<motion.header layoutId="keyframe-header">
+			<div data-keyframe="show_candidates">
+				<header>
 					<span>show candidates</span>
 
 					<CandidateStatusBar
@@ -534,9 +567,9 @@ export const Keyframes = {
 							findState(candidateAtoms, candidate.candidate),
 						)}
 					/>
-				</motion.header>
-				<motion.main layoutId="keyframe-main">
-					<motion.ol layoutId="candidates">
+				</header>
+				<main>
+					<ol>
 						{voteTotals.map(({ total, key }, idx) => {
 							return (
 								<CandidateTotal
@@ -546,9 +579,9 @@ export const Keyframes = {
 								/>
 							)
 						})}
-					</motion.ol>
-				</motion.main>
-			</motion.div>
+					</ol>
+				</main>
+			</div>
 		)
 	},
 	draw_quota_line({ election }) {
@@ -561,14 +594,16 @@ export const Keyframes = {
 		if (droopQuota instanceof Error) {
 			return <div>Error: {droopQuota.message}</div>
 		}
+		const droopQuotaSimple = droopQuota.simplify()
+		const droopQuotaApprox = Number(droopQuotaSimple[0]) / Number(droopQuotaSimple[1])
 		const indexOfFirstNonWinner = voteTotals.findIndex(({ total }) =>
 			droopQuota.isGreaterThan(total),
 		)
 		// biome-ignore lint/style/noNonNullAssertion: INTERDEPENDENCY_ISSUE
 		const candidatesByStatus = getState(currentRound.state.candidatesByStatus!)
 		return (
-			<motion.div layoutId="keyframe" data-keyframe="draw_quota_line">
-				<motion.header layoutId="keyframe-header">
+			<div data-keyframe="draw_quota_line">
+				<header>
 					<span>draw quota line</span>
 					<CandidateStatusBar
 						running={[]}
@@ -579,15 +614,15 @@ export const Keyframes = {
 							findState(candidateAtoms, candidate.candidate),
 						)}
 					/>
-				</motion.header>
-				<motion.main layoutId="keyframe-main">
+				</header>
+				<main>
 					<ol>
 						{voteTotals.map(({ total, key }, idx) => {
 							return (
 								<React.Fragment key={idx}>
 									{idx === indexOfFirstNonWinner ? (
 										<motion.div layoutId="quota-line" transition={{ duration: 2.5 }}>
-											droop quota
+											droop quota ({droopQuotaApprox})
 											<hr data-keyframe="quota-line" />
 										</motion.div>
 									) : null}
@@ -596,8 +631,8 @@ export const Keyframes = {
 							)
 						})}
 					</ol>
-				</motion.main>
-			</motion.div>
+				</main>
+			</div>
 		)
 	},
 	highlight_winners({ election }) {
@@ -613,8 +648,8 @@ export const Keyframes = {
 			return <div>Error: {roundOutcome.message}</div>
 		}
 		return (
-			<motion.div layoutId="keyframe" data-keyframe="highlight_winners">
-				<motion.header layoutId="keyframe-header">
+			<div data-keyframe="highlight_winners">
+				<header>
 					<span>highlight winners</span>
 					<CandidateStatusBar
 						running={candidatesByStatus.running
@@ -633,8 +668,8 @@ export const Keyframes = {
 							findState(candidateAtoms, candidate.candidate),
 						)}
 					/>
-				</motion.header>
-				<motion.main layoutId="keyframe-main">
+				</header>
+				<main>
 					<ol>
 						{voteTotals
 							.filter(
@@ -656,8 +691,8 @@ export const Keyframes = {
 							<hr data-keyframe-quota-line />
 						</motion.div>
 					</ol>
-				</motion.main>
-			</motion.div>
+				</main>
+			</div>
 		)
 	},
 	// loser_selection
@@ -673,8 +708,8 @@ export const Keyframes = {
 		// biome-ignore lint/style/noNonNullAssertion: INTERDEPENDENCY_ISSUE
 		const candidatesByStatus = getState(currentRound.state.candidatesByStatus!)
 		return (
-			<motion.div layoutId="keyframe" data-keyframe="highlight_losers">
-				<motion.header layoutId="keyframe-header">
+			<div data-keyframe="highlight_losers">
+				<header>
 					<span>highlight losers</span>
 					<CandidateStatusBar
 						running={candidatesByStatus.running.map((candidate) =>
@@ -687,16 +722,39 @@ export const Keyframes = {
 							findState(candidateAtoms, candidate.candidate),
 						)}
 					/>
-				</motion.header>
-			</motion.div>
+				</header>
+			</div>
 		)
 	},
 	// done
-	done(_) {
+	done({ election }) {
+		const view = useO(resultsViewAtom)
+		const currentRound = election.rounds[view.round]
+		const droopQuota = getState(election.state.droopQuota)
+
+		if (droopQuota instanceof Error) {
+			return <div>Error: {droopQuota.message}</div>
+		}
+
+		// biome-ignore lint/style/noNonNullAssertion: INTERDEPENDENCY_ISSUE
+		const candidatesByStatus = getState(currentRound.state.candidatesByStatus!)
 		return (
-			<motion.div layoutId="keyframe" data-keyframe="done">
-				<motion.header layoutId="keyframe-header">done</motion.header>
-			</motion.div>
+			<div data-keyframe="done">
+				<header>
+					<span>done</span>
+					<CandidateStatusBar
+						running={candidatesByStatus.running.map((candidate) =>
+							findState(candidateAtoms, candidate.candidate),
+						)}
+						elected={candidatesByStatus.elected.map((candidate) =>
+							findState(candidateAtoms, candidate.candidate),
+						)}
+						eliminated={candidatesByStatus.eliminated.map((candidate) =>
+							findState(candidateAtoms, candidate.candidate),
+						)}
+					/>
+				</header>
+			</div>
 		)
 	},
 } satisfies Record<
@@ -714,14 +772,15 @@ function CandidateTotal(props: {
 	const simplified = props.total.simplify()
 	const numerator = simplified[0]
 	const denominator = simplified[1]
+	const total = (Number(numerator) / Number(denominator)).toString()
+	const decimalIdx = total.indexOf(`.`)
+	const totalApprox = decimalIdx === -1 ? total : total.slice(0, decimalIdx + 4)
 	return (
 		<motion.li layoutId={props.candidate.key} data-candidate-total>
 			<header>
 				<span>{candidate.name}</span>
 				{` `}
-				<span>
-					{numerator.toString()}/{denominator.toString()}
-				</span>
+				<span>{totalApprox === total ? total : `~${totalApprox}…`}</span>
 			</header>
 			<main>
 				<CandidatePicture
