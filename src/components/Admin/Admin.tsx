@@ -1,6 +1,7 @@
 import "./admin.css"
 
 import { faker } from "@faker-js/faker"
+import { getState } from "atom.io"
 import { useI, useO } from "atom.io/react"
 import {
 	addDoc,
@@ -17,7 +18,7 @@ import { toast } from "react-toastify"
 
 import Modal from "~/src/components/Modal/Modal"
 import NewElection from "~/src/components/NewElection/NewElection"
-import { currentElectionIdAtom } from "~/src/lib/atomStore"
+import { currentElectionIdAtom, currentElectionLabelAtom } from "~/src/lib/atomStore"
 import { db } from "~/src/lib/firebase"
 import { useUserStore } from "~/src/lib/userStore"
 import type { ActualVote, ElectionData, SystemUser } from "~/src/types"
@@ -142,13 +143,27 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 	}
 
 	async function handleAddVotes(voterId: string) {
-		const candidates = await getDocs(collection(db, `candidates`))
-		const ids = shuffleArray(candidates.docs.map((document) => document.id))
+		const currentElectionLabel = getState(currentElectionLabelAtom)
+		const candidates = (await getDocs(collection(db, `candidates`))).docs.map((document) =>
+			document.data(),
+		)
+		const candidatesFiltered = candidates.filter(
+			(candidate) => candidate.label === currentElectionLabel,
+		)
+		const idsFiltered = candidatesFiltered.map((document) => document.id)
+		const idsShuffled = shuffleArray(idsFiltered)
+
+		console.log({
+			candidates,
+			candidatesFiltered,
+			idsFiltered,
+			idsShuffled,
+		})
 		await setDoc(doc(db, `votes`, voterId), {
 			finished: true,
-			firstChoice: ids.slice(0, 3),
-			secondChoice: ids.slice(3, 6),
-			thirdChoice: ids.slice(6, 9),
+			firstChoice: idsShuffled.slice(0, 2),
+			secondChoice: idsShuffled.slice(2, 4),
+			thirdChoice: idsShuffled.slice(4, 6),
 		})
 		setFinishedVoters((prev) => [...prev, voterId])
 	}
