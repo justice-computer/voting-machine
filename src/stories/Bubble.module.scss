@@ -1,11 +1,29 @@
-svg.class {
-  width: 200px;
-  height: 200px;
-  > path {
-    stroke: #000;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: .5px;
-    fill: none;
+label.class {
+  position: relative;
+  display: flex;
+  border-radius: 50%;
+  border: 2px solid black;
+  > input[type="checkbox"] {
+    display: none;
+  }
+  > svg {
+    pointer-events: none;
+    position: absolute;
+    height: 250%;
+    top: -75%;
+    left: -75%;
+    > path {
+      stroke: #000;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 0.5px;
+      fill: none;
+    }
+  }
+  &:hover {
+    background-color: #ff03;
+  }
+  &:active {
+    background-color: #ff0;
   }
 }
