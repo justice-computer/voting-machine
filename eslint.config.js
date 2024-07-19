@@ -189,7 +189,6 @@ const configs = [
 		},
 		rules: commonRules,
 	},
-	{},
 ]
 
 export default configs
