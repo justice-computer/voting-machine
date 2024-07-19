@@ -19,7 +19,9 @@
 		"preview": "vite preview",
 		"test": "vitest",
 		"test:watch": "vitest --watch",
-		"nuke": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' + && rm pnpm-lock.yaml"
+		"nuke": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' + && rm pnpm-lock.yaml",
+		"storybook": "storybook dev -p 6006",
+		"build-storybook": "storybook build"
 	},
 	"dependencies": {
 		"concurrently": "8.2.2",
@@ -35,10 +37,19 @@
 	"devDependencies": {
 		"@biomejs/biome": "1.8.3",
 		"@changesets/cli": "2.27.7",
+		"@chromatic-com/storybook": "1.6.1",
 		"@eslint/eslintrc": "3.1.0",
 		"@eslint/js": "9.7.0",
 		"@faker-js/faker": "8.4.1",
 		"@testing-library/jest-dom": "6.4.8",
+		"@storybook/addon-essentials": "8.2.4",
+		"@storybook/addon-interactions": "8.2.4",
+		"@storybook/addon-links": "8.2.4",
+		"@storybook/addon-onboarding": "8.2.4",
+		"@storybook/blocks": "8.2.4",
+		"@storybook/react": "8.2.4",
+		"@storybook/react-vite": "8.2.4",
+		"@storybook/test": "8.2.4",
 		"@testing-library/react": "16.0.0",
 		"@tsconfig/vite-react": "3.0.2",
 		"@types/node": "20.14.12",
@@ -53,6 +64,7 @@
 		"jsdom": "24.1.1",
 		"sass": "1.77.8",
 		"typescript": "5.5.4",
+		"storybook": "8.2.4",
 		"vite": "5.3.4",
 		"vite-tsconfig-paths": "4.3.2",
 		"vitest": "2.0.4"
