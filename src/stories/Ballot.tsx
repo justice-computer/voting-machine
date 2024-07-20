@@ -131,7 +131,7 @@ const issuesSelectors = selectorFamily<BallotIssue[], string>({
 		},
 })
 
-export function Ballot({ title, elections }: BallotProps): JSX.Element {
+export function BallotSheet({ title, elections }: BallotProps): JSX.Element {
 	return (
 		<article className={scss.class}>
 			<header>
@@ -187,6 +187,7 @@ function BallotElection({ id, displayName, candidates, config }: BallotElectionP
 															candidate: candidate.id,
 															tier: i,
 														})}
+														color="#05f"
 													/>
 												</span>
 											</span>
@@ -220,7 +221,7 @@ function Issue({ electionKey, issue }: { electionKey: string; issue: BallotIssue
 		<Spotlight
 			elementIds={[`${electionKey}-${issue.on}-${key}-A`, `${electionKey}-${issue.on}-${key}-Z`]}
 			updateSignals={[issue]}
-			padding={2}
+			padding={1}
 		/>
 	)
 }
