@@ -63,12 +63,13 @@ function Bubble_INTERNAL(props: BubbleProps_INTERNAL): JSX.Element {
 }
 
 function warn() {
-	console.warn(`Bubble: options, selections, or both must be provided`)
+	console.warn(`No setChecked provided`)
 }
 export function Bubble(props: BubbleProps): JSX.Element {
 	let checked = false
 	let setChecked: (value: boolean) => void = warn
 	if (`checked` in props) {
+		setChecked = props.setChecked
 		checked = props.checked
 	} else {
 		setChecked = useI(props.checkedState)

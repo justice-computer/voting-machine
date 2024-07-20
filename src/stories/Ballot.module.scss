@@ -1,0 +1,111 @@
+article.class {
+  user-select: none;
+  font-family: Brahmin;
+  color: #443;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px 1px #0002;
+  background-color: #fdfdfc;
+  // reset
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+    background: transparent;
+    list-style: none;
+  }
+  // end reset
+  &::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url(/noise.svg) repeat;
+    background-size: 2048px;
+    background-position: center;
+    opacity: 0.5;
+    mix-blend-mode: screen;
+  }
+  &::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url(/noise.svg) repeat;
+    background-size: 2048px;
+    background-position: center;
+    opacity: 0.25;
+    mix-blend-mode: multiply;
+  }
+  > header {
+    padding: 20px;
+    font-size: 32px;
+    font-weight: 600;
+  }
+  > span {
+    margin-left: 20px;
+    display: block;
+    background-image: url(/diagonal.svg);
+    background-size: 4px 20px; /* Image size slightly larger for overlap */
+    background-position: -4px -8px; /* Offset to create overlap */
+    height: 4px;
+    width: 40px;
+  }
+  > main {
+    > section {
+      padding: 20px;
+      > h2 {
+        font-size: 21px;
+        font-weight: 500;
+        margin-bottom: 10px;
+      }
+      > ul {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        > li {
+          display: contents;
+          > header {
+            grid-column-start: 1;
+            padding-right: 6px;
+          }
+          > main {
+            grid-column-start: 2;
+            display: flex;
+            > span {
+              flex: 1;
+              display: flex;
+              place-content: center;
+            }
+          }
+          > * {
+            border-bottom: 0.5px solid #ddc;
+            padding: 6px 2px 3px;
+          }
+          &[data-description] > header {
+            font-weight: 600;
+          }
+        }
+      }
+    }
+  }
+  data {
+    mix-blend-mode: multiply;
+    background-color: #f002;
+    border: 2px solid #f008;
+    border-radius: 4px;
+    pointer-events: none;
+  }
+}
