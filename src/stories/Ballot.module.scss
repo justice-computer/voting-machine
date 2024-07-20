@@ -1,14 +1,14 @@
 article.class {
   user-select: none;
   font-family: Brahmin;
-  color: #443;
+  color: #234;
   position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   border-radius: 4px;
   box-shadow: 0 1px 2px 1px #0002;
-  background-color: #fdfdfc;
+  background-color: #fffdfc;
   // reset
   * {
     box-sizing: border-box;
@@ -34,7 +34,7 @@ article.class {
     background-size: 2048px;
     background-position: center;
     opacity: 0.5;
-    mix-blend-mode: screen;
+    mix-blend-mode: subtract;
   }
   &::after {
     content: "";
@@ -79,20 +79,28 @@ article.class {
           display: contents;
           > header {
             grid-column-start: 1;
+            padding-left: 4px;
             padding-right: 6px;
+            display: flex;
+            align-items: center;
           }
           > main {
             grid-column-start: 2;
             display: flex;
+            height: 100%;
             > span {
               flex: 1;
               display: flex;
               place-content: center;
+              height: 100%;
+              > span {
+                height: 100%;
+                padding: 4px 2px 4px;
+              }
             }
           }
           > * {
             border-bottom: 0.5px solid #ddc;
-            padding: 6px 2px 3px;
           }
           &[data-description] > header {
             font-weight: 600;
@@ -102,9 +110,9 @@ article.class {
     }
   }
   data {
-    mix-blend-mode: multiply;
+    // mix-blend-mode: multiply;
     background-color: #f002;
-    border: 2px solid #f008;
+    border: 2px solid #d99;
     border-radius: 4px;
     pointer-events: none;
   }
