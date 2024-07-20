@@ -78,7 +78,45 @@ const candidatesByTierSelectors = selectorFamily<
 		},
 })
 
-type BallotIssue =
+export const transposedRankingsSelectors = selectorFamily<
+	{ candidateKey: string; written: number; actual: number }[],
+	string
+>({
+	key: `transposedRankings`,
+	get:
+		(electionKey) =>
+		({ get, find }) => {
+			const electionTiers = get(find(electionConfigAtoms, electionKey)).votingTiers
+			console.log({ electionTiers })
+			const candidatesVotedFor: string[] = []
+			const skippedTiers: number[] = []
+			const transposedRankings: { candidateKey: string; written: number; actual: number }[] = []
+			for (const [idx] of electionTiers.entries()) {
+				const candidates = get(
+					find(candidatesByTierSelectors, {
+						election: electionKey,
+						tier: idx,
+					}),
+				)
+				if (candidates.length !== 1 || candidatesVotedFor.includes(candidates[0].id)) {
+					skippedTiers.push(idx)
+				} else {
+					candidatesVotedFor.push(candidates[0].id)
+					if (skippedTiers.length > 0) {
+						transposedRankings.push({
+							candidateKey: candidates[0].id,
+							written: idx,
+							actual: idx - skippedTiers.length,
+						})
+					}
+				}
+			}
+			console.log({ transposedRankings, skippedTiers, candidatesVotedFor })
+			return transposedRankings
+		},
+})
+
+type Overvote =
 	| {
 			on: `candidate`
 			id: string
@@ -89,12 +127,12 @@ type BallotIssue =
 			idx: number
 			description: string
 	  }
-const issuesSelectors = selectorFamily<BallotIssue[], string>({
-	key: `issue`,
+const overvotesSelectors = selectorFamily<Overvote[], string>({
+	key: `overvote`,
 	get:
 		(electionKey) =>
 		({ get, find }) => {
-			const issues: BallotIssue[] = []
+			const overvotes: Overvote[] = []
 			const electionCandidates = get(find(electionCandidatesAtoms, electionKey))
 			for (const candidate of electionCandidates) {
 				const tiers = get(
@@ -104,7 +142,7 @@ const issuesSelectors = selectorFamily<BallotIssue[], string>({
 					}),
 				)
 				if (tiers.length > 1) {
-					issues.push({
+					overvotes.push({
 						on: `candidate`,
 						id: candidate.id,
 						description: `${candidate.displayName} cannot be listed in more than one tier`,
@@ -120,14 +158,14 @@ const issuesSelectors = selectorFamily<BallotIssue[], string>({
 					}),
 				)
 				if (candidates.length > 1) {
-					issues.push({
+					overvotes.push({
 						on: `tier`,
 						idx: idx,
 						description: `More than one candidate was listed in tier ${idx + 1}`,
 					})
 				}
 			}
-			return issues
+			return overvotes
 		},
 })
 
@@ -188,6 +226,7 @@ function BallotElection({ id, displayName, candidates, config }: BallotElectionP
 															tier: i,
 														})}
 														color="#05f"
+														id={`${id}-${candidate.id}-${i}`}
 													/>
 												</span>
 											</span>
@@ -199,23 +238,28 @@ function BallotElection({ id, displayName, candidates, config }: BallotElectionP
 					})}
 				</ul>
 			</section>
-			<Issues electionKey={id} />
+			<Overvotes electionKey={id} />
+			<TransposedRankings electionKey={id} />
 		</>
 	)
 }
 
-function Issues({ electionKey }: { electionKey: string }) {
-	const issues = useO(issuesSelectors, electionKey)
+function Overvotes({ electionKey }: { electionKey: string }) {
+	const overvotes = useO(overvotesSelectors, electionKey)
 	return (
-		<aside>
-			{issues.map((issue) => (
-				<Issue key={`id` in issue ? issue.id : issue.idx} electionKey={electionKey} issue={issue} />
+		<aside data-overvotes>
+			{overvotes.map((issue) => (
+				<OvervoteSpotlight
+					key={`id` in issue ? issue.id : issue.idx}
+					electionKey={electionKey}
+					issue={issue}
+				/>
 			))}
 		</aside>
 	)
 }
 
-function Issue({ electionKey, issue }: { electionKey: string; issue: BallotIssue }) {
+function OvervoteSpotlight({ electionKey, issue }: { electionKey: string; issue: Overvote }) {
 	const key = `id` in issue ? issue.id : issue.idx
 	return (
 		<Spotlight
@@ -305,5 +349,124 @@ export function Spotlight({
 				height: position.height + padding * 2,
 			}}
 		/>
+	)
+}
+
+function TransposedRankings({ electionKey }: { electionKey: string }) {
+	const transposedRankings = useO(transposedRankingsSelectors, electionKey)
+	return (
+		<aside data-transposed-rankings>
+			{transposedRankings.map(({ candidateKey, written, actual }) => (
+				<TransposedRankingsArrow
+					key={candidateKey}
+					electionKey={electionKey}
+					candidateKey={candidateKey}
+					written={written}
+					actual={actual}
+				/>
+			))}
+		</aside>
+	)
+}
+
+function TransposedRankingsArrow({
+	electionKey,
+	candidateKey,
+	written,
+	actual,
+}: { electionKey: string; candidateKey: string; written: number; actual: number }) {
+	return (
+		<Arrow
+			elementIds={[
+				`${electionKey}-${candidateKey}-${written}`,
+				`${electionKey}-${candidateKey}-${actual}`,
+			]}
+		/>
+	)
+}
+
+export type ArrowProps = {
+	elementIds: [originId: string, targetId: string]
+	originPadding?: number
+	targetPadding?: number
+	updateSignals?: any[]
+}
+export type DomPoint = { top: number; left: number }
+export function Arrow({
+	elementIds,
+	originPadding = 0,
+	targetPadding = 0,
+	updateSignals = [],
+}: ArrowProps): JSX.Element | null {
+	const [originId, targetId] = elementIds
+	const [originPoint, setOriginPoint] = useState<DomPoint>({ top: 0, left: 0 })
+	const [targetPoint, setTargetPoint] = useState<DomPoint>({ top: 0, left: 0 })
+
+	useEffect(() => {
+		const originElement = document.getElementById(originId)
+		const targetElement = document.getElementById(targetId)
+		if (originElement && targetElement) {
+			const updatePosition = () => {
+				const originRect = originElement.getBoundingClientRect()
+				const targetRect = targetElement.getBoundingClientRect()
+
+				const originCenterT = originRect.top + originRect.height / 2
+				const originCenterL = originRect.left + originRect.width / 2
+				const targetCenterT = targetRect.top + targetRect.height / 2
+				const targetCenterL = targetRect.left + targetRect.width / 2
+
+				const angle = Math.atan2(targetCenterT - originCenterT, targetCenterL - originCenterL)
+
+				setOriginPoint({
+					top: originCenterT + 0.5 - Math.sin(angle) * originPadding,
+					left: originCenterL - 0.25 - Math.cos(angle) * originPadding,
+				})
+				setTargetPoint({
+					top: targetCenterT + 0.5 + Math.sin(angle) * targetPadding,
+					left: targetCenterL - 0.25 + Math.cos(angle) * targetPadding,
+				})
+			}
+			originElement.addEventListener(`resize`, updatePosition)
+			targetElement.addEventListener(`resize`, updatePosition)
+			updatePosition()
+			addEventListener(`resize`, updatePosition)
+			return () => {
+				removeEventListener(`resize`, updatePosition)
+				originElement.removeEventListener(`resize`, updatePosition)
+				targetElement.removeEventListener(`resize`, updatePosition)
+			}
+		}
+	}, [elementIds, ...updateSignals])
+
+	return [originPoint.top, originPoint.left, targetPoint.top, targetPoint.left].includes(
+		0,
+	) ? null : (
+		<svg
+			style={{
+				position: `fixed`,
+				pointerEvents: `none`,
+				top: 0,
+				left: 0,
+				width: `100svw`,
+				height: `100svh`,
+			}}
+		>
+			<title>arrow</title>
+			<motion.g
+				initial={{ opacity: 0, transform: `scale(0.96)` }}
+				animate={{ opacity: 1, transform: `scale(1)` }}
+				transition={{
+					type: `spring`,
+					stiffness: 500,
+					damping: 30,
+					duration: 0.1,
+				}}
+			>
+				<path
+					d={`M${originPoint.left},${originPoint.top} L${targetPoint.left},${targetPoint.top}`}
+				/>
+				<circle cx={targetPoint.left} cy={targetPoint.top} r={3} />
+			</motion.g>
+		</svg>
 	)
 }

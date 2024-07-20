@@ -10,6 +10,7 @@ export type BubblePropsCore = {
 	color?: string
 	height?: number | string
 	width?: number | string
+	id?: string
 }
 
 export type BubbleStateTokenized = {
@@ -23,12 +24,12 @@ export type BubbleState = {
 
 export type BubbleProps = BubblePropsCore & (BubbleState | BubbleStateTokenized)
 
-export type BubbleProps_INTERNAL = BubblePropsCore & BubbleState & { id: string }
+export type BubbleProps_INTERNAL = BubblePropsCore & BubbleState & { id: string; userId?: string }
 
 function Bubble_INTERNAL(props: BubbleProps_INTERNAL): JSX.Element {
-	const { id, checked, setChecked, height = 20, width = 20 } = props
+	const { id, userId, checked, setChecked, height = 20, width = 20 } = props
 	return (
-		<label className={scss.class} htmlFor={`${id}-checkbox`} style={{ height, width }}>
+		<label id={userId} className={scss.class} htmlFor={`${id}-checkbox`} style={{ height, width }}>
 			<input
 				type="checkbox"
 				id={`${id}-checkbox`}
@@ -78,5 +79,13 @@ export function Bubble(props: BubbleProps): JSX.Element {
 		checked = useO(props.checkedState)
 	}
 	const id = useId()
-	return <Bubble_INTERNAL checked={checked} setChecked={setChecked} color={props.color} id={id} />
+	return (
+		<Bubble_INTERNAL
+			checked={checked}
+			setChecked={setChecked}
+			color={props.color}
+			id={id}
+			userId={props.id}
+		/>
+	)
 }
