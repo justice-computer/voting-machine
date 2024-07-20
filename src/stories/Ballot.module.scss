@@ -94,7 +94,7 @@ article.class {
               place-content: center;
               height: 100%;
               > span {
-                height: 100%;
+                min-height: 100%;
                 padding: 4px 2px 4px;
               }
             }
@@ -109,11 +109,20 @@ article.class {
       }
     }
   }
-  data {
+  aside[data-overvotes] > data {
     // mix-blend-mode: multiply;
     background-color: #f002;
     border: 2px solid #d99;
     border-radius: 4px;
     pointer-events: none;
+  }
+  aside[data-transposed-rankings] > svg > g {
+    > path {
+      stroke: #05f;
+      stroke-width: 2px;
+    }
+    > circle {
+      fill: #05f;
+    }
   }
 }
