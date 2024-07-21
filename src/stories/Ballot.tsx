@@ -4,7 +4,6 @@ import { atomFamily, selectorFamily, setState } from "atom.io"
 import { findState } from "atom.io/ephemeral"
 import { useO } from "atom.io/react"
 import { motion } from "framer-motion"
-import type { ElectionConfig } from "justiciar"
 import { useEffect, useState } from "react"
 
 import scss from "./Ballot.module.scss"
@@ -17,7 +16,10 @@ type BallotElectionProps = {
 		displayName: string
 		id: string
 	}[]
-	config: ElectionConfig
+	config: {
+		numberOfWinners: number
+		votingTiers: number[]
+	}
 }
 export type BallotProps = {
 	title: string
@@ -29,9 +31,9 @@ const checkboxAtoms = atomFamily<boolean, { election: string; candidate: string;
 	default: false,
 })
 
-const electionConfigAtoms = atomFamily<ElectionConfig, string>({
+const electionConfigAtoms = atomFamily<{ numberOfWinners: number; votingTiers: number[] }, string>({
 	key: `electionConfig`,
-	default: { numberOfWinners: 1n, votingTiers: [1n] },
+	default: { numberOfWinners: 1, votingTiers: [1] },
 })
 
 const electionCandidatesAtoms = atomFamily<{ id: string; displayName: string }[], string>({
