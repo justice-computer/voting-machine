@@ -381,8 +381,8 @@ export function Arrow({
 	updateSignals = [],
 }: ArrowProps): JSX.Element | null {
 	const [originId, targetId] = elementIds
-	const [originPoint, setOriginPoint] = useState<DomPoint>({ top: 0, left: 0 })
-	const [targetPoint, setTargetPoint] = useState<DomPoint>({ top: 0, left: 0 })
+	const [originPoint, setOriginPoint] = useState<DomPoint>({ top: Number.NaN, left: Number.NaN })
+	const [targetPoint, setTargetPoint] = useState<DomPoint>({ top: Number.NaN, left: Number.NaN })
 
 	useEffect(() => {
 		const originElement = document.getElementById(originId)
@@ -421,7 +421,7 @@ export function Arrow({
 	}, [elementIds, ...updateSignals])
 
 	return [originPoint.top, originPoint.left, targetPoint.top, targetPoint.left].includes(
-		0,
+		Number.NaN,
 	) ? null : (
 		<svg
 			style={{
