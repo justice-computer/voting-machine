@@ -55,16 +55,22 @@ article.class {
     font-size: 32px;
     font-weight: 600;
   }
-  > span {
-    margin-left: 20px;
-    display: block;
-    background-image: url(/diagonal.svg);
-    background-size: 4px 20px; /* Image size slightly larger for overlap */
-    background-position: -4px -8px; /* Offset to create overlap */
-    height: 4px;
-    width: 40px;
-  }
   > main {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    > span {
+      margin: 0 20px;
+      display: block;
+      background-image: url(/diagonal.svg);
+      background-size: 4px 20px; /* Image size slightly larger for overlap */
+      background-position: -4px -8px; /* Offset to create overlap */
+      height: 4px;
+      width: 40px;
+      &:last-of-type {
+        align-self: flex-end;
+      }
+    }
     > section {
       padding: 20px;
       > h2 {
@@ -109,31 +115,34 @@ article.class {
         }
       }
     }
-  }
-  data[data-spotlight] {
-    background-color: #f002;
-    border: 2px solid #d99;
-    border-radius: 4px;
-    pointer-events: none;
-  }
-  svg > g[data-arrow] {
-    > path {
-      stroke: #0af;
-      stroke-width: 3px;
-      stroke-linecap: round;
-    }
-    > circle {
-      fill: #0af;
-    }
-  }
-  svg > g[data-x-out] {
-    > path {
-      stroke: #e55;
-      stroke-width: 3px;
-      stroke-linecap: round;
-    }
-    > circle {
-      fill: #e55;
+    > aside {
+      display: contents;
+      data[data-spotlight] {
+        background-color: #f002;
+        border: 2px solid #d99;
+        border-radius: 4px;
+        pointer-events: none;
+      }
+      svg > g[data-arrow] {
+        > path {
+          stroke: #0af;
+          stroke-width: 3px;
+          stroke-linecap: round;
+        }
+        > circle {
+          fill: #0af;
+        }
+      }
+      svg > g[data-x-out] {
+        > path {
+          stroke: #e55;
+          stroke-width: 3px;
+          stroke-linecap: round;
+        }
+        > circle {
+          fill: #e55;
+        }
+      }
     }
   }
 }

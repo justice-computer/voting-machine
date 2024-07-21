@@ -4,7 +4,7 @@ import { atomFamily, selectorFamily, setState } from "atom.io"
 import { findState } from "atom.io/ephemeral"
 import { useO } from "atom.io/react"
 import { motion } from "framer-motion"
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 
 import scss from "./Ballot.module.scss"
 import { Bubble } from "./Bubble"
@@ -171,11 +171,14 @@ export function BallotSheet({ title, elections }: BallotProps): JSX.Element {
 			<header>
 				<h1>{title}</h1>
 			</header>
-			<span />
 			<main>
 				{elections.map((election) => (
-					<BallotElection key={election.id} {...election} />
+					<React.Fragment key={election.id}>
+						<span />
+						<BallotElection key={election.id} {...election} />
+					</React.Fragment>
 				))}
+				<span />
 			</main>
 		</article>
 	)
