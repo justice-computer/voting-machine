@@ -20,7 +20,12 @@ const ERROR = 2
 
 /** @type {import("@typescript-eslint/parser").ParserOptions} */
 const parserOptions = {
-	project: [`./tsconfig.json`, `./tsconfig.base.json`, `./tsconfig.node.json`],
+	project: [
+		`./tsconfig.json`,
+		`./tsconfig.base.json`,
+		`./tsconfig.node.json`,
+		`./src/stories/tsconfig.json`,
+	],
 	sourceType: `module`,
 }
 
