@@ -69,24 +69,29 @@ export const transposedRankingsSelectors = selectorFamily<
 	get:
 		(electionKey) =>
 		({ get, find }) => {
-			const electionTiers = get(find(electionConfigAtoms, electionKey)).votingTiers
+			const transposedRankings: { candidateKey: string; written: number; actual: number }[] = []
 			const candidatesVotedFor: string[] = []
 			const skippedTiers: number[] = []
-			const transposedRankings: { candidateKey: string; written: number; actual: number }[] = []
-			for (const [idx] of electionTiers.entries()) {
-				const candidates = get(
+
+			const { votingTiers } = get(find(electionConfigAtoms, electionKey))
+
+			for (const [idx] of votingTiers.entries()) {
+				const candidatesAtThisTier = get(
 					find(candidatesByTierSelectors, {
 						election: electionKey,
 						tier: idx,
 					}),
 				)
-				if (candidates.length !== 1 || candidatesVotedFor.includes(candidates[0].id)) {
+				if (
+					candidatesAtThisTier.length !== 1 ||
+					candidatesVotedFor.includes(candidatesAtThisTier[0].id)
+				) {
 					skippedTiers.push(idx)
 				} else {
-					candidatesVotedFor.push(candidates[0].id)
+					candidatesVotedFor.push(candidatesAtThisTier[0].id)
 					if (skippedTiers.length > 0) {
 						transposedRankings.push({
-							candidateKey: candidates[0].id,
+							candidateKey: candidatesAtThisTier[0].id,
 							written: idx,
 							actual: idx - skippedTiers.length,
 						})
@@ -134,10 +139,12 @@ export const repeatRankingsSelectors = selectorFamily<
 	get:
 		(electionKey) =>
 		({ get, find }) => {
-			const electionTiers = get(find(electionConfigAtoms, electionKey)).votingTiers
-			const candidatesVotedFor: string[] = []
 			const repeatRankings: { candidateKey: string; tier: number }[] = []
-			for (const [idx] of electionTiers.entries()) {
+			const candidatesVotedFor: string[] = []
+
+			const { votingTiers } = get(find(electionConfigAtoms, electionKey))
+
+			for (const [idx] of votingTiers.entries()) {
 				const candidates = get(
 					find(candidatesByTierSelectors, {
 						election: electionKey,
@@ -240,7 +247,15 @@ function Overvotes({ electionKey }: { electionKey: string }) {
 		<aside data-overvotes>
 			{overvotes.map((overvote) => (
 				<>
-					<OvervoteSpotlight key={overvote.tierIdx} electionKey={electionKey} overvote={overvote} />
+					<Spotlight
+						key={overvote.tierIdx}
+						elementIds={[
+							`${electionKey}-tier-${overvote.tierIdx}-A`,
+							`${electionKey}-tier-${overvote.tierIdx}-Z`,
+						]}
+						updateSignals={[overvote]}
+						padding={1}
+					/>
 					{overvote.candidateKeys.map((candidateKey) => {
 						const k = `${electionKey}-${candidateKey}-${overvote.tierIdx}`
 						return <XOut key={candidateKey} elementId={k} updateSignals={[candidateKey]} />
@@ -248,19 +263,6 @@ function Overvotes({ electionKey }: { electionKey: string }) {
 				</>
 			))}
 		</aside>
-	)
-}
-
-function OvervoteSpotlight({ electionKey, overvote }: { electionKey: string; overvote: Overvote }) {
-	return (
-		<Spotlight
-			elementIds={[
-				`${electionKey}-tier-${overvote.tierIdx}-A`,
-				`${electionKey}-tier-${overvote.tierIdx}-Z`,
-			]}
-			updateSignals={[overvote]}
-			padding={1}
-		/>
 	)
 }
 
@@ -326,6 +328,7 @@ export function Spotlight({
 
 	return position.width === 0 ? null : (
 		<motion.data
+			data-spotlight
 			initial={{ opacity: 0, transform: `scale(0.96)` }}
 			animate={{ opacity: 1, transform: `scale(1)` }}
 			exit={{ opacity: 0, transform: `scale(2)` }}
@@ -351,46 +354,30 @@ function TransposedRankings({ electionKey }: { electionKey: string }) {
 	return (
 		<aside data-transposed-rankings>
 			{transposedRankings.map(({ candidateKey, written, actual }) => (
-				<TransposedRankingsArrow
+				<Arrow
 					key={candidateKey}
-					electionKey={electionKey}
-					candidateKey={candidateKey}
-					written={written}
-					actual={actual}
+					elementIds={[
+						`${electionKey}-${candidateKey}-${written}`,
+						`${electionKey}-${candidateKey}-${actual}`,
+					]}
+					originOffset={-12}
 				/>
 			))}
 		</aside>
 	)
 }
 
-function TransposedRankingsArrow({
-	electionKey,
-	candidateKey,
-	written,
-	actual,
-}: { electionKey: string; candidateKey: string; written: number; actual: number }) {
-	return (
-		<Arrow
-			elementIds={[
-				`${electionKey}-${candidateKey}-${written}`,
-				`${electionKey}-${candidateKey}-${actual}`,
-			]}
-			originPadding={-10}
-		/>
-	)
-}
-
 export type ArrowProps = {
 	elementIds: [originId: string, targetId: string]
-	originPadding?: number
-	targetPadding?: number
+	originOffset?: number
+	targetOffset?: number
 	updateSignals?: any[]
 }
 export type DomPoint = { top: number; left: number }
 export function Arrow({
 	elementIds,
-	originPadding = 0,
-	targetPadding = 0,
+	originOffset = 0,
+	targetOffset = 0,
 	updateSignals = [],
 }: ArrowProps): JSX.Element | null {
 	const [originId, targetId] = elementIds
@@ -413,12 +400,12 @@ export function Arrow({
 				const angle = Math.atan2(targetCenterT - originCenterT, targetCenterL - originCenterL)
 
 				setOriginPoint({
-					top: originCenterT + 0.5 - Math.sin(angle) * originPadding,
-					left: originCenterL - 0.25 - Math.cos(angle) * originPadding,
+					top: originCenterT + 0.5 - Math.sin(angle) * originOffset,
+					left: originCenterL - 0.25 - Math.cos(angle) * originOffset,
 				})
 				setTargetPoint({
-					top: targetCenterT + 0.5 + Math.sin(angle) * targetPadding,
-					left: targetCenterL - 0.25 + Math.cos(angle) * targetPadding,
+					top: targetCenterT + 0.5 + Math.sin(angle) * targetOffset,
+					left: targetCenterL - 0.25 + Math.cos(angle) * targetOffset,
 				})
 			}
 			originElement.addEventListener(`resize`, updatePosition)
@@ -448,6 +435,7 @@ export function Arrow({
 		>
 			<title>arrow</title>
 			<motion.g
+				data-arrow
 				initial={{ opacity: 0, transform: `scale(0.96)` }}
 				animate={{ opacity: 1, transform: `scale(1)` }}
 				transition={{
@@ -460,7 +448,7 @@ export function Arrow({
 				<path
 					d={`M${originPoint.left},${originPoint.top} L${targetPoint.left},${targetPoint.top}`}
 				/>
-				<circle cx={targetPoint.left} cy={targetPoint.top} r={3} />
+				<circle cx={targetPoint.left} cy={targetPoint.top} r={4} />
 			</motion.g>
 		</svg>
 	)
@@ -525,6 +513,7 @@ export function XOut({ elementId, updateSignals = [] }: XOutProps): JSX.Element 
 		>
 			<title>x-out</title>
 			<motion.g
+				data-x-out
 				initial={{ opacity: 0, transform: `scale(0.96)` }}
 				animate={{ opacity: 1, transform: `scale(1)` }}
 				transition={{
