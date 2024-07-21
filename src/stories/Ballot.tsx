@@ -292,11 +292,10 @@ export function Spotlight({
 			setPosition(startingPosition)
 			return
 		}
-		const elements = elementIds.map((id) => document.getElementById(id)).filter(Boolean)
+		const elements = elementIds.map((id) => document.getElementById(id)).filter((el) => el !== null)
 		if (elements.length > 0) {
 			const updatePosition = () => {
-				// biome-ignore lint/style/noNonNullAssertion: <explanation>
-				const rects = elements.map((el) => el!.getBoundingClientRect())
+				const rects = elements.map((el) => el.getBoundingClientRect())
 				const combinedRect = rects.reduce<Pick<DOMRect, `height` | `left` | `top` | `width`>>(
 					(acc, rect) => ({
 						top: Math.min(acc.top, rect.top),
