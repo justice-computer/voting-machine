@@ -41,8 +41,8 @@ export const Primary: Story = {
 					},
 				],
 				config: {
-					numberOfWinners: 1n,
-					votingTiers: [1n, 1n, 1n, 1n, 1n, 1n],
+					numberOfWinners: 1,
+					votingTiers: [1, 1, 1, 1, 1, 1],
 				},
 			},
 		],
