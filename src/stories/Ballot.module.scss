@@ -109,20 +109,40 @@ article.class {
       }
     }
   }
-  aside[data-overvotes] > data {
-    // mix-blend-mode: multiply;
-    background-color: #f002;
-    border: 2px solid #d99;
-    border-radius: 4px;
-    pointer-events: none;
+  aside[data-overvotes] {
+    > data {
+      // mix-blend-mode: multiply;
+      background-color: #f002;
+      border: 2px solid #d99;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+    > svg > g {
+      > path {
+        stroke: #e55;
+        stroke-width: 3px;
+      }
+      > circle {
+        fill: #e55;
+      }
+    }
   }
   aside[data-transposed-rankings] > svg > g {
     > path {
-      stroke: #05f;
+      stroke: #0af;
       stroke-width: 2px;
     }
     > circle {
-      fill: #05f;
+      fill: #0af;
+    }
+  }
+  aside[data-repeat-rankings] > svg > g {
+    > path {
+      stroke: #e55;
+      stroke-width: 3px;
+    }
+    > circle {
+      fill: #e55;
     }
   }
 }
