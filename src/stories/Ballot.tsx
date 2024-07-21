@@ -4,7 +4,7 @@ import { atomFamily, selectorFamily, setState } from "atom.io"
 import { findState } from "atom.io/ephemeral"
 import { useO } from "atom.io/react"
 import { motion } from "framer-motion"
-import React, { useEffect, useState } from "react"
+import { Fragment, useEffect, useState } from "react"
 
 import scss from "./Ballot.module.scss"
 import { Bubble } from "./Bubble"
@@ -173,10 +173,10 @@ export function BallotSheet({ title, elections }: BallotProps): JSX.Element {
 			</header>
 			<main>
 				{elections.map((election) => (
-					<React.Fragment key={election.id}>
+					<Fragment key={election.id}>
 						<span />
 						<BallotElection key={election.id} {...election} />
-					</React.Fragment>
+					</Fragment>
 				))}
 				<span />
 			</main>
@@ -249,9 +249,8 @@ function Overvotes({ electionKey }: { electionKey: string }) {
 	return (
 		<aside data-overvotes>
 			{overvotes.map((overvote) => (
-				<>
+				<Fragment key={overvote.tierIdx}>
 					<Spotlight
-						key={overvote.tierIdx}
 						elementIds={[
 							`${electionKey}-tier-${overvote.tierIdx}-A`,
 							`${electionKey}-tier-${overvote.tierIdx}-Z`,
@@ -260,10 +259,10 @@ function Overvotes({ electionKey }: { electionKey: string }) {
 						padding={1}
 					/>
 					{overvote.candidateKeys.map((candidateKey) => {
-						const k = `${electionKey}-${candidateKey}-${overvote.tierIdx}`
-						return <XOut key={candidateKey} elementId={k} updateSignals={[candidateKey]} />
+						const elementId = `${electionKey}-${candidateKey}-${overvote.tierIdx}`
+						return <XOut key={candidateKey} elementId={elementId} updateSignals={[candidateKey]} />
 					})}
-				</>
+				</Fragment>
 			))}
 		</aside>
 	)
@@ -516,7 +515,7 @@ export function XOut({ elementId, updateSignals = [] }: XOutProps): JSX.Element 
 			<title>x-out</title>
 			<motion.g
 				data-x-out
-				initial={{ opacity: 0, transform: `scale(0.96)` }}
+				initial={{ opacity: 0, transform: `scale(0.5)` }}
 				animate={{ opacity: 1, transform: `scale(1)` }}
 				transition={{
 					type: `spring`,
