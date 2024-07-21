@@ -39,25 +39,6 @@ const electionCandidatesAtoms = atomFamily<{ id: string; displayName: string }[]
 	default: [],
 })
 
-const tiersByCandidateSelectors = selectorFamily<bigint[], { election: string; candidate: string }>(
-	{
-		key: `tiersByCandidate`,
-		get:
-			(keys) =>
-			({ get }) => {
-				const electionConfig = get(electionConfigAtoms, keys.election)
-				const votesForCandidate = electionConfig.votingTiers.filter((_, tier) =>
-					get(checkboxAtoms, {
-						election: keys.election,
-						candidate: keys.candidate,
-						tier: Number(tier),
-					}),
-				)
-				return votesForCandidate
-			},
-	},
-)
-
 const candidatesByTierSelectors = selectorFamily<
 	{ id: string; displayName: string }[],
 	{ election: string; tier: number }
@@ -65,8 +46,8 @@ const candidatesByTierSelectors = selectorFamily<
 	key: `candidatesByTier`,
 	get:
 		(keys) =>
-		({ get }) => {
-			const electionCandidates = get(electionCandidatesAtoms, keys.election)
+		({ get, find }) => {
+			const electionCandidates = get(find(electionCandidatesAtoms, keys.election))
 			const votesInTier = electionCandidates.filter((candidate) =>
 				get(checkboxAtoms, {
 					election: keys.election,
@@ -87,7 +68,6 @@ export const transposedRankingsSelectors = selectorFamily<
 		(electionKey) =>
 		({ get, find }) => {
 			const electionTiers = get(find(electionConfigAtoms, electionKey)).votingTiers
-			console.log({ electionTiers })
 			const candidatesVotedFor: string[] = []
 			const skippedTiers: number[] = []
 			const transposedRankings: { candidateKey: string; written: number; actual: number }[] = []
@@ -111,44 +91,20 @@ export const transposedRankingsSelectors = selectorFamily<
 					}
 				}
 			}
-			console.log({ transposedRankings, skippedTiers, candidatesVotedFor })
 			return transposedRankings
 		},
 })
 
-type Overvote =
-	| {
-			on: `candidate`
-			id: string
-			description: string
-	  }
-	| {
-			on: `tier`
-			idx: number
-			description: string
-	  }
+type Overvote = {
+	tierIdx: number
+	candidateKeys: string[]
+}
 const overvotesSelectors = selectorFamily<Overvote[], string>({
 	key: `overvote`,
 	get:
 		(electionKey) =>
 		({ get, find }) => {
 			const overvotes: Overvote[] = []
-			const electionCandidates = get(find(electionCandidatesAtoms, electionKey))
-			for (const candidate of electionCandidates) {
-				const tiers = get(
-					find(tiersByCandidateSelectors, {
-						election: electionKey,
-						candidate: candidate.id,
-					}),
-				)
-				if (tiers.length > 1) {
-					overvotes.push({
-						on: `candidate`,
-						id: candidate.id,
-						description: `${candidate.displayName} cannot be listed in more than one tier`,
-					})
-				}
-			}
 			const electionTiers = get(find(electionConfigAtoms, electionKey)).votingTiers
 			for (const [idx] of electionTiers.entries()) {
 				const candidates = get(
@@ -159,13 +115,44 @@ const overvotesSelectors = selectorFamily<Overvote[], string>({
 				)
 				if (candidates.length > 1) {
 					overvotes.push({
-						on: `tier`,
-						idx: idx,
-						description: `More than one candidate was listed in tier ${idx + 1}`,
+						tierIdx: idx,
+						candidateKeys: candidates.map((candidate) => candidate.id),
 					})
 				}
 			}
 			return overvotes
+		},
+})
+
+export const repeatRankingsSelectors = selectorFamily<
+	{ candidateKey: string; tier: number }[],
+	string
+>({
+	key: `repeatRankings`,
+	get:
+		(electionKey) =>
+		({ get, find }) => {
+			const electionTiers = get(find(electionConfigAtoms, electionKey)).votingTiers
+			const candidatesVotedFor: string[] = []
+			const repeatRankings: { candidateKey: string; tier: number }[] = []
+			for (const [idx] of electionTiers.entries()) {
+				const candidates = get(
+					find(candidatesByTierSelectors, {
+						election: electionKey,
+						tier: idx,
+					}),
+				)
+				if (candidatesVotedFor.includes(candidates[0]?.id)) {
+					repeatRankings.push({
+						candidateKey: candidates[0].id,
+						tier: idx,
+					})
+				}
+				if (candidates.length === 1) {
+					candidatesVotedFor.push(candidates[0].id)
+				}
+			}
+			return repeatRankings
 		},
 })
 
@@ -240,6 +227,7 @@ function BallotElection({ id, displayName, candidates, config }: BallotElectionP
 			</section>
 			<Overvotes electionKey={id} />
 			<TransposedRankings electionKey={id} />
+			<RepeatRankings electionKey={id} />
 		</>
 	)
 }
@@ -248,23 +236,27 @@ function Overvotes({ electionKey }: { electionKey: string }) {
 	const overvotes = useO(overvotesSelectors, electionKey)
 	return (
 		<aside data-overvotes>
-			{overvotes.map((issue) => (
-				<OvervoteSpotlight
-					key={`id` in issue ? issue.id : issue.idx}
-					electionKey={electionKey}
-					issue={issue}
-				/>
+			{overvotes.map((overvote) => (
+				<>
+					<OvervoteSpotlight key={overvote.tierIdx} electionKey={electionKey} overvote={overvote} />
+					{overvote.candidateKeys.map((candidateKey) => {
+						const k = `${electionKey}-${candidateKey}-${overvote.tierIdx}`
+						return <XOut key={candidateKey} elementId={k} updateSignals={[candidateKey]} />
+					})}
+				</>
 			))}
 		</aside>
 	)
 }
 
-function OvervoteSpotlight({ electionKey, issue }: { electionKey: string; issue: Overvote }) {
-	const key = `id` in issue ? issue.id : issue.idx
+function OvervoteSpotlight({ electionKey, overvote }: { electionKey: string; overvote: Overvote }) {
 	return (
 		<Spotlight
-			elementIds={[`${electionKey}-${issue.on}-${key}-A`, `${electionKey}-${issue.on}-${key}-Z`]}
-			updateSignals={[issue]}
+			elementIds={[
+				`${electionKey}-tier-${overvote.tierIdx}-A`,
+				`${electionKey}-tier-${overvote.tierIdx}-Z`,
+			]}
+			updateSignals={[overvote]}
 			padding={1}
 		/>
 	)
@@ -381,6 +373,7 @@ function TransposedRankingsArrow({
 				`${electionKey}-${candidateKey}-${written}`,
 				`${electionKey}-${candidateKey}-${actual}`,
 			]}
+			originPadding={-10}
 		/>
 	)
 }
@@ -466,6 +459,85 @@ export function Arrow({
 					d={`M${originPoint.left},${originPoint.top} L${targetPoint.left},${targetPoint.top}`}
 				/>
 				<circle cx={targetPoint.left} cy={targetPoint.top} r={3} />
+			</motion.g>
+		</svg>
+	)
+}
+
+function RepeatRankings({ electionKey }: { electionKey: string }) {
+	const repeatRankings = useO(repeatRankingsSelectors, electionKey)
+	return (
+		<aside data-repeat-rankings>
+			{repeatRankings.map(({ candidateKey, tier }) => (
+				<XOut
+					key={candidateKey}
+					elementId={`${electionKey}-${candidateKey}-${tier}`}
+					updateSignals={[candidateKey]}
+				/>
+			))}
+		</aside>
+	)
+}
+
+export type XOutProps = {
+	elementId: string
+	updateSignals?: any[]
+}
+export function XOut({ elementId, updateSignals = [] }: XOutProps): JSX.Element | null {
+	const [originPoint, setOriginPoint] = useState<DomPoint>({ top: 0, left: 0 })
+
+	useEffect(() => {
+		const originElement = document.getElementById(elementId)
+		if (originElement) {
+			const updatePosition = () => {
+				const originRect = originElement.getBoundingClientRect()
+
+				const originCenterT = originRect.top + originRect.height / 2
+				const originCenterL = originRect.left + originRect.width / 2
+
+				setOriginPoint({
+					top: originCenterT + 0.5,
+					left: originCenterL - 0.25,
+				})
+			}
+			originElement.addEventListener(`resize`, updatePosition)
+			updatePosition()
+			addEventListener(`resize`, updatePosition)
+			return () => {
+				removeEventListener(`resize`, updatePosition)
+				originElement.removeEventListener(`resize`, updatePosition)
+			}
+		}
+	}, [elementId, ...updateSignals])
+
+	return [originPoint.top, originPoint.left].includes(0) ? null : (
+		<svg
+			style={{
+				position: `fixed`,
+				pointerEvents: `none`,
+				top: 0,
+				left: 0,
+				width: `100svw`,
+				height: `100svh`,
+			}}
+		>
+			<title>x-out</title>
+			<motion.g
+				initial={{ opacity: 0, transform: `scale(0.96)` }}
+				animate={{ opacity: 1, transform: `scale(1)` }}
+				transition={{
+					type: `spring`,
+					stiffness: 500,
+					damping: 30,
+					duration: 0.1,
+				}}
+			>
+				<path
+					d={`M${originPoint.left - 8},${originPoint.top - 8} L${originPoint.left + 8},${originPoint.top + 8}`}
+				/>
+				<path
+					d={`M${originPoint.left - 8},${originPoint.top + 8} L${originPoint.left + 8},${originPoint.top - 8}`}
+				/>
 			</motion.g>
 		</svg>
 	)
