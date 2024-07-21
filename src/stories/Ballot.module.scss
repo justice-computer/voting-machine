@@ -10,6 +10,7 @@ article.class {
   box-shadow: 0 1px 2px 1px #0002;
   background-color: #fffdfc;
   * {
+    line-height: calc(4 / 3);
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -50,6 +51,7 @@ article.class {
   }
   > header {
     padding: 20px;
+    line-height: 33px;
     font-size: 32px;
     font-weight: 600;
   }
@@ -66,6 +68,7 @@ article.class {
     > section {
       padding: 20px;
       > h2 {
+        line-height: 23px;
         font-size: 21px;
         font-weight: 500;
         margin-bottom: 10px;
