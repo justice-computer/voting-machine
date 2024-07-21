@@ -9,7 +9,6 @@ article.class {
   border-radius: 4px;
   box-shadow: 0 1px 2px 1px #0002;
   background-color: #fffdfc;
-  // reset
   * {
     box-sizing: border-box;
     margin: 0;
@@ -21,7 +20,6 @@ article.class {
     background: transparent;
     list-style: none;
   }
-  // end reset
   &::before {
     content: "";
     pointer-events: none;
@@ -109,37 +107,27 @@ article.class {
       }
     }
   }
-  aside[data-overvotes] {
-    > data {
-      // mix-blend-mode: multiply;
-      background-color: #f002;
-      border: 2px solid #d99;
-      border-radius: 4px;
-      pointer-events: none;
-    }
-    > svg > g {
-      > path {
-        stroke: #e55;
-        stroke-width: 3px;
-      }
-      > circle {
-        fill: #e55;
-      }
-    }
+  data[data-spotlight] {
+    background-color: #f002;
+    border: 2px solid #d99;
+    border-radius: 4px;
+    pointer-events: none;
   }
-  aside[data-transposed-rankings] > svg > g {
+  svg > g[data-arrow] {
     > path {
       stroke: #0af;
-      stroke-width: 2px;
+      stroke-width: 3px;
+      stroke-linecap: round;
     }
     > circle {
       fill: #0af;
     }
   }
-  aside[data-repeat-rankings] > svg > g {
+  svg > g[data-x-out] {
     > path {
       stroke: #e55;
       stroke-width: 3px;
+      stroke-linecap: round;
     }
     > circle {
       fill: #e55;
