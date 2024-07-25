@@ -1,6 +1,6 @@
 import "~/src/font-face.scss"
 
-import { atomFamily, selectorFamily, setState } from "atom.io"
+import { atomFamily, getState, selectorFamily, setState } from "atom.io"
 import { findState } from "atom.io/ephemeral"
 import { useO } from "atom.io/react"
 import { motion } from "framer-motion"
@@ -164,6 +164,30 @@ export const repeatRankingsSelectors = selectorFamily<
 			return repeatRankings
 		},
 })
+
+export function prepareBallot(electionId: string): string[][] {
+	const cleanBallot: string[][] = []
+
+	const candidatesVotedFor: string[] = []
+	const { votingTiers } = getState(electionConfigAtoms, electionId)
+
+	for (const [idx, allowedCandidates] of votingTiers.entries()) {
+		const candidatesAtThisTier = getState(candidatesByTierSelectors, {
+			election: electionId,
+			tier: idx,
+		})
+		const shouldSkipVote =
+			candidatesAtThisTier.length === 0 ||
+			candidatesVotedFor.includes(candidatesAtThisTier[0].id) ||
+			candidatesAtThisTier.length > allowedCandidates
+		if (shouldSkipVote === false) {
+			candidatesVotedFor.push(candidatesAtThisTier[0].id)
+			cleanBallot.push(candidatesAtThisTier.map((candidate) => candidate.id))
+		}
+	}
+
+	return cleanBallot
+}
 
 export function BallotSheet({ title, elections }: BallotSheetProps): JSX.Element {
 	return (
