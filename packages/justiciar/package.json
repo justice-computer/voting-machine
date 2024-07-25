@@ -9,7 +9,7 @@
 		"test:coverage": "vitest run --coverage"
 	},
 	"dependencies": {
-		"atom.io": "0.25.4"
+		"atom.io": "0.25.5"
 	},
 	"devDependencies": {
 		"@vitest/browser": "2.0.4",

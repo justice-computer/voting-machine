@@ -106,8 +106,8 @@ importers:
         specifier: 4.3.1
         version: 4.3.1(vite@5.3.4(@types/node@20.14.12)(sass@1.77.8))
       atom.io:
-        specifier: 0.25.4
-        version: 0.25.4(@testing-library/react@16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(framer-motion@11.3.17(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        specifier: 0.25.5
+        version: 0.25.5(@testing-library/react@16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(framer-motion@11.3.17(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       c8:
         specifier: 10.1.2
         version: 10.1.2
@@ -139,8 +139,8 @@ importers:
   packages/justiciar:
     dependencies:
       atom.io:
-        specifier: 0.25.4
-        version: 0.25.4(@testing-library/react@16.0.0(@testing-library/dom@10.3.2)(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(framer-motion@11.3.17(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        specifier: 0.25.5
+        version: 0.25.5(@testing-library/react@16.0.0(@testing-library/dom@10.3.2)(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(framer-motion@11.3.17(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@vitest/browser':
         specifier: 2.0.4
@@ -2267,8 +2267,8 @@ packages:
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
 
-  atom.io@0.25.4:
-    resolution: {integrity: sha512-SESFYZAt+T3jGey1T1f2wviF9TFwLFHx9vvPvBrHuq1acZ6WSbvUCGy6cu+ZCsIlIYchOfXINlFrh55ZkaPSwA==}
+  atom.io@0.25.5:
+    resolution: {integrity: sha512-5gu0OwBRK9zK4eJOmryvU8zHAUdLXXTTuH2mV2cv7oZV8tK0LDxLpz828PMKkcDFxmAHVK0ptVQ6uMDu6Pw5+Q==}
     peerDependencies:
       '@floating-ui/react': '>=0.25.0'
       '@floating-ui/react-dom': '>=2.0.0'
@@ -8285,13 +8285,13 @@ snapshots:
 
   asynckit@0.4.0: {}
 
-  atom.io@0.25.4(@testing-library/react@16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(framer-motion@11.3.17(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
+  atom.io@0.25.5(@testing-library/react@16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(framer-motion@11.3.17(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
     optionalDependencies:
       '@testing-library/react': 16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       framer-motion: 11.3.17(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
 
-  atom.io@0.25.4(@testing-library/react@16.0.0(@testing-library/dom@10.3.2)(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(framer-motion@11.3.17(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
+  atom.io@0.25.5(@testing-library/react@16.0.0(@testing-library/dom@10.3.2)(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(framer-motion@11.3.17(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
     optionalDependencies:
       '@testing-library/react': 16.0.0(@testing-library/dom@10.3.2)(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       framer-motion: 11.3.17(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
