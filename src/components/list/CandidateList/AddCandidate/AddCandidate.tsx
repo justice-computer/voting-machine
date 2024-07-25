@@ -30,6 +30,7 @@ function AddCandidate({ close }: AddCandidateProps): JSX.Element {
 		console.log(currentElectionLabel)
 		const label = currentElectionLabel as string
 		const newCandidate: Candidate = {
+			id: undefined,
 			name: name.value,
 			heading: heading.value,
 			details: details.value,

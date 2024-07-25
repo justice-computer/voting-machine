@@ -129,6 +129,8 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 				createdAt: new Date(),
 				users: [],
 				label,
+				title: ``,
+				subtitle: ``,
 			}
 			const election = await addDoc(collection(db, `elections`), newElection)
 			setCurrentElectionId(election.id)

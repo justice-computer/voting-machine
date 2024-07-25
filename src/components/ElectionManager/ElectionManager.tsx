@@ -51,6 +51,8 @@ function ElectionManager({
 						userName: user.data()?.username || `unknown`,
 						formattedCreatedAt,
 						label: election.data().label,
+						title: election.data().title,
+						subtitle: election.data().subtitle,
 					}
 				})
 
