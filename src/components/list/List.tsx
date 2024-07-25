@@ -1,11 +1,32 @@
 import "./list.css"
 
-import CandidateList from "./CandidateList/CandidateList"
+import { useO } from "atom.io/react"
+
+import { candidatesInCurrentElectionSelector } from "~/src/lib/atomStore"
+import type { BallotSheetElection } from "~/src/stories/Ballot"
+import { BallotSheet } from "~/src/stories/Ballot"
 
 function List(): JSX.Element {
+	const candidates = useO(candidatesInCurrentElectionSelector).filter(
+		(candidate) => candidate.id !== undefined,
+	)
+
+	const title = `General Election`
+	const elections = [
+		{
+			name: `President of the United States of America`,
+			id: `potus`,
+			candidates,
+			config: {
+				numberOfWinners: 1,
+				votingTiers: [1, 1, 1, 1, 1, 1],
+			},
+		},
+	] satisfies BallotSheetElection[]
+
 	return (
 		<div className="list">
-			<CandidateList />
+			<BallotSheet title={title} elections={elections} />
 		</div>
 	)
 }

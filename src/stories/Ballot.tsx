@@ -9,11 +9,11 @@ import { Fragment, useEffect, useState } from "react"
 import scss from "./Ballot.module.scss"
 import { Bubble } from "./Bubble"
 
-type BallotElectionProps = {
-	displayName: string
+export type BallotSheetElection = {
+	name: string
 	id: string
 	candidates: {
-		displayName: string
+		name: string
 		id: string
 	}[]
 	config: {
@@ -21,31 +21,31 @@ type BallotElectionProps = {
 		votingTiers: number[]
 	}
 }
-export type BallotProps = {
+export type BallotSheetProps = {
 	title: string
-	elections: BallotElectionProps[]
+	elections: BallotSheetElection[]
 }
 
 const checkboxAtoms = atomFamily<boolean, { election: string; candidate: string; tier: number }>({
-	key: `ballot`,
+	key: `ballotSheetCheckbox`,
 	default: false,
 })
 
 const electionConfigAtoms = atomFamily<{ numberOfWinners: number; votingTiers: number[] }, string>({
-	key: `electionConfig`,
+	key: `ballotSheetElectionConfig`,
 	default: { numberOfWinners: 1, votingTiers: [1] },
 })
 
-const electionCandidatesAtoms = atomFamily<{ id: string; displayName: string }[], string>({
-	key: `electionCandidates`,
+const electionCandidatesAtoms = atomFamily<{ id: string; name: string }[], string>({
+	key: `ballotSheetElectionCandidates`,
 	default: [],
 })
 
 const candidatesByTierSelectors = selectorFamily<
-	{ id: string; displayName: string }[],
+	{ id: string; name: string }[],
 	{ election: string; tier: number }
 >({
-	key: `candidatesByTier`,
+	key: `ballotSheetCandidatesByTier`,
 	get:
 		(keys) =>
 		({ get, find }) => {
@@ -65,7 +65,7 @@ export const transposedRankingsSelectors = selectorFamily<
 	{ candidateKey: string; written: number; actual: number }[],
 	string
 >({
-	key: `transposedRankings`,
+	key: `ballotSheetTransposedRankings`,
 	get:
 		(electionKey) =>
 		({ get, find }) => {
@@ -107,7 +107,7 @@ type Overvote = {
 	candidateKeys: string[]
 }
 const overvotesSelectors = selectorFamily<Overvote[], string>({
-	key: `overvote`,
+	key: `ballotSheetOvervote`,
 	get:
 		(electionKey) =>
 		({ get, find }) => {
@@ -135,7 +135,7 @@ export const repeatRankingsSelectors = selectorFamily<
 	{ candidateKey: string; tier: number }[],
 	string
 >({
-	key: `repeatRankings`,
+	key: `ballotSheetRepeatRankings`,
 	get:
 		(electionKey) =>
 		({ get, find }) => {
@@ -165,7 +165,7 @@ export const repeatRankingsSelectors = selectorFamily<
 		},
 })
 
-export function BallotSheet({ title, elections }: BallotProps): JSX.Element {
+export function BallotSheet({ title, elections }: BallotSheetProps): JSX.Element {
 	return (
 		<article className={scss.class}>
 			<header>
@@ -184,15 +184,15 @@ export function BallotSheet({ title, elections }: BallotProps): JSX.Element {
 	)
 }
 
-function BallotElection({ id, displayName, candidates, config }: BallotElectionProps): JSX.Element {
+function BallotElection({ id, name, candidates, config }: BallotSheetElection): JSX.Element {
 	useEffect(() => {
 		setState(electionCandidatesAtoms, id, candidates)
 		setState(electionConfigAtoms, id, config)
-	}, [])
+	}, [candidates, config])
 	return (
 		<>
-			<section key={displayName}>
-				<h2>{displayName}</h2>
+			<section key={name}>
+				<h2>{name}</h2>
 				<ul>
 					<li data-description>
 						<header>Name</header>
@@ -208,7 +208,7 @@ function BallotElection({ id, displayName, candidates, config }: BallotElectionP
 						const isLastCandidate = idx === candidates.length - 1
 						return (
 							<li key={candidate.id}>
-								<header id={`${id}-candidate-${candidate.id}-A`}>{candidate.displayName}</header>
+								<header id={`${id}-candidate-${candidate.id}-A`}>{candidate.name}</header>
 								<main>
 									{config.votingTiers.map((_, i) => {
 										const isLastTier = i === config.votingTiers.length - 1
