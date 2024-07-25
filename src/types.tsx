@@ -6,14 +6,23 @@ export type SystemUser = {
 	id: string
 }
 
-export type Candidate = {
-	id?: string
-	name: string
-	avatar?: string
-	heading: string
-	details: string
-	label: string
-}
+export type Candidate =
+	| {
+			id: string
+			name: string
+			avatar?: string
+			heading: string
+			details: string
+			label: string
+	  }
+	| {
+			id: undefined
+			name: string
+			avatar?: string
+			heading: string
+			details: string
+			label: string
+	  }
 
 export type AvatarImage = {
 	file: File | null
@@ -30,6 +39,8 @@ export type ElectionData = {
 	createdBy: string
 	users: string[]
 	label: string
+	title: string
+	subtitle: string
 }
 
 export type ActualVote = {
