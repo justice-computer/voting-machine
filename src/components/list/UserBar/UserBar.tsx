@@ -1,15 +1,14 @@
 import "./userBar.css"
 
 import { useI, useO } from "atom.io/react"
-import { deleteDoc, doc, onSnapshot } from "firebase/firestore"
-import { useEffect, useState } from "react"
+import { deleteDoc, doc } from "firebase/firestore"
+import { useState } from "react"
 
 import ElectionManager from "~/src/components/ElectionManager/ElectionManager"
 import Modal from "~/src/components/Modal/Modal"
-import { currentElectionIdAtom } from "~/src/lib/atomStore"
+import { currentElectionIdAtom, electionAtom } from "~/src/lib/atomStore"
 import { db } from "~/src/lib/firebase"
 import { useUserStore } from "~/src/lib/userStore"
-import type { ElectionData } from "~/src/types"
 
 import Logout from "../../Logout/Logout"
 
@@ -21,18 +20,8 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 	const { currentUser, logout } = useUserStore()
 	const [showLogout, setShowLogout] = useState(false)
 	const [showElectionManager, setShowElectionManager] = useState(false)
-	const [currentElectionName, setCurrentElectionName] = useState<string | null>(null)
-	const currentElectionId = useO(currentElectionIdAtom)
 	const setCurrentElectionId = useI(currentElectionIdAtom)
-
-	useEffect(() => {
-		if (currentElectionId == null) return
-		const unSub = onSnapshot(doc(db, `elections`, currentElectionId), (document) => {
-			const electionData = document.data() as ElectionData
-			setCurrentElectionName(electionData.name)
-		})
-		return unSub
-	}, [currentElectionId])
+	const election = useO(electionAtom)
 
 	function handleLogout() {
 		logout()
@@ -67,7 +56,7 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 					}}
 				>
 					<img src="./switch-icon.svg" alt="change" />
-					{currentElectionName && <p style={{ marginLeft: `10px` }}>{currentElectionName}</p>}
+					{election.name && <p style={{ marginLeft: `10px` }}>{election.name}</p>}
 				</button>
 			</div>
 			<Modal
@@ -89,7 +78,7 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 				onClose={() => {
 					setShowElectionManager(false)
 				}}
-				title={`Election` + (currentElectionName ? `: ${currentElectionName}` : ``)}
+				title={`Election` + (election.name ? `: ${election.name}` : ``)}
 			>
 				<ElectionManager
 					handleChangeElection={handleChangeElection}

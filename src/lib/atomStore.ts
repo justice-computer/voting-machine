@@ -1,7 +1,7 @@
-import { atom, atomFamily, selector } from "atom.io"
+import { atom, atomFamily, selector, subscribe } from "atom.io"
 import { collection, doc, onSnapshot } from "firebase/firestore"
 
-import type { Candidate } from "../types"
+import type { Candidate, ElectionData } from "../types"
 import { db } from "./firebase"
 
 export const currentElectionIdAtom = atom<string | null>({
@@ -30,6 +30,37 @@ export const candidateIndexAtoms = atomFamily<string[], string>({
 					})
 					.filter((candidate) => candidate.label === electionLabel)
 				setSelf(candidateDocs.map((candidate) => candidate.id).filter((id) => id !== undefined))
+			})
+			return unSub
+		},
+	],
+})
+
+export const electionAtom = atom<ElectionData>({
+	key: `election`,
+	default: {
+		id: ``,
+		name: ``,
+		state: `not-started`,
+		createdAt: new Date(),
+		createdBy: ``,
+		users: [],
+		label: ``,
+		title: ``,
+		subtitle: ``,
+	},
+	effects: [
+		({ setSelf }) => {
+			let unSub: (() => void) | undefined
+			subscribe(currentElectionIdAtom, ({ newValue }) => {
+				unSub?.()
+				if (newValue === null) {
+					return
+				}
+				unSub = onSnapshot(doc(db, `elections`, newValue), (snapshot) => {
+					const election = snapshot.data() as ElectionData
+					setSelf(election)
+				})
 			})
 			return unSub
 		},
