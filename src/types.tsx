@@ -1,3 +1,4 @@
+import type { Stringified } from "atom.io/json"
 export type SystemUser = {
 	admin?: boolean
 	username: string
@@ -46,8 +47,13 @@ export type ElectionData = {
 export type ActualVote = {
 	voterId: string
 	electionId: string
-	firstChoice: string[]
-	secondChoice: string[]
-	thirdChoice: string[]
+	tierList: string[][]
+	finished: boolean
+}
+
+export type SerializedVote = {
+	voterId: string
+	electionId: string
+	tierList: Stringified<string[][]>
 	finished: boolean
 }

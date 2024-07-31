@@ -1,12 +1,14 @@
 import "./electionManager.css"
 
+import { stringifyJson } from "atom.io/json"
 import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
 import Accordion from "~/src/components/Accordion/Accordion"
 import { db } from "~/src/lib/firebase"
 import { useUserStore } from "~/src/lib/userStore"
-import type { ElectionData } from "~/src/types"
+import { prepareBallot } from "~/src/stories/Ballot"
+import type { ElectionData, SerializedVote } from "~/src/types"
 
 type ElectionManagerProps = {
 	handleChangeElection: (id: string) => void
@@ -72,7 +74,21 @@ function ElectionManager({
 
 	const handleFinished = async () => {
 		if (currentUser == null) return
-		await setDoc(doc(db, `votes`, currentUser.id), { finished: true }, { merge: true })
+		for (const election of electionData) {
+			const tierList = stringifyJson(prepareBallot(election.id))
+			const newVote: SerializedVote = {
+				voterId: currentUser.id,
+				electionId: election.id,
+				tierList,
+				finished: true,
+			}
+
+			await setDoc(doc(db, `votes`, currentUser.id), newVote)
+			if (!election.users.includes(currentUser.id)) {
+				election.users.push(currentUser.id)
+				await setDoc(doc(db, `elections`, election.id), { users: election.users }, { merge: true })
+			}
+		}
 		close()
 	}
 

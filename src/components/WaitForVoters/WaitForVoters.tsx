@@ -8,7 +8,7 @@ import { currentElectionIdAtom } from "~/src/lib/atomStore"
 
 import { db } from "../../lib/firebase"
 import { useUserStore } from "../../lib/userStore"
-import type { ActualVote, ElectionData, ElectionState, SystemUser } from "../../types"
+import type { ElectionData, ElectionState, SerializedVote, SystemUser } from "../../types"
 
 type WaitForVotersProps = {
 	targetState: ElectionState
@@ -39,8 +39,8 @@ function WaitForVoters({ targetState }: WaitForVotersProps): JSX.Element {
 							// TODO: Make this onSnapshot so it updates
 							const voteDocRef = doc(db, `votes`, id)
 							const voteDocSnap = await getDoc(voteDocRef)
-							const vote = voteDocSnap.data() as ActualVote
-							if (vote.finished) {
+							const vote = voteDocSnap.data() as SerializedVote | undefined
+							if (vote?.finished) {
 								setFinishedVoters((prev) => [...prev, id])
 							}
 							return id
@@ -61,9 +61,7 @@ function WaitForVoters({ targetState }: WaitForVotersProps): JSX.Element {
 		if (currentUser == null || currentElectionId == null) return
 		await setDoc(doc(db, `votes`, currentUser.id), {
 			finished: false,
-			firstChoice: [],
-			secondChoice: [],
-			thirdChoice: [],
+			tierList: `[]`,
 		})
 		const electionDoc = doc(db, `elections`, currentElectionId)
 		const electionDocSnap = await getDoc(electionDoc)

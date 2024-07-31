@@ -2,7 +2,11 @@ import "./list.css"
 
 import { useO } from "atom.io/react"
 
-import { candidatesInCurrentElectionSelector, electionAtom } from "~/src/lib/atomStore"
+import {
+	candidatesInCurrentElectionSelector,
+	currentElectionIdAtom,
+	electionAtom,
+} from "~/src/lib/atomStore"
 import type { BallotSheetElection } from "~/src/stories/Ballot"
 import { BallotSheet } from "~/src/stories/Ballot"
 
@@ -10,12 +14,14 @@ function List(): JSX.Element {
 	const candidates = useO(candidatesInCurrentElectionSelector).filter(
 		(candidate) => candidate.id !== undefined,
 	)
+	const electionId = useO(currentElectionIdAtom)
 	const election = useO(electionAtom)
+	if (electionId == null) return <div>No election found</div>
 
 	const elections = [
 		{
 			name: election.subtitle,
-			id: `potus`,
+			id: electionId,
 			candidates,
 			config: {
 				numberOfWinners: 1,

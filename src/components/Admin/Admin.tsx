@@ -2,6 +2,7 @@ import "./admin.css"
 
 import { faker } from "@faker-js/faker"
 import { getState } from "atom.io"
+import { stringifyJson } from "atom.io/json"
 import { useI, useO } from "atom.io/react"
 import {
 	addDoc,
@@ -21,7 +22,7 @@ import NewElection from "~/src/components/NewElection/NewElection"
 import { currentElectionIdAtom, currentElectionLabelAtom } from "~/src/lib/atomStore"
 import { db } from "~/src/lib/firebase"
 import { useUserStore } from "~/src/lib/userStore"
-import type { ActualVote, ElectionData, SystemUser } from "~/src/types"
+import type { ElectionData, SerializedVote, SystemUser } from "~/src/types"
 
 type AdminProps = {
 	exitAdminMode: () => void
@@ -65,7 +66,7 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 					electionData.users.map(async (id) => {
 						const voteDocRef = doc(db, `votes`, id)
 						const voteDocSnap = await getDoc(voteDocRef)
-						const vote = voteDocSnap.data() as ActualVote
+						const vote = voteDocSnap.data() as SerializedVote
 						if (vote.finished) {
 							setFinishedVoters((prev) => [...prev, id])
 						}
@@ -105,9 +106,7 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 		await setDoc(doc(db, `users`, user.id), { id: user.id }, { merge: true })
 		await setDoc(doc(db, `votes`, user.id), {
 			finished: false,
-			firstChoice: [],
-			secondChoice: [],
-			thirdChoice: [],
+			tierList: `[]`,
 		})
 		const electionDoc = doc(db, `elections`, currentElectionId)
 		const electionDocSnap = await getDoc(electionDoc)
@@ -163,9 +162,7 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 		})
 		await setDoc(doc(db, `votes`, voterId), {
 			finished: true,
-			firstChoice: idsShuffled.slice(0, 2),
-			secondChoice: idsShuffled.slice(2, 4),
-			thirdChoice: idsShuffled.slice(4, 6),
+			tierList: stringifyJson(idsShuffled.map((id) => [id])),
 		})
 		setFinishedVoters((prev) => [...prev, voterId])
 	}

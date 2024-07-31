@@ -101,9 +101,7 @@ function Login(): JSX.Element {
 			await setDoc(doc(db, `users`, res.user.uid), user)
 			await setDoc(doc(db, `votes`, res.user.uid), {
 				voterId: username,
-				firstChoice: [],
-				secondChoice: [],
-				thirdChoice: [],
+				tierList: `[]`,
 				finished: false,
 			})
 			toast.success(`Account created for ${emailString}`)

@@ -44,6 +44,8 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 			.catch((error) => {
 				console.error(error)
 			})
+		// FIXME
+		// SIDE EFFECT: useEffect in StateRouter will update the election state
 	}
 
 	return (
