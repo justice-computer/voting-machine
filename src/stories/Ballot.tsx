@@ -6,16 +6,17 @@ import { useO } from "atom.io/react"
 import { motion } from "framer-motion"
 import { Fragment, useEffect, useState } from "react"
 
+import CandidateDetail from "~/src/components/CandidateDetail/CandidateDetail"
+import Modal from "~/src/components/Modal/Modal"
+import type { Candidate } from "~/src/types"
+
 import scss from "./Ballot.module.scss"
 import { Bubble } from "./Bubble"
 
 export type BallotSheetElection = {
 	name: string
 	id: string
-	candidates: {
-		name: string
-		id: string
-	}[]
+	candidates: Candidate[]
 	config: {
 		numberOfWinners: number
 		votingTiers: number[]
@@ -28,7 +29,7 @@ export type BallotSheetProps = {
 
 export const checkboxAtoms = atomFamily<
 	boolean,
-	{ election: string; candidate: string; tier: number }
+	{ election: string; candidate: Candidate; tier: number }
 >({
 	key: `ballotSheetCheckbox`,
 	default: false,
@@ -42,15 +43,12 @@ export const electionConfigAtoms = atomFamily<
 	default: { numberOfWinners: 1, votingTiers: [1] },
 })
 
-export const electionCandidatesAtoms = atomFamily<{ id: string; name: string }[], string>({
+export const electionCandidatesAtoms = atomFamily<Candidate[], string>({
 	key: `ballotSheetElectionCandidates`,
 	default: [],
 })
 
-const candidatesByTierSelectors = selectorFamily<
-	{ id: string; name: string }[],
-	{ election: string; tier: number }
->({
+const candidatesByTierSelectors = selectorFamily<Candidate[], { election: string; tier: number }>({
 	key: `ballotSheetCandidatesByTier`,
 	get:
 		(keys) =>
@@ -59,7 +57,7 @@ const candidatesByTierSelectors = selectorFamily<
 			const votesInTier = electionCandidates.filter((candidate) =>
 				get(checkboxAtoms, {
 					election: keys.election,
-					candidate: candidate.id,
+					candidate,
 					tier: keys.tier,
 				}),
 			)
@@ -216,12 +214,21 @@ export function BallotSheet({ title, elections }: BallotSheetProps): JSX.Element
 }
 
 function BallotElection({ id, name, candidates, config }: BallotSheetElection): JSX.Element {
+	const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null)
 	useEffect(() => {
 		setState(electionCandidatesAtoms, id, candidates)
 		setState(electionConfigAtoms, id, config)
 	}, [candidates, config])
 	return (
 		<>
+			<Modal
+				isOpen={selectedCandidate != null}
+				onClose={() => {
+					setSelectedCandidate(null)
+				}}
+			>
+				<CandidateDetail candidate={selectedCandidate} />
+			</Modal>
 			<section key={name}>
 				<h2>{name}</h2>
 				<ul>
@@ -239,7 +246,16 @@ function BallotElection({ id, name, candidates, config }: BallotSheetElection): 
 						const isLastCandidate = idx === candidates.length - 1
 						return (
 							<li key={candidate.id}>
-								<header id={`${id}-candidate-${candidate.id}-A`}>{candidate.name}</header>
+								<header style={{ color: `green` }} id={`${id}-candidate-${candidate.id}-A`}>
+									<button
+										onClick={() => {
+											setSelectedCandidate(candidate)
+										}}
+										type="button"
+									>
+										{candidate.name}
+									</button>
+								</header>
 								<main>
 									{config.votingTiers.map((_, i) => {
 										const isLastTier = i === config.votingTiers.length - 1
@@ -252,7 +268,7 @@ function BallotElection({ id, name, candidates, config }: BallotSheetElection): 
 													<Bubble
 														checkedState={findState(checkboxAtoms, {
 															election: id,
-															candidate: candidate.id,
+															candidate,
 															tier: i,
 														})}
 														color="#05f"

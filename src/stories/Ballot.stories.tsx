@@ -31,14 +31,23 @@ export const Primary: Story = {
 					{
 						name: "Jonathan Jimble",
 						id: "jonathan-jimble",
+						heading: ``,
+						details: ``,
+						label: ``,
 					},
 					{
 						name: "Squiggly Miggly",
 						id: "squiggly-miggly",
+						heading: ``,
+						details: ``,
+						label: ``,
 					},
 					{
 						name: "Mr. Frog",
 						id: "mr-frog",
+						heading: ``,
+						details: ``,
+						label: ``,
 					},
 				],
 				config: {

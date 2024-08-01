@@ -7,23 +7,14 @@ export type SystemUser = {
 	id: string
 }
 
-export type Candidate =
-	| {
-			id: string
-			name: string
-			avatar?: string
-			heading: string
-			details: string
-			label: string
-	  }
-	| {
-			id: undefined
-			name: string
-			avatar?: string
-			heading: string
-			details: string
-			label: string
-	  }
+export type Candidate = {
+	id: string
+	name: string
+	avatar?: string
+	heading: string
+	details: string
+	label: string
+}
 
 export type AvatarImage = {
 	file: File | null
