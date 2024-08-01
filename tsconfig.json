@@ -1,10 +1,28 @@
 {
-	"extends": "./tsconfig.base.json",
 	"compilerOptions": {
-		"types": ["node", "vitest/globals"],
+		"allowImportingTsExtensions": true,
+		"allowJs": true,
+		"baseUrl": "./",
+		"esModuleInterop": true,
+		"isolatedModules": true,
 		"jsx": "react-jsx",
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"module": "Preserve",
 		"moduleResolution": "Bundler",
-		"strict": true
+		"noEmit": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"paths": {
+			"~/*": ["./*"],
+			"justiciar": ["./packages/justiciar/src"]
+		},
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"target": "ES2020",
+		"types": ["vitest/globals", "node"],
+		"useDefineForClassFields": true
 	},
-	"include": ["**/*.ts", "**/*.tsx", "**/*.d.ts"]
+	"include": ["**/*.ts", "**/*.tsx", "**/*.d.ts", ".storybook/*.ts", "eslint.config.js"]
 }

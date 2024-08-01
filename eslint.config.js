@@ -1,31 +1,16 @@
-import path from "node:path"
-import { fileURLToPath } from "node:url"
+// @ts-check
 
-import { FlatCompat } from "@eslint/eslintrc"
 import TypeScriptPlugin from "@typescript-eslint/eslint-plugin"
 import parser from "@typescript-eslint/parser"
 import AtomIOPlugin from "atom.io/eslint-plugin"
 import ImportPlugin from "eslint-plugin-import"
 import SimpleImportSortPlugin from "eslint-plugin-simple-import-sort"
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
-/** @type {import("@eslint/eslintrc").FlatCompat} */
-const compat = new FlatCompat({
-	baseDirectory: __dirname,
-})
-
 const ERROR = 2
 
 /** @type {import("@typescript-eslint/parser").ParserOptions} */
 const parserOptions = {
-	project: [
-		`./tsconfig.json`,
-		`./tsconfig.base.json`,
-		`./tsconfig.node.json`,
-		`./src/stories/tsconfig.json`,
-	],
+	project: [`./tsconfig.json`],
 	sourceType: `module`,
 }
 
@@ -36,7 +21,6 @@ const commonRules = {
 	"@typescript-eslint/await-thenable": 0,
 	"@typescript-eslint/ban-ts-comment": ERROR,
 	"@typescript-eslint/ban-tslint-comment": 0,
-	"@typescript-eslint/ban-types": ERROR,
 	"@typescript-eslint/class-literal-property-style": ERROR,
 	"@typescript-eslint/consistent-generic-constructors": 0,
 	"@typescript-eslint/consistent-indexed-object-style": 0,
@@ -122,7 +106,6 @@ const commonRules = {
 	"@typescript-eslint/no-use-before-define": 0,
 	"@typescript-eslint/no-useless-constructor": ERROR,
 	"@typescript-eslint/no-useless-empty-export": ERROR,
-	"@typescript-eslint/no-useless-template-literals": ERROR,
 	"@typescript-eslint/no-var-requires": ERROR,
 	"@typescript-eslint/non-nullable-type-assertion-style": 0,
 	"@typescript-eslint/parameter-properties": 0,
@@ -171,7 +154,7 @@ const commonRules = {
 	quotes: [ERROR, `backtick`],
 }
 
-/** @type {(import("eslint").Linter.FlatConfig)[]} */
+/** @type {(import("eslint").Linter.Config)[]} */
 const configs = [
 	{
 		ignores: [
