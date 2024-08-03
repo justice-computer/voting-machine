@@ -90,6 +90,12 @@ article.class {
             padding-right: 6px;
             display: flex;
             align-items: center;
+
+            button {
+              background: none;
+              border: none;
+              font-size: 16px;
+            }
           }
           > main {
             grid-column-start: 2;

@@ -6,7 +6,7 @@ import { currentElectionIdAtom, currentElectionLabelAtom } from "~/src/lib/atomS
 
 import { db } from "../../lib/firebase"
 import { useUserStore } from "../../lib/userStore"
-import type { ActualVote, ElectionData, ElectionState } from "../../types"
+import type { ElectionData, ElectionState, SerializedVote } from "../../types"
 import Admin from "../Admin/Admin"
 import List from "../list/List"
 import UserBar from "../list/UserBar/UserBar"
@@ -98,7 +98,7 @@ function StateRouter(): JSX.Element {
 	useEffect(() => {
 		if (currentUser == null) return
 		const unSub = onSnapshot(doc(db, `votes`, currentUser?.id), (res) => {
-			const newVotes: ActualVote = res.data() as ActualVote
+			const newVotes = res.data() as SerializedVote | undefined
 			if (newVotes) {
 				setHasVoted(newVotes.finished)
 			}

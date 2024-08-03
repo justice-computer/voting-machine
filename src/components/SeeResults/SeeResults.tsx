@@ -11,6 +11,7 @@ import {
 	transaction,
 } from "atom.io"
 import { findState } from "atom.io/ephemeral"
+import { parseJson } from "atom.io/json"
 import { useO } from "atom.io/react"
 import { collection, doc, getDoc, getDocs } from "firebase/firestore"
 import { LayoutGroup, motion } from "framer-motion"
@@ -28,7 +29,7 @@ import React, { useEffect, useRef, useState } from "react"
 
 import { currentElectionIdAtom, currentElectionLabelAtom } from "~/src/lib/atomStore"
 import { db } from "~/src/lib/firebase"
-import type { ActualVote, Candidate, ElectionData } from "~/src/types"
+import type { ActualVote, Candidate, ElectionData, SerializedVote } from "~/src/types"
 
 import { CandidatePicture } from "../CandidatePicture/CandidatePicture"
 import scss from "./SeeResults.module.scss"
@@ -193,7 +194,7 @@ function actualVoteToBallot(actualVote: ActualVote): Ballot {
 	const ballot: Ballot = {
 		voterId: actualVote.voterId,
 		votes: {
-			election0: [actualVote.firstChoice, actualVote.secondChoice, actualVote.thirdChoice],
+			election0: actualVote.tierList,
 		},
 	}
 	return ballot
@@ -353,7 +354,7 @@ function SeeResults(): JSX.Element {
 		}
 		const electionToken = makeMolecule(root, electionMolecules, `election0`, {
 			numberOfWinners: 3n,
-			votingTiers: [3n, 3n, 3n],
+			votingTiers: [1n, 1n, 1n, 1n, 1n, 1n],
 		})
 		const election = getState(electionToken)
 		electionRef.current = election
@@ -363,10 +364,14 @@ function SeeResults(): JSX.Element {
 			console.log({ electionData })
 			const votes = await Promise.all<ActualVote>(
 				electionData.users.map(async (userKey) => {
-					const actualVoteDocToken = doc(db, `votes`, userKey)
-					const actualVoteDocSnapshot = await getDoc(actualVoteDocToken)
-					const actualVote = actualVoteDocSnapshot.data() as Omit<ActualVote, `voterId`>
-					return { ...actualVote, voterId: userKey }
+					const serializedVoteDocToken = doc(db, `votes`, userKey)
+					const serializedVoteDocSnapshot = await getDoc(serializedVoteDocToken)
+					const serializedVote = serializedVoteDocSnapshot.data() as Omit<SerializedVote, `voterId`>
+					return {
+						...serializedVote,
+						tierList: parseJson(serializedVote.tierList),
+						voterId: userKey,
+					}
 				}),
 			)
 			console.log(votes)

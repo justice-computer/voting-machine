@@ -8,7 +8,7 @@ import { useState } from "react"
 import { db } from "~/src//lib/firebase"
 import { currentElectionLabelAtom } from "~/src/lib/atomStore"
 import { uploadImage } from "~/src/lib/upload"
-import type { AvatarImage, Candidate } from "~/src/types"
+import type { AvatarImage } from "~/src/types"
 
 const initialImage: AvatarImage = {
 	file: null,
@@ -29,7 +29,8 @@ function AddCandidate({ close }: AddCandidateProps): JSX.Element {
 		const { name, heading, details } = e.target.elements
 		console.log(currentElectionLabel)
 		const label = currentElectionLabel as string
-		const newCandidate: Candidate = {
+		const newCandidate: any = {
+			id: undefined,
 			name: name.value,
 			heading: heading.value,
 			details: details.value,

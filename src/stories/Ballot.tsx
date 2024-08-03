@@ -1,51 +1,55 @@
 import "~/src/font-face.scss"
 
-import { atomFamily, selectorFamily, setState } from "atom.io"
+import { atomFamily, getState, selectorFamily, setState } from "atom.io"
 import { findState } from "atom.io/ephemeral"
 import { useO } from "atom.io/react"
 import { motion } from "framer-motion"
 import { Fragment, useEffect, useState } from "react"
 
+import CandidateDetail from "~/src/components/CandidateDetail/CandidateDetail"
+import Modal from "~/src/components/Modal/Modal"
+import type { Candidate } from "~/src/types"
+
 import scss from "./Ballot.module.scss"
 import { Bubble } from "./Bubble"
 
-type BallotElectionProps = {
-	displayName: string
+export type BallotSheetElection = {
+	name: string
 	id: string
-	candidates: {
-		displayName: string
-		id: string
-	}[]
+	candidates: Candidate[]
 	config: {
 		numberOfWinners: number
 		votingTiers: number[]
 	}
 }
-export type BallotProps = {
+export type BallotSheetProps = {
 	title: string
-	elections: BallotElectionProps[]
+	elections: BallotSheetElection[]
 }
 
-const checkboxAtoms = atomFamily<boolean, { election: string; candidate: string; tier: number }>({
-	key: `ballot`,
+export const checkboxAtoms = atomFamily<
+	boolean,
+	{ election: string; candidate: Candidate; tier: number }
+>({
+	key: `ballotSheetCheckbox`,
 	default: false,
 })
 
-const electionConfigAtoms = atomFamily<{ numberOfWinners: number; votingTiers: number[] }, string>({
-	key: `electionConfig`,
+export const electionConfigAtoms = atomFamily<
+	{ numberOfWinners: number; votingTiers: number[] },
+	string
+>({
+	key: `ballotSheetElectionConfig`,
 	default: { numberOfWinners: 1, votingTiers: [1] },
 })
 
-const electionCandidatesAtoms = atomFamily<{ id: string; displayName: string }[], string>({
-	key: `electionCandidates`,
+export const electionCandidatesAtoms = atomFamily<Candidate[], string>({
+	key: `ballotSheetElectionCandidates`,
 	default: [],
 })
 
-const candidatesByTierSelectors = selectorFamily<
-	{ id: string; displayName: string }[],
-	{ election: string; tier: number }
->({
-	key: `candidatesByTier`,
+const candidatesByTierSelectors = selectorFamily<Candidate[], { election: string; tier: number }>({
+	key: `ballotSheetCandidatesByTier`,
 	get:
 		(keys) =>
 		({ get, find }) => {
@@ -53,7 +57,7 @@ const candidatesByTierSelectors = selectorFamily<
 			const votesInTier = electionCandidates.filter((candidate) =>
 				get(checkboxAtoms, {
 					election: keys.election,
-					candidate: candidate.id,
+					candidate,
 					tier: keys.tier,
 				}),
 			)
@@ -65,7 +69,7 @@ export const transposedRankingsSelectors = selectorFamily<
 	{ candidateKey: string; written: number; actual: number }[],
 	string
 >({
-	key: `transposedRankings`,
+	key: `ballotSheetTransposedRankings`,
 	get:
 		(electionKey) =>
 		({ get, find }) => {
@@ -107,7 +111,7 @@ type Overvote = {
 	candidateKeys: string[]
 }
 const overvotesSelectors = selectorFamily<Overvote[], string>({
-	key: `overvote`,
+	key: `ballotSheetOvervote`,
 	get:
 		(electionKey) =>
 		({ get, find }) => {
@@ -135,7 +139,7 @@ export const repeatRankingsSelectors = selectorFamily<
 	{ candidateKey: string; tier: number }[],
 	string
 >({
-	key: `repeatRankings`,
+	key: `ballotSheetRepeatRankings`,
 	get:
 		(electionKey) =>
 		({ get, find }) => {
@@ -165,7 +169,32 @@ export const repeatRankingsSelectors = selectorFamily<
 		},
 })
 
-export function BallotSheet({ title, elections }: BallotProps): JSX.Element {
+export function prepareBallot(electionId: string): string[][] {
+	const cleanBallot: string[][] = []
+
+	const candidatesVotedFor: string[] = []
+	// BUG HERE: votingTiers is default
+	const { votingTiers } = getState(electionConfigAtoms, electionId)
+
+	for (const [idx, allowedCandidates] of votingTiers.entries()) {
+		const candidatesAtThisTier = getState(candidatesByTierSelectors, {
+			election: electionId,
+			tier: idx,
+		})
+		const shouldSkipVote =
+			candidatesAtThisTier.length === 0 ||
+			candidatesVotedFor.includes(candidatesAtThisTier[0].id) ||
+			candidatesAtThisTier.length > allowedCandidates
+		if (shouldSkipVote === false) {
+			candidatesVotedFor.push(candidatesAtThisTier[0].id)
+			cleanBallot.push(candidatesAtThisTier.map((candidate) => candidate.id))
+		}
+	}
+
+	return cleanBallot
+}
+
+export function BallotSheet({ title, elections }: BallotSheetProps): JSX.Element {
 	return (
 		<article className={scss.class}>
 			<header>
@@ -184,15 +213,24 @@ export function BallotSheet({ title, elections }: BallotProps): JSX.Element {
 	)
 }
 
-function BallotElection({ id, displayName, candidates, config }: BallotElectionProps): JSX.Element {
+function BallotElection({ id, name, candidates, config }: BallotSheetElection): JSX.Element {
+	const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null)
 	useEffect(() => {
 		setState(electionCandidatesAtoms, id, candidates)
 		setState(electionConfigAtoms, id, config)
-	}, [])
+	}, [candidates, config])
 	return (
 		<>
-			<section key={displayName}>
-				<h2>{displayName}</h2>
+			<Modal
+				isOpen={selectedCandidate != null}
+				onClose={() => {
+					setSelectedCandidate(null)
+				}}
+			>
+				<CandidateDetail candidate={selectedCandidate} />
+			</Modal>
+			<section key={name}>
+				<h2>{name}</h2>
 				<ul>
 					<li data-description>
 						<header>Name</header>
@@ -208,7 +246,16 @@ function BallotElection({ id, displayName, candidates, config }: BallotElectionP
 						const isLastCandidate = idx === candidates.length - 1
 						return (
 							<li key={candidate.id}>
-								<header id={`${id}-candidate-${candidate.id}-A`}>{candidate.displayName}</header>
+								<header style={{ color: `green` }} id={`${id}-candidate-${candidate.id}-A`}>
+									<button
+										onClick={() => {
+											setSelectedCandidate(candidate)
+										}}
+										type="button"
+									>
+										{candidate.name}
+									</button>
+								</header>
 								<main>
 									{config.votingTiers.map((_, i) => {
 										const isLastTier = i === config.votingTiers.length - 1
@@ -221,7 +268,7 @@ function BallotElection({ id, displayName, candidates, config }: BallotElectionP
 													<Bubble
 														checkedState={findState(checkboxAtoms, {
 															election: id,
-															candidate: candidate.id,
+															candidate,
 															tier: i,
 														})}
 														color="#05f"

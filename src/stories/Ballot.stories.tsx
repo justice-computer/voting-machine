@@ -22,22 +22,32 @@ type Story = StoryObj<typeof meta>
 export const Primary: Story = {
 	args: {
 		title: "General Election",
+		// TODO: should this be called races?
 		elections: [
 			{
-				displayName: "President of the United States of America",
+				name: "President of the United States of America",
 				id: "potus",
 				candidates: [
 					{
-						displayName: "Jonathan Jimble",
+						name: "Jonathan Jimble",
 						id: "jonathan-jimble",
+						heading: ``,
+						details: ``,
+						label: ``,
 					},
 					{
-						displayName: "Squiggly Miggly",
+						name: "Squiggly Miggly",
 						id: "squiggly-miggly",
+						heading: ``,
+						details: ``,
+						label: ``,
 					},
 					{
-						displayName: "Mr. Frog",
+						name: "Mr. Frog",
 						id: "mr-frog",
+						heading: ``,
+						details: ``,
+						label: ``,
 					},
 				],
 				config: {
