@@ -29,7 +29,7 @@ export type BallotSheetProps = {
 
 export const checkboxAtoms = atomFamily<
 	boolean,
-	{ election: string; candidate: Candidate; tier: number }
+	{ election: string; candidate: string; tier: number }
 >({
 	key: `ballotSheetCheckbox`,
 	default: false,
@@ -57,7 +57,7 @@ const candidatesByTierSelectors = selectorFamily<Candidate[], { election: string
 			const votesInTier = electionCandidates.filter((candidate) =>
 				get(checkboxAtoms, {
 					election: keys.election,
-					candidate,
+					candidate: candidate.id,
 					tier: keys.tier,
 				}),
 			)
@@ -268,7 +268,7 @@ function BallotElection({ id, name, candidates, config }: BallotSheetElection): 
 													<Bubble
 														checkedState={findState(checkboxAtoms, {
 															election: id,
-															candidate,
+															candidate: candidate.id,
 															tier: i,
 														})}
 														color="#05f"

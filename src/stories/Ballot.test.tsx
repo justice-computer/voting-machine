@@ -15,14 +15,14 @@ function vote(electionId: string, candidate: Candidate, tier: number): Disposabl
 		checkboxAtoms,
 		{
 			election: electionId,
-			candidate,
+			candidate: candidate.id,
 			tier: tier,
 		},
 		true,
 	)
 	return {
 		[Symbol.dispose]: () => {
-			disposeState(checkboxAtoms, { election: electionId, candidate, tier: tier })
+			disposeState(checkboxAtoms, { election: electionId, candidate: candidate.id, tier: tier })
 		},
 	}
 }
