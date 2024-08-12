@@ -29,7 +29,7 @@ export type BallotSheetProps = {
 
 export const checkboxAtoms = atomFamily<
 	boolean,
-	{ election: string; candidate: string; tier: number }
+	[[`election`, string], [`candidate`, string], [`tier`, number]]
 >({
 	key: `ballotSheetCheckbox`,
 	default: false,
@@ -48,18 +48,38 @@ export const electionCandidatesAtoms = atomFamily<Candidate[], string>({
 	default: [],
 })
 
-const candidatesByTierSelectors = selectorFamily<Candidate[], { election: string; tier: number }>({
+type Entries<K extends keyof any, V> = [K, V][]
+type KeyOfEntries<E extends Entries<any, any>> = E extends [infer K, any][] ? K : never
+type CertainEntry<E extends Entries<any, any>, K extends KeyOfEntries<E>> = {
+	[P in 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9]: E[P] extends [K, infer V] ? V : never
+}[0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9]
+export type Flat<R extends { [K in PropertyKey]: any }> = {
+	[K in keyof R]: R[K]
+}
+type FromEntries<E extends Entries<keyof any, any>> = Flat<{
+	[K in KeyOfEntries<E>]: CertainEntry<E, K>
+}>
+
+function fromEntries<E extends Entries<keyof any, any>>(entries: E): FromEntries<E> {
+	return Object.fromEntries(entries) as FromEntries<E>
+}
+
+const candidatesByTierSelectors = selectorFamily<
+	Candidate[],
+	[[`election`, string], [`tier`, number]]
+>({
 	key: `ballotSheetCandidatesByTier`,
 	get:
-		(keys) =>
+		(electionTier) =>
 		({ get, find }) => {
+			const keys = fromEntries(electionTier)
 			const electionCandidates = get(find(electionCandidatesAtoms, keys.election))
 			const votesInTier = electionCandidates.filter((candidate) =>
-				get(checkboxAtoms, {
-					election: keys.election,
-					candidate: candidate.id,
-					tier: keys.tier,
-				}),
+				get(checkboxAtoms, [
+					[`election`, keys.election],
+					[`candidate`, candidate.id],
+					[`tier`, keys.tier],
+				]),
 			)
 			return votesInTier
 		},
@@ -80,12 +100,10 @@ export const transposedRankingsSelectors = selectorFamily<
 			const { votingTiers } = get(find(electionConfigAtoms, electionKey))
 
 			for (const [idx] of votingTiers.entries()) {
-				const candidatesAtThisTier = get(
-					find(candidatesByTierSelectors, {
-						election: electionKey,
-						tier: idx,
-					}),
-				)
+				const candidatesAtThisTier = get(candidatesByTierSelectors, [
+					[`election`, electionKey],
+					[`tier`, idx],
+				])
 				if (
 					candidatesAtThisTier.length !== 1 ||
 					candidatesVotedFor.includes(candidatesAtThisTier[0].id)
@@ -118,12 +136,10 @@ const overvotesSelectors = selectorFamily<Overvote[], string>({
 			const overvotes: Overvote[] = []
 			const electionTiers = get(find(electionConfigAtoms, electionKey)).votingTiers
 			for (const [idx] of electionTiers.entries()) {
-				const candidates = get(
-					find(candidatesByTierSelectors, {
-						election: electionKey,
-						tier: idx,
-					}),
-				)
+				const candidates = get(candidatesByTierSelectors, [
+					[`election`, electionKey],
+					[`tier`, idx],
+				])
 				if (candidates.length > 1) {
 					overvotes.push({
 						tierIdx: idx,
@@ -149,12 +165,10 @@ export const repeatRankingsSelectors = selectorFamily<
 			const { votingTiers } = get(find(electionConfigAtoms, electionKey))
 
 			for (const [idx] of votingTiers.entries()) {
-				const candidates = get(
-					find(candidatesByTierSelectors, {
-						election: electionKey,
-						tier: idx,
-					}),
-				)
+				const candidates = get(candidatesByTierSelectors, [
+					[`election`, electionKey],
+					[`tier`, idx],
+				])
 				if (candidatesVotedFor.includes(candidates[0]?.id)) {
 					repeatRankings.push({
 						candidateKey: candidates[0].id,
@@ -177,10 +191,10 @@ export function prepareBallot(electionId: string): string[][] {
 	const { votingTiers } = getState(electionConfigAtoms, electionId)
 
 	for (const [idx, allowedCandidates] of votingTiers.entries()) {
-		const candidatesAtThisTier = getState(candidatesByTierSelectors, {
-			election: electionId,
-			tier: idx,
-		})
+		const candidatesAtThisTier = getState(candidatesByTierSelectors, [
+			[`election`, electionId],
+			[`tier`, idx],
+		])
 		const shouldSkipVote =
 			candidatesAtThisTier.length === 0 ||
 			candidatesVotedFor.includes(candidatesAtThisTier[0].id) ||
@@ -266,11 +280,11 @@ function BallotElection({ id, name, candidates, config }: BallotSheetElection): 
 											>
 												<span id={isLastCandidate ? `${id}-tier-${i}-Z` : undefined}>
 													<Bubble
-														checkedState={findState(checkboxAtoms, {
-															election: id,
-															candidate: candidate.id,
-															tier: i,
-														})}
+														checkedState={findState(checkboxAtoms, [
+															[`election`, id],
+															[`candidate`, candidate.id],
+															[`tier`, i],
+														])}
 														color="#05f"
 														id={`${id}-${candidate.id}-${i}`}
 													/>
