@@ -1,9 +1,9 @@
 import type { CtorToolkit } from "atom.io"
 import { atomFamily, moleculeFamily, selectorFamily } from "atom.io"
 import { findRelations } from "atom.io/data"
+import { fromEntries } from "atom.io/json"
 
 import { electionMolecules, votes } from "./election"
-import type { ElectionRoundKey } from "./election-round"
 import { Rational } from "./rational"
 import { need } from "./refinements"
 import { voterCurrentFavoritesSelectors } from "./voter"
@@ -35,20 +35,22 @@ export const candidateMolecules = moleculeFamily({
 	},
 })
 
-export type ElectionRoundCandidateKey = {
-	electionRound: ElectionRoundKey
-	candidate: string
-}
+export type ElectionRoundCandidateKey = [
+	[`election`, string],
+	[`round`, number],
+	[`candidate`, string],
+]
 export const candidateStatusSelectors = selectorFamily<
 	CandidateStatus | Error,
 	ElectionRoundCandidateKey
 >({
 	key: `candidateStatus`,
 	get:
-		(keys) =>
+		(keyEntries) =>
 		({ get }) => {
-			const election = get(electionMolecules, keys.electionRound.election)
-			const previousElectionRounds = election.rounds.slice(0, keys.electionRound.round)
+			const keys = fromEntries(keyEntries)
+			const election = get(electionMolecules, keys.election)
+			const previousElectionRounds = election.rounds.slice(0, keys.round)
 			let status: CandidateStatus = `running`
 			for (const round of previousElectionRounds) {
 				const outcome = get(need(round.state.outcome))
@@ -72,8 +74,9 @@ export const candidateAlternativeConsensusSelectors = selectorFamily<
 >({
 	key: `candidateAlternativeConsensus`,
 	get:
-		(keys) =>
+		(keyEntries) =>
 		({ get, seek }) => {
+			const keys = fromEntries(keyEntries)
 			const voterKeysForCandidateSelector = findRelations(
 				votes,
 				keys.candidate,
@@ -81,10 +84,11 @@ export const candidateAlternativeConsensusSelectors = selectorFamily<
 			const voterKeysForCandidate = get(voterKeysForCandidateSelector)
 			const alternativeConsensus: AlternativeConsensus = {}
 			for (const voterKey of voterKeysForCandidate) {
-				const voterCurrentFavoritesSelector = seek(voterCurrentFavoritesSelectors, {
-					electionRound: keys.electionRound,
-					voter: voterKey,
-				})
+				const voterCurrentFavoritesSelector = seek(voterCurrentFavoritesSelectors, [
+					[`election`, keys.election],
+					[`round`, keys.round],
+					[`voter`, voterKey],
+				])
 				if (!voterCurrentFavoritesSelector) {
 					return new Error(`Could not find voterCurrentFavorites for voter "${voterKey}"`)
 				}

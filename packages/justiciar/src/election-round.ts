@@ -1,16 +1,17 @@
 import type { CtorToolkit, MoleculeType, ReadonlySelectorToken } from "atom.io"
 import { moleculeFamily, selectorFamily } from "atom.io"
 import { findRelations } from "atom.io/data"
+import { fromEntries } from "atom.io/json"
 
 import type { ElectionRoundCandidateKey } from "./candidate"
 import { electionRoundCandidateMolecules } from "./candidate"
 import { type ElectionInstance, electionMolecules, votes } from "./election"
 import { Rational } from "./rational"
 import { need } from "./refinements"
-import type { ElectionRoundVoterInstance } from "./voter"
+import type { ElectionRoundVoterInstance, ElectionRoundVoterKey } from "./voter"
 import { electionRoundVoterMolecules, voterRemainingEnergySelectors } from "./voter"
 
-export type ElectionRoundKey = { election: string; round: number }
+export type ElectionRoundKey = [[`election`, string], [`round`, number]]
 
 export type CandidatesByStatus = {
 	running: ElectionRoundCandidateKey[]
@@ -23,8 +24,9 @@ export const electionRoundCandidatesByStatusSelectors = selectorFamily<
 >({
 	key: `electionRoundCandidatesByStatus`,
 	get:
-		(keys) =>
+		(keyEntries) =>
 		({ get }) => {
+			const keys = fromEntries(keyEntries)
 			const running: ElectionRoundCandidateKey[] = []
 			const elected: ElectionRoundCandidateKey[] = []
 			const eliminated: ElectionRoundCandidateKey[] = []
@@ -34,20 +36,14 @@ export const electionRoundCandidatesByStatusSelectors = selectorFamily<
 
 			const runningCandidates = candidates.map(
 				(candidateKey) =>
-					({
-						electionRound: keys,
-						candidate: candidateKey,
-					}) satisfies ElectionRoundCandidateKey,
+					[
+						[`election`, keys.election],
+						[`round`, keys.round],
+						[`candidate`, candidateKey],
+					] satisfies ElectionRoundCandidateKey,
 			)
 			for (const candidate of runningCandidates) {
-				const candidateRoundCandidateKey = {
-					electionRound: keys,
-					candidate: candidate.candidate,
-				}
-				const candidateRoundCandidate = get(
-					electionRoundCandidateMolecules,
-					candidateRoundCandidateKey,
-				)
+				const candidateRoundCandidate = get(electionRoundCandidateMolecules, candidate)
 				const status = get(candidateRoundCandidate.state.status)
 				switch (status) {
 					case `running`:
@@ -72,17 +68,19 @@ export const electionRoundVoteTotalsSelectors = selectorFamily<
 >({
 	key: `electionRoundVoteTotals`,
 	get:
-		(keys) =>
+		(keyEntries) =>
 		({ get }) => {
+			const keys = fromEntries(keyEntries)
 			const election = get(electionMolecules, keys.election)
-			const electionRound = get(electionRoundMolecules, keys)
+			const electionRound = get(electionRoundMolecules, keyEntries)
 
 			const candidates = get(election.state.candidates.relatedKeys)
 			const runningCandidates = candidates.filter((candidateKey) => {
-				const candidateRoundCandidateKey = {
-					electionRound: keys,
-					candidate: candidateKey,
-				}
+				const candidateRoundCandidateKey = [
+					[`election`, keys.election],
+					[`round`, keys.round],
+					[`candidate`, candidateKey],
+				] satisfies ElectionRoundCandidateKey
 				const candidate = get(electionRoundCandidateMolecules, candidateRoundCandidateKey)
 				const status = get(candidate.state.status)
 				return status === `running`
@@ -100,10 +98,13 @@ export const electionRoundVoteTotalsSelectors = selectorFamily<
 							if (!voterTopFavorites.includes(candidateKey)) {
 								return null
 							}
-							const numerator = get(voterRemainingEnergySelectors, {
-								electionRound: keys,
-								voter: voterKey,
-							})
+							const electionRoundVoterKey = [
+								[`election`, keys.election],
+								[`round`, keys.round],
+								[`voter`, voterKey],
+							] satisfies ElectionRoundVoterKey
+
+							const numerator = get(voterRemainingEnergySelectors, electionRoundVoterKey)
 							if (numerator instanceof Error) {
 								return null
 							}
@@ -133,8 +134,9 @@ export const electionRoundOutcomeSelectors = selectorFamily<
 >({
 	key: `electionRoundOutcome`,
 	get:
-		(keys) =>
+		(keyEntries) =>
 		({ get }) => {
+			const keys = fromEntries(keyEntries)
 			const election = get(electionMolecules, keys.election)
 			const electionRound = election.rounds[keys.round]
 			const voteTotals = get(need(electionRound.state.voteTotals))
@@ -200,17 +202,14 @@ export const electionRoundMolecules = moleculeFamily({
 		public setup() {
 			const candidates = this.tools.get(this.election.state.candidates.relatedKeys)
 			for (const candidate of candidates) {
-				this.tools.spawn(electionRoundCandidateMolecules, {
-					electionRound: this.key,
-					candidate,
-				})
+				this.tools.spawn(electionRoundCandidateMolecules, [...this.key, [`candidate`, candidate]])
 			}
 			this.state.setup()
 		}
 		public spawnVoter(
 			voterId: string,
 		): InstanceType<MoleculeType<typeof electionRoundVoterMolecules>> {
-			const key = { electionRound: this.key, voter: voterId }
+			const key = [...this.key, [`voter`, voterId]] satisfies ElectionRoundVoterKey
 			const token = this.tools.spawn(electionRoundVoterMolecules, key)
 			const roundVoter = this.tools.get(token)
 			this.voters.set(voterId, roundVoter)

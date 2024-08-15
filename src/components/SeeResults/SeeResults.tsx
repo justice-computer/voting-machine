@@ -11,7 +11,7 @@ import {
 	transaction,
 } from "atom.io"
 import { findState } from "atom.io/ephemeral"
-import { parseJson } from "atom.io/json"
+import { fromEntries, parseJson } from "atom.io/json"
 import { useO } from "atom.io/react"
 import { collection, doc, getDoc, getDocs } from "firebase/firestore"
 import { LayoutGroup, motion } from "framer-motion"
@@ -577,11 +577,11 @@ export const Keyframes = {
 
 					<CandidateStatusBar
 						running={[]}
-						elected={candidatesByStatus.elected.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+						elected={candidatesByStatus.elected.map((candidateKeyEntries) =>
+							findState(candidateAtoms, fromEntries(candidateKeyEntries).candidate),
 						)}
 						eliminated={candidatesByStatus.eliminated.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 					/>
 				</header>
@@ -625,10 +625,10 @@ export const Keyframes = {
 					<CandidateStatusBar
 						running={[]}
 						elected={candidatesByStatus.elected.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 						eliminated={candidatesByStatus.eliminated.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 					/>
 				</header>
@@ -674,15 +674,15 @@ export const Keyframes = {
 								(candidate) =>
 									!(
 										roundOutcome.type === `elected` &&
-										roundOutcome.candidates.some((c) => c.key === candidate.candidate)
+										roundOutcome.candidates.some((c) => c.key === fromEntries(candidate).candidate)
 									),
 							)
-							.map((candidate) => findState(candidateAtoms, candidate.candidate))}
+							.map((candidate) => findState(candidateAtoms, fromEntries(candidate).candidate))}
 						elected={candidatesByStatus.elected.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 						eliminated={candidatesByStatus.eliminated.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 					/>
 				</header>
@@ -730,13 +730,13 @@ export const Keyframes = {
 					<span>highlight losers</span>
 					<CandidateStatusBar
 						running={candidatesByStatus.running.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 						elected={candidatesByStatus.elected.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 						eliminated={candidatesByStatus.eliminated.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 					/>
 				</header>
@@ -761,13 +761,13 @@ export const Keyframes = {
 					<span>done</span>
 					<CandidateStatusBar
 						running={candidatesByStatus.running.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 						elected={candidatesByStatus.elected.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 						eliminated={candidatesByStatus.eliminated.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 					/>
 				</header>

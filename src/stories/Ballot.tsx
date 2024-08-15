@@ -2,6 +2,7 @@ import "~/src/font-face.scss"
 
 import { atomFamily, getState, selectorFamily, setState } from "atom.io"
 import { findState } from "atom.io/ephemeral"
+import { fromEntries } from "atom.io/json"
 import { useO } from "atom.io/react"
 import { motion } from "framer-motion"
 import { Fragment, useEffect, useState } from "react"
@@ -48,21 +49,21 @@ export const electionCandidatesAtoms = atomFamily<Candidate[], string>({
 	default: [],
 })
 
-type Entries<K extends keyof any, V> = [K, V][]
-type KeyOfEntries<E extends Entries<any, any>> = E extends [infer K, any][] ? K : never
-type CertainEntry<E extends Entries<any, any>, K extends KeyOfEntries<E>> = {
-	[P in 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9]: E[P] extends [K, infer V] ? V : never
-}[0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9]
-export type Flat<R extends { [K in PropertyKey]: any }> = {
-	[K in keyof R]: R[K]
-}
-type FromEntries<E extends Entries<keyof any, any>> = Flat<{
-	[K in KeyOfEntries<E>]: CertainEntry<E, K>
-}>
+// type Entries<K extends keyof any, V> = [K, V][]
+// type KeyOfEntries<E extends Entries<any, any>> = E extends [infer K, any][] ? K : never
+// type CertainEntry<E extends Entries<any, any>, K extends KeyOfEntries<E>> = {
+// 	[P in 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9]: E[P] extends [K, infer V] ? V : never
+// }[0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9]
+// export type Flat<R extends { [K in PropertyKey]: any }> = {
+// 	[K in keyof R]: R[K]
+// }
+// type FromEntries<E extends Entries<keyof any, any>> = Flat<{
+// 	[K in KeyOfEntries<E>]: CertainEntry<E, K>
+// }>
 
-function fromEntries<E extends Entries<keyof any, any>>(entries: E): FromEntries<E> {
-	return Object.fromEntries(entries) as FromEntries<E>
-}
+// function fromEntries<E extends Entries<keyof any, any>>(entries: E): FromEntries<E> {
+// 	return Object.fromEntries(entries) as FromEntries<E>
+// }
 
 const candidatesByTierSelectors = selectorFamily<
 	Candidate[],
