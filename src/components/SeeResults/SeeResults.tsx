@@ -1,7 +1,6 @@
 import type { AtomToken, ReadonlySelectorToken } from "atom.io"
 import {
 	atom,
-	atomFamily,
 	disposeState,
 	getState,
 	makeMolecule,
@@ -27,7 +26,11 @@ import { electionMolecules } from "justiciar"
 import type { FunctionComponent, ReactNode } from "react"
 import React, { useEffect, useRef, useState } from "react"
 
-import { currentElectionIdAtom, currentElectionLabelAtom } from "~/src/lib/atomStore"
+import {
+	candidateAtoms,
+	currentElectionIdAtom,
+	currentElectionLabelAtom,
+} from "~/src/lib/atomStore"
 import { db } from "~/src/lib/firebase"
 import type { ActualVote, Candidate, ElectionData, SerializedVote } from "~/src/types"
 
@@ -314,29 +317,6 @@ function ElectionRounds(props: {
 			)
 	}
 }
-
-export const candidateAtoms = atomFamily<Candidate, string>({
-	key: `candidates`,
-	default: (id) => ({
-		id,
-		type: `candidate`,
-		name: `NO_NAME`,
-		heading: `NO_HEADING`,
-		details: `NO_DETAILS`,
-		label: `NO_LABEL`,
-		status: `running`,
-	}),
-	effects: (id) => [
-		({ setSelf }) => {
-			void getDoc(doc(db, `candidates`, id)).then((snapshot) => {
-				const candidate = snapshot.data() as Candidate
-				const loadedAvatar = new Image()
-				loadedAvatar.src = candidate.avatar ?? `./avatar.png`
-				setSelf({ ...candidate, loadedAvatar })
-			})
-		},
-	],
-})
 
 function SeeResults(): JSX.Element {
 	const resultsView = useO(resultsViewAtom)
