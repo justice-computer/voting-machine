@@ -13,16 +13,20 @@ import {
 function vote(electionId: string, candidate: Candidate, tier: number): Disposable {
 	setState(
 		checkboxAtoms,
-		{
-			election: electionId,
-			candidate: candidate.id,
-			tier: tier,
-		},
+		[
+			[`election`, electionId],
+			[`candidate`, candidate.id],
+			[`tier`, tier],
+		],
 		true,
 	)
 	return {
 		[Symbol.dispose]: () => {
-			disposeState(checkboxAtoms, { election: electionId, candidate: candidate.id, tier: tier })
+			disposeState(checkboxAtoms, [
+				[`election`, electionId],
+				[`candidate`, candidate.id],
+				[`tier`, tier],
+			])
 		},
 	}
 }

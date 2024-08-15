@@ -4,7 +4,8 @@ import { editRelations, join } from "atom.io/data"
 
 import { candidateMolecules } from "./candidate"
 import { droopQuotaSelectors } from "./droop"
-import { type ElectionRoundInstance, electionRoundMolecules } from "./election-round"
+import type { ElectionRoundInstance, ElectionRoundKey } from "./election-round"
+import { electionRoundMolecules } from "./election-round"
 import type { Ballot } from "./voter"
 
 export type ElectionPhase =
@@ -210,10 +211,10 @@ export const electionMolecules = moleculeFamily({
 		})
 
 		public spawnRound(): ElectionRoundInstance {
-			const keys = {
-				election: this.key,
-				round: this.rounds.length,
-			}
+			const keys = [
+				[`election`, this.key],
+				[`round`, this.rounds.length],
+			] satisfies ElectionRoundKey
 			const token = this.tools.spawn(electionRoundMolecules, keys, this)
 			const round = this.tools.get(token)
 			this.rounds.push(round)

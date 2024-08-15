@@ -1,10 +1,11 @@
 import type { CtorToolkit, MoleculeType } from "atom.io"
 import { moleculeFamily, selectorFamily } from "atom.io"
 import { findRelations } from "atom.io/data"
+import { fromEntries } from "atom.io/json"
 
+import type { ElectionRoundCandidateKey } from "./candidate"
 import { candidateStatusSelectors } from "./candidate"
 import { electionMolecules, votes } from "./election"
-import type { ElectionRoundKey } from "./election-round"
 import { Rational } from "./rational"
 import { need } from "./refinements"
 
@@ -21,10 +22,7 @@ export type Ballot = {
 	}
 }
 
-export type ElectionRoundVoterKey = {
-	electionRound: ElectionRoundKey
-	voter: string
-}
+export type ElectionRoundVoterKey = [[`election`, string], [`round`, number], [`voter`, string]]
 
 export const voterCurrentFavoritesSelectors = selectorFamily<
 	[topTier: string[], nextTier: string[]],
@@ -32,15 +30,16 @@ export const voterCurrentFavoritesSelectors = selectorFamily<
 >({
 	key: `voterCurrentFavorites`,
 	get:
-		(keys) =>
+		(keyEntries) =>
 		({ get }) => {
+			const keys = fromEntries(keyEntries)
 			const votedForCandidateEntries = get(findRelations(votes, keys.voter).candidateEntriesOfVoter)
 			const stillRunning = votedForCandidateEntries.filter(([candidateKey]) => {
-				const electionRoundCandidateKey = {
-					electionRound: keys.electionRound,
-					candidate: candidateKey,
-				}
-
+				const electionRoundCandidateKey = [
+					[`election`, keys.election],
+					[`round`, keys.round],
+					[`candidate`, candidateKey],
+				] satisfies ElectionRoundCandidateKey
 				const candidateStatus = get(candidateStatusSelectors, electionRoundCandidateKey)
 				return candidateStatus === `running`
 			})
@@ -74,19 +73,25 @@ export const voterRemainingEnergySelectors = selectorFamily<
 >({
 	key: `voterRemainingEnergy`,
 	get:
-		(keys) =>
+		(keyEntries) =>
 		({ get }) => {
+			const keys = fromEntries(keyEntries)
 			const remainingEnergy = new Rational(1n)
-			const election = get(electionMolecules, keys.electionRound.election)
+			const election = get(electionMolecules, keys.election)
 			// const votedForCandidateEntries = get(findRelations(votes, keys.voter).candidateEntriesOfVoter)
-			const previousElectionRounds = election.rounds.slice(0, keys.electionRound.round)
+			const previousElectionRounds = election.rounds.slice(0, keys.round)
 			let roundNumber = -1
 			for (const round of previousElectionRounds) {
 				roundNumber++
-				const [voterFavoritesDuringRound] = get(voterCurrentFavoritesSelectors, {
-					electionRound: { election: keys.electionRound.election, round: roundNumber },
-					voter: keys.voter,
-				})
+				const electionRoundVoterKey = [
+					[`election`, keys.election],
+					[`round`, roundNumber],
+					[`voter`, keys.voter],
+				] satisfies ElectionRoundVoterKey
+				const [voterFavoritesDuringRound] = get(
+					voterCurrentFavoritesSelectors,
+					electionRoundVoterKey,
+				)
 				const numberOfFavoriteCandidates = BigInt(voterFavoritesDuringRound.length)
 				const outcome = get(need(round.state.outcome))
 				if (outcome instanceof Error) {

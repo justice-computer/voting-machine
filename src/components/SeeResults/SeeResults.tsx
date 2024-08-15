@@ -1,7 +1,6 @@
 import type { AtomToken, ReadonlySelectorToken } from "atom.io"
 import {
 	atom,
-	atomFamily,
 	disposeState,
 	getState,
 	makeMolecule,
@@ -11,7 +10,7 @@ import {
 	transaction,
 } from "atom.io"
 import { findState } from "atom.io/ephemeral"
-import { parseJson } from "atom.io/json"
+import { fromEntries, parseJson } from "atom.io/json"
 import { useO } from "atom.io/react"
 import { collection, doc, getDoc, getDocs } from "firebase/firestore"
 import { LayoutGroup, motion } from "framer-motion"
@@ -27,7 +26,11 @@ import { electionMolecules } from "justiciar"
 import type { FunctionComponent, ReactNode } from "react"
 import React, { useEffect, useRef, useState } from "react"
 
-import { currentElectionIdAtom, currentElectionLabelAtom } from "~/src/lib/atomStore"
+import {
+	candidateAtoms,
+	currentElectionIdAtom,
+	currentElectionLabelAtom,
+} from "~/src/lib/atomStore"
 import { db } from "~/src/lib/firebase"
 import type { ActualVote, Candidate, ElectionData, SerializedVote } from "~/src/types"
 
@@ -315,29 +318,6 @@ function ElectionRounds(props: {
 	}
 }
 
-export const candidateAtoms = atomFamily<Candidate, string>({
-	key: `candidates`,
-	default: (id) => ({
-		id,
-		type: `candidate`,
-		name: `NO_NAME`,
-		heading: `NO_HEADING`,
-		details: `NO_DETAILS`,
-		label: `NO_LABEL`,
-		status: `running`,
-	}),
-	effects: (id) => [
-		({ setSelf }) => {
-			void getDoc(doc(db, `candidates`, id)).then((snapshot) => {
-				const candidate = snapshot.data() as Candidate
-				const loadedAvatar = new Image()
-				loadedAvatar.src = candidate.avatar ?? `./avatar.png`
-				setSelf({ ...candidate, loadedAvatar })
-			})
-		},
-	],
-})
-
 function SeeResults(): JSX.Element {
 	const resultsView = useO(resultsViewAtom)
 	const viewLocation = useO(viewLocationSelector)
@@ -577,11 +557,11 @@ export const Keyframes = {
 
 					<CandidateStatusBar
 						running={[]}
-						elected={candidatesByStatus.elected.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+						elected={candidatesByStatus.elected.map((candidateKeyEntries) =>
+							findState(candidateAtoms, fromEntries(candidateKeyEntries).candidate),
 						)}
 						eliminated={candidatesByStatus.eliminated.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 					/>
 				</header>
@@ -625,10 +605,10 @@ export const Keyframes = {
 					<CandidateStatusBar
 						running={[]}
 						elected={candidatesByStatus.elected.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 						eliminated={candidatesByStatus.eliminated.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 					/>
 				</header>
@@ -674,15 +654,15 @@ export const Keyframes = {
 								(candidate) =>
 									!(
 										roundOutcome.type === `elected` &&
-										roundOutcome.candidates.some((c) => c.key === candidate.candidate)
+										roundOutcome.candidates.some((c) => c.key === fromEntries(candidate).candidate)
 									),
 							)
-							.map((candidate) => findState(candidateAtoms, candidate.candidate))}
+							.map((candidate) => findState(candidateAtoms, fromEntries(candidate).candidate))}
 						elected={candidatesByStatus.elected.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 						eliminated={candidatesByStatus.eliminated.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 					/>
 				</header>
@@ -730,13 +710,13 @@ export const Keyframes = {
 					<span>highlight losers</span>
 					<CandidateStatusBar
 						running={candidatesByStatus.running.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 						elected={candidatesByStatus.elected.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 						eliminated={candidatesByStatus.eliminated.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 					/>
 				</header>
@@ -761,13 +741,13 @@ export const Keyframes = {
 					<span>done</span>
 					<CandidateStatusBar
 						running={candidatesByStatus.running.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 						elected={candidatesByStatus.elected.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 						eliminated={candidatesByStatus.eliminated.map((candidate) =>
-							findState(candidateAtoms, candidate.candidate),
+							findState(candidateAtoms, fromEntries(candidate).candidate),
 						)}
 					/>
 				</header>
