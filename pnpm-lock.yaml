@@ -158,8 +158,8 @@ importers:
         specifier: 2.4.0
         version: 2.4.0
       openai:
-        specifier: 4.55.7
-        version: 4.55.7
+        specifier: 4.55.8
+        version: 4.55.8
       varmint:
         specifier: 0.2.0
         version: 0.2.0
@@ -4184,8 +4184,8 @@ packages:
     resolution: {integrity: sha512-1FlR+gjXK7X+AsAHso35MnyN5KqGwJRi/31ft6x0M194ht7S+rWAvd7PHss9xSKMzE0asv1pyIHaJYq+BbacAQ==}
     engines: {node: '>=12'}
 
-  openai@4.55.7:
-    resolution: {integrity: sha512-I2dpHTINt0Zk+Wlns6KzkKu77MmNW3VfIIQf5qYziEUI6t7WciG1zTobfKqdPzBmZi3TTM+3DtjPumxQdcvzwA==}
+  openai@4.55.8:
+    resolution: {integrity: sha512-k40u3QCrP10bL6c5b6b+lffJzG4QBSAqr6QDxXPThTuWaQmlKztaeW+NmSkJTsB7Ho1Cwq+IkdZZs1ZIlScXMA==}
     hasBin: true
     peerDependencies:
       zod: ^3.23.8
@@ -7933,7 +7933,7 @@ snapshots:
       magic-string: 0.30.11
       msw: 2.3.5(typescript@5.5.4)
       sirv: 2.0.4
-      vitest: 2.0.5(@types/node@20.14.15)(@vitest/browser@2.0.5)(jsdom@24.1.1)(sass@1.77.8)
+      vitest: 2.0.5(@types/node@22.3.0)(@vitest/browser@2.0.5)(jsdom@24.1.1)(sass@1.77.8)
       ws: 8.18.0
     optionalDependencies:
       webdriverio: 8.40.2
@@ -10316,7 +10316,7 @@ snapshots:
     dependencies:
       mimic-fn: 4.0.0
 
-  openai@4.55.7:
+  openai@4.55.8:
     dependencies:
       '@types/node': 18.19.44
       '@types/node-fetch': 2.6.11
