@@ -12,6 +12,23 @@
     background-color: #dddddd35;
   }
 
+  .google-button {
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+
+    img {
+      width: 35px;
+      height: 35px;
+      padding-right: 10px;
+    }
+  }
+
   .switch-button {
     width: 100%;
     padding: 20px;
@@ -23,13 +40,13 @@
     font-weight: 500;
   }
 
-  .item {
+  .wrapper {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 60px;
-    
+
     form {
       display: flex;
       flex-direction: column;

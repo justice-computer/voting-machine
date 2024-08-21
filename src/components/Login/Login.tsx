@@ -1,11 +1,17 @@
 import "./login.css"
 
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth"
+import {
+	createUserWithEmailAndPassword,
+	GoogleAuthProvider,
+	signInWithEmailAndPassword,
+	signInWithPopup,
+} from "firebase/auth"
 import { doc, setDoc } from "firebase/firestore"
 import type { ChangeEvent } from "react"
 import { useState } from "react"
 import { toast } from "react-toastify"
 
+// import { getAuth, GoogleAuthProvider, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../../lib/firebase"
 import { uploadImage } from "../../lib/upload"
 import type { AvatarImage, SystemUser } from "../../types"
@@ -21,7 +27,7 @@ type ProvideCredentialsProps = {
 
 function ProvideCredentials({ handleLogin }: ProvideCredentialsProps) {
 	return (
-		<div className="item">
+		<div className="wrapper">
 			<h2>Welcome back,</h2>
 			<form onSubmit={handleLogin}>
 				<input type="text" placeholder="Email" name="email" />
@@ -40,7 +46,7 @@ type RegisterProps = {
 
 function Register({ handleRegister, avatarImage, handleAvatar }: RegisterProps) {
 	return (
-		<div className="item">
+		<div className="wrapper">
 			<h2>Create an account</h2>
 			<form onSubmit={handleRegister}>
 				<label htmlFor="file">
@@ -75,6 +81,31 @@ function Login(): JSX.Element {
 		const email = e.target.email.value
 		const password = e.target.password.value
 		await signInWithEmailAndPassword(auth, email, password)
+	}
+
+	const handleGoogleSignIn = async () => {
+		try {
+			const googleProvider = new GoogleAuthProvider()
+			const result = await signInWithPopup(auth, googleProvider)
+			const user = result.user
+
+			// Assuming your user data structure is the same
+			const userDoc = doc(db, `users`, user.uid)
+			const userData = {
+				username: user.displayName ?? user.email?.split(`@`)[0], // Use email prefix if username is not provided
+				email: user.email,
+				id: user.uid,
+				avatar: user.photoURL ?? null,
+			}
+
+			await setDoc(userDoc, userData, { merge: true })
+
+			console.log(`Google Sign-In successful: ${user.email}`)
+			toast.success(`Google Sign-In successful: ${user.email}`)
+		} catch (error) {
+			console.error(`Google Sign-In error:`, error)
+			toast.error(`Error signing in with Google`)
+		}
 	}
 
 	const handleRegister = async (e: any) => {
@@ -124,6 +155,12 @@ function Login(): JSX.Element {
 			) : (
 				<ProvideCredentials handleLogin={handleLogin} />
 			)}
+
+			<button className="google-button" type="button" onClick={handleGoogleSignIn}>
+				<img src="./google-settings.svg" alt="reset" />
+				Sign in with Google
+			</button>
+
 			<button
 				type="button"
 				className="switch-button"
