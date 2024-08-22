@@ -1,8 +1,17 @@
-import { atom, atomFamily, getState, selector, subscribe } from "atom.io"
+import {
+	atom,
+	atomFamily,
+	getState,
+	selector,
+	selectorFamily,
+	subscribe,
+	transaction,
+} from "atom.io"
+import { parseJson, stringifyJson } from "atom.io/json"
 import * as FirebaseAuth from "firebase/auth"
 import { collection, doc, onSnapshot, setDoc } from "firebase/firestore"
 
-import type { Candidate, ElectionData, SerializedVote, SystemUser } from "../types"
+import type { ActualVote, Candidate, ElectionData, SerializedVote, SystemUser } from "../types"
 import { auth, db } from "./firebase"
 
 export const currentElectionIdAtom = atom<string | null>({
@@ -163,16 +172,107 @@ export const systemUserAtoms = atomFamily<SystemUser, string>({
 	],
 })
 
-export const voterIsFinishedAtoms = atomFamily<boolean, string>({
-	key: `voterIsFinished`,
-	default: false,
+export const serializedVoteAtoms = atomFamily<SerializedVote, string>({
+	key: `serializedVote`,
+	default: {
+		voterId: ``,
+		electionId: ``,
+		finished: false,
+		tierList: stringifyJson([] satisfies string[][]),
+	},
 	effects: (id) => [
 		({ setSelf }) => {
 			const unSub = onSnapshot(doc(db, `votes`, id), (snapshot) => {
 				const vote = snapshot.data() as SerializedVote
-				setSelf(vote.finished)
+				setSelf(vote)
 			})
 			return unSub
 		},
+		({ onSet }) => {
+			onSet(async ({ newValue, oldValue }) => {
+				const myId = getState(myselfSelector)?.id
+				if (oldValue.voterId === myId) {
+					await setDoc(doc(db, `votes`, newValue.voterId), newValue)
+				} else {
+					console.error(
+						`Attempted to set serializedVote for ${newValue.voterId} but you are ${myId}`,
+					)
+				}
+			})
+		},
 	],
+})
+
+export const actualVoteSelectors = selectorFamily<ActualVote, string>({
+	key: `actualVote`,
+	get:
+		(electionId) =>
+		({ get }) => {
+			const serializedVote = get(serializedVoteAtoms, electionId)
+			const actualVote: ActualVote = {
+				...serializedVote,
+				tierList: parseJson(serializedVote.tierList),
+			}
+			return actualVote
+		},
+	set:
+		(electionId) =>
+		({ get, set }, newValue) => {
+			const myId = get(myselfSelector)?.id
+			if (newValue.voterId === myId) {
+				set(serializedVoteAtoms, electionId, {
+					...newValue,
+					tierList: stringifyJson(newValue.tierList),
+				})
+			} else {
+				console.error(`Attempted to set actualVote for ${newValue.voterId} but you are ${myId}`)
+			}
+		},
+})
+
+export const retractSubmittedBallotTX = transaction<() => void>({
+	key: `retractSubmittedBallot`,
+	do: ({ get, set }) => {
+		const myId = get(myselfSelector)?.id
+		if (!myId) {
+			console.error(`Attempted to retract a ballot but you are not logged in`)
+			return
+		}
+		const serializedVote = get(serializedVoteAtoms, myId)
+		if (serializedVote.finished) {
+			set(serializedVoteAtoms, myId, {
+				...serializedVote,
+				finished: false,
+			})
+		} else {
+			console.error(`Attempted to retract a ballot that is not finished`)
+		}
+	},
+})
+
+export const joinElectionTX = transaction<() => void>({
+	key: `joinElection`,
+	do: ({ get, set }) => {
+		const currentElection = get(electionAtom)
+		const myId = get(myselfSelector)?.id
+		if (!myId) {
+			console.error(`Attempted to join an election but you are not logged in`)
+			return
+		}
+		if (currentElection.users.includes(myId)) {
+			console.error(`Attempted to join an election but you are already in it`)
+			return
+		}
+		set(electionAtom, {
+			...currentElection,
+			users: [...currentElection.users, myId],
+		})
+		set(actualVoteSelectors, myId, (current) => {
+			return {
+				...current,
+				voterId: myId,
+				electionId: currentElection.id,
+			}
+		})
+	},
 })
