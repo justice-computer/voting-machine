@@ -157,8 +157,10 @@ export const systemUserAtoms = atomFamily<SystemUser, string>({
 	effects: (id) => [
 		({ setSelf }) => {
 			const unSub = onSnapshot(doc(db, `users`, id), (snapshot) => {
-				const user = snapshot.data() as SystemUser
-				setSelf(user)
+				if (snapshot.exists()) {
+					const user = snapshot.data() as SystemUser
+					setSelf(user)
+				}
 			})
 			return unSub
 		},
@@ -172,6 +174,7 @@ export const systemUserAtoms = atomFamily<SystemUser, string>({
 	],
 })
 
+const serializedVoteAtomsGate: Record<string, boolean> = {} // AtomIO calls onSet on setSelf, which I'm blocking using this.
 export const serializedVoteAtoms = atomFamily<SerializedVote, string>({
 	key: `serializedVote`,
 	default: {
@@ -180,18 +183,25 @@ export const serializedVoteAtoms = atomFamily<SerializedVote, string>({
 		finished: false,
 		tierList: stringifyJson([] satisfies string[][]),
 	},
-	effects: (id) => [
+	effects: (userId) => [
 		({ setSelf }) => {
-			const unSub = onSnapshot(doc(db, `votes`, id), (snapshot) => {
-				const vote = snapshot.data() as SerializedVote
-				setSelf(vote)
+			const unSub = onSnapshot(doc(db, `votes`, userId), (snapshot) => {
+				if (snapshot.exists()) {
+					const vote = snapshot.data() as SerializedVote
+					serializedVoteAtomsGate[userId] = true
+					setSelf(vote)
+				}
 			})
 			return unSub
 		},
 		({ onSet }) => {
-			onSet(async ({ newValue, oldValue }) => {
+			onSet(async ({ newValue }) => {
+				if (serializedVoteAtomsGate[userId]) {
+					serializedVoteAtomsGate[userId] = false
+					return
+				}
 				const myId = getState(myselfSelector)?.id
-				if (oldValue.voterId === myId) {
+				if (userId === myId) {
 					await setDoc(doc(db, `votes`, newValue.voterId), newValue)
 				} else {
 					console.error(
@@ -206,9 +216,9 @@ export const serializedVoteAtoms = atomFamily<SerializedVote, string>({
 export const actualVoteSelectors = selectorFamily<ActualVote, string>({
 	key: `actualVote`,
 	get:
-		(electionId) =>
+		(userId) =>
 		({ get }) => {
-			const serializedVote = get(serializedVoteAtoms, electionId)
+			const serializedVote = get(serializedVoteAtoms, userId)
 			const actualVote: ActualVote = {
 				...serializedVote,
 				tierList: parseJson(serializedVote.tierList),
@@ -216,11 +226,11 @@ export const actualVoteSelectors = selectorFamily<ActualVote, string>({
 			return actualVote
 		},
 	set:
-		(electionId) =>
+		(userId) =>
 		({ get, set }, newValue) => {
 			const myId = get(myselfSelector)?.id
-			if (newValue.voterId === myId) {
-				set(serializedVoteAtoms, electionId, {
+			if (userId === myId) {
+				set(serializedVoteAtoms, userId, {
 					...newValue,
 					tierList: stringifyJson(newValue.tierList),
 				})
