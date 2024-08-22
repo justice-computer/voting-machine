@@ -1,10 +1,17 @@
 import "./waitForVoters.css"
 
+import { runTransaction } from "atom.io"
 import { useO } from "atom.io/react"
 import { doc, getDoc, onSnapshot, setDoc } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
-import { currentElectionIdAtom } from "~/src/lib/atomStore"
+import {
+	currentElectionIdAtom,
+	finishedVotersSelector,
+	joinElectionTX,
+	myselfSelector,
+	retractSubmittedBallotTX,
+} from "~/src/lib/atomStore"
 
 import { db } from "../../lib/firebase"
 import { useUserStore } from "../../lib/userStore"
@@ -15,63 +22,67 @@ type WaitForVotersProps = {
 }
 
 function WaitForVoters({ targetState }: WaitForVotersProps): JSX.Element {
-	const { currentUser } = useUserStore()
-	const [voters, setVoters] = useState<SystemUser[]>()
-	const [finishedVoters, setFinishedVoters] = useState<string[]>([])
-	const currentElectionId = useO(currentElectionIdAtom)
+	// const { currentUser } = useUserStore()
+	// const [voters, setVoters] = useState<SystemUser[]>()
+	// const [finishedVoters, setFinishedVoters] = useState<string[]>([])
+	// const currentElectionId = useO(currentElectionIdAtom)
+	const finishedVoters = useO(finishedVotersSelector)
+	const myself = useO(myselfSelector)
+	const joinElection = runTransaction(joinElectionTX)
+	const retractSubmittedBallot = runTransaction(retractSubmittedBallotTX)
 
-	useEffect(() => {
-		if (currentElectionId == null) return
-		const unSub = onSnapshot(doc(db, `elections`, currentElectionId), async (res) => {
-			const electionData = res.data() as ElectionData
-			const promises = electionData.users.map(async (id) => {
-				const userDocRef = doc(db, `users`, id)
-				const userDocSnap = await getDoc(userDocRef)
-				const user = userDocSnap.data() as SystemUser
-				return user
-			})
-			await Promise.all(promises).then(async (users) => {
-				console.log(targetState, electionData.state)
-				setVoters(users)
-				if (targetState === `closed`) {
-					await Promise.all(
-						electionData.users.map(async (id) => {
-							// TODO: Make this onSnapshot so it updates
-							const voteDocRef = doc(db, `votes`, id)
-							const voteDocSnap = await getDoc(voteDocRef)
-							const vote = voteDocSnap.data() as SerializedVote | undefined
-							if (vote?.finished) {
-								setFinishedVoters((prev) => [...prev, id])
-							}
-							return id
-						}),
-					)
-				}
-			})
-		})
-		return unSub
-	}, [currentUser?.id, targetState, currentElectionId])
+	// useEffect(() => {
+	// 	if (currentElectionId == null) return
+	// 	const unSub = onSnapshot(doc(db, `elections`, currentElectionId), async (res) => {
+	// 		const electionData = res.data() as ElectionData
+	// 		const promises = electionData.users.map(async (id) => {
+	// 			const userDocRef = doc(db, `users`, id)
+	// 			const userDocSnap = await getDoc(userDocRef)
+	// 			const user = userDocSnap.data() as SystemUser
+	// 			return user
+	// 		})
+	// 		await Promise.all(promises).then(async (users) => {
+	// 			console.log(targetState, electionData.state)
+	// 			setVoters(users)
+	// 			if (targetState === `closed`) {
+	// 				await Promise.all(
+	// 					electionData.users.map(async (id) => {
+	// 						// TODO: Make this onSnapshot so it updates
+	// 						const voteDocRef = doc(db, `votes`, id)
+	// 						const voteDocSnap = await getDoc(voteDocRef)
+	// 						const vote = voteDocSnap.data() as SerializedVote | undefined
+	// 						if (vote?.finished) {
+	// 							setFinishedVoters((prev) => [...prev, id])
+	// 						}
+	// 						return id
+	// 					}),
+	// 				)
+	// 			}
+	// 		})
+	// 	})
+	// 	return unSub
+	// }, [currentUser?.id, targetState, currentElectionId])
 
-	const handleReturn = () => {
-		if (currentUser == null) return
-		void setDoc(doc(db, `votes`, currentUser.id), { finished: false }, { merge: true })
-	}
+	// const handleReturn = () => {
+	// 	if (currentUser == null) return
+	// 	void setDoc(doc(db, `votes`, currentUser.id), { finished: false }, { merge: true })
+	// }
 
-	const handleJoin = async () => {
-		if (currentUser == null || currentElectionId == null) return
-		await setDoc(doc(db, `votes`, currentUser.id), {
-			finished: false,
-			tierList: `[]`,
-		})
-		const electionDoc = doc(db, `elections`, currentElectionId)
-		const electionDocSnap = await getDoc(electionDoc)
-		const electionData = electionDocSnap.data() as ElectionData
-		const users = electionData.users
-		if (!users.includes(currentUser.id)) {
-			users.push(currentUser.id)
-			await setDoc(electionDoc, { users }, { merge: true })
-		}
-	}
+	// const handleJoin = async () => {
+	// 	if (currentUser == null || currentElectionId == null) return
+	// 	await setDoc(doc(db, `votes`, currentUser.id), {
+	// 		finished: false,
+	// 		tierList: `[]`,
+	// 	})
+	// 	const electionDoc = doc(db, `elections`, currentElectionId)
+	// 	const electionDocSnap = await getDoc(electionDoc)
+	// 	const electionData = electionDocSnap.data() as ElectionData
+	// 	const users = electionData.users
+	// 	if (!users.includes(currentUser.id)) {
+	// 		users.push(currentUser.id)
+	// 		await setDoc(electionDoc, { users }, { merge: true })
+	// 	}
+	// }
 
 	return (
 		<div className="waitForVoters">
