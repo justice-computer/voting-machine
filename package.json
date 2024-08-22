@@ -59,7 +59,7 @@
 		"@typescript-eslint/eslint-plugin": "8.2.0",
 		"@typescript-eslint/parser": "8.2.0",
 		"@vitejs/plugin-react": "4.3.1",
-		"atom.io": "0.27.5",
+		"atom.io": "0.28.0",
 		"c8": "10.1.2",
 		"eslint": "9.9.0",
 		"eslint-plugin-simple-import-sort": "12.1.1",
