@@ -1,8 +1,9 @@
-import { atom, atomFamily, selector, subscribe } from "atom.io"
-import { collection, doc, onSnapshot } from "firebase/firestore"
+import { atom, atomFamily, getState, selector, subscribe } from "atom.io"
+import * as FirebaseAuth from "firebase/auth"
+import { collection, doc, onSnapshot, setDoc } from "firebase/firestore"
 
-import type { Candidate, ElectionData } from "../types"
-import { db } from "./firebase"
+import type { Candidate, ElectionData, SerializedVote, SystemUser } from "../types"
+import { auth, db } from "./firebase"
 
 export const currentElectionIdAtom = atom<string | null>({
 	key: `currentElectionId`,
@@ -34,6 +35,36 @@ export const candidateIndexAtoms = atomFamily<string[], string>({
 			return unSub
 		},
 	],
+})
+
+export type MyFirebaseUser = FirebaseAuth.User | { unauthenticated: true; loading: boolean }
+export const myFirebaseUserAtom = atom<MyFirebaseUser>({
+	key: `myFirebaseUser`,
+	default: { unauthenticated: true, loading: true },
+	effects: [
+		({ setSelf }) => {
+			const unSub = FirebaseAuth.onAuthStateChanged(auth, (myFirebaseUser) => {
+				if (myFirebaseUser) {
+					setSelf(myFirebaseUser)
+				} else {
+					setSelf({ unauthenticated: true, loading: false })
+				}
+			})
+			return unSub
+		},
+	],
+})
+
+export const myselfSelector = selector<SystemUser | null>({
+	key: `myself`,
+	get: ({ get }) => {
+		const myFirebaseUser = get(myFirebaseUserAtom)
+		if (`unauthenticated` in myFirebaseUser) {
+			return null
+		}
+		const myself = get(systemUserAtoms, myFirebaseUser.uid)
+		return myself
+	},
 })
 
 export const electionAtom = atom<ElectionData>({
@@ -104,4 +135,44 @@ export const candidatesInCurrentElectionSelector = selector<Candidate[]>({
 			return candidate
 		})
 	},
+})
+
+export const systemUserAtoms = atomFamily<SystemUser, string>({
+	key: `systemUser`,
+	default: (id) => ({
+		id,
+		username: ``,
+		email: ``,
+		avatar: ``,
+	}),
+	effects: (id) => [
+		({ setSelf }) => {
+			const unSub = onSnapshot(doc(db, `users`, id), (snapshot) => {
+				const user = snapshot.data() as SystemUser
+				setSelf(user)
+			})
+			return unSub
+		},
+		({ onSet }) => {
+			onSet(async ({ newValue, oldValue }) => {
+				if (oldValue.id === getState(myselfSelector)?.id) {
+					await setDoc(doc(db, `users`, newValue.id), newValue, { merge: true })
+				}
+			})
+		},
+	],
+})
+
+export const voterIsFinishedAtoms = atomFamily<boolean, string>({
+	key: `voterIsFinished`,
+	default: false,
+	effects: (id) => [
+		({ setSelf }) => {
+			const unSub = onSnapshot(doc(db, `votes`, id), (snapshot) => {
+				const vote = snapshot.data() as SerializedVote
+				setSelf(vote.finished)
+			})
+			return unSub
+		},
+	],
 })
