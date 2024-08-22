@@ -277,21 +277,19 @@ export const joinElectionTX = transaction<() => void>({
 	},
 })
 
-export const finishedVotersSelector = selector<SystemUser[]>({
-	key: `finishedVoters`,
+export const currentElectionVotersSelector = selector<{ user: SystemUser; vote: ActualVote }[]>({
+	key: `currentElectionVoters`,
 	get: ({ get }) => {
 		const currentElectionId = get(currentElectionIdAtom)
 		if (currentElectionId == null) {
 			return []
 		}
 		const election = get(electionAtom)
-		const finishedVoters = election.users.filter((userId) => {
-			const serializedVote = get(serializedVoteAtoms, userId)
-			return serializedVote.finished
-		})
-		return finishedVoters.map((userId) => {
+		const voters = election.users.map((userId) => {
 			const user = get(systemUserAtoms, userId)
-			return user
+			const vote = get(actualVoteSelectors, userId)
+			return { user, vote }
 		})
+		return voters
 	},
 })
