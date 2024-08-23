@@ -4,7 +4,6 @@ import {
 	disposeState,
 	getState,
 	makeMolecule,
-	makeRootMolecule,
 	runTransaction,
 	selector,
 	transaction,
@@ -15,7 +14,6 @@ import { useO } from "atom.io/react"
 import { collection, doc, getDoc, getDocs } from "firebase/firestore"
 import { LayoutGroup, motion } from "framer-motion"
 import type {
-	Ballot,
 	CandidateStatus,
 	ElectionInstance,
 	ElectionRoundInstance,
@@ -29,6 +27,7 @@ import React, { useEffect, useRef, useState } from "react"
 import { currentElectionIdAtom, currentElectionLabelAtom } from "~/src/lib/election"
 import { candidateAtoms } from "~/src/lib/election-candidates"
 import { db } from "~/src/lib/firebase"
+import { actualVoteToBallot, root } from "~/src/lib/justiciar"
 import type { ActualVote, Candidate, ElectionData, SerializedVote } from "~/src/types"
 
 import { CandidatePicture } from "../CandidatePicture/CandidatePicture"
@@ -190,18 +189,6 @@ const changeFrameTX = transaction<(direction: `next` | `prev`, election: Electio
 	},
 )
 
-function actualVoteToBallot(actualVote: ActualVote): Ballot {
-	const ballot: Ballot = {
-		voterId: actualVote.voterId,
-		votes: {
-			election0: actualVote.tierList,
-		},
-	}
-	return ballot
-}
-
-const root = makeRootMolecule(`root`)
-
 export const STATUS_COLORS = {
 	running: `white`,
 	elected: `green`,
@@ -324,7 +311,6 @@ function SeeResults(): JSX.Element {
 	const [actualVotes, setActualVotes] = useState<ActualVote[]>([])
 	const [candidates, setCandidates] = useState<Candidate[]>([])
 
-	console.log(currentElectionLabel)
 	useEffect(() => {
 		if (currentElectionId === null) {
 			return
@@ -394,11 +380,9 @@ function SeeResults(): JSX.Element {
 				runTransaction(election.registerCandidate)(candidateId)
 			}
 			runTransaction(election.beginVoting)()
-			const ballots: Ballot[] = actualVotes.map(actualVoteToBallot)
 			for (const actualVote of actualVotes) {
 				console.log(actualVote)
 				const ballot = actualVoteToBallot(actualVote)
-				ballots.push(ballot)
 				runTransaction(election.castBallot)(ballot)
 			}
 			runTransaction(election.beginCounting)()
