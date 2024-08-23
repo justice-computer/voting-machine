@@ -4,6 +4,7 @@ import {
 	getState,
 	selector,
 	selectorFamily,
+	setState,
 	subscribe,
 	transaction,
 } from "atom.io"
@@ -46,35 +47,41 @@ export const candidateIndexAtoms = atomFamily<string[], string>({
 	],
 })
 
-export type MyFirebaseUser = FirebaseAuth.User | { unauthenticated: true; loading: boolean }
-export const myFirebaseUserAtom = atom<MyFirebaseUser>({
-	key: `myFirebaseUser`,
-	default: { unauthenticated: true, loading: true },
+export type AuthStatus =
+	| { authenticated: false; loading: boolean }
+	| { authenticated: true; loading: false; me: FirebaseAuth.User }
+export const myAuthStatusAtom = atom<AuthStatus>({
+	key: `myAuthStatus`,
+	default: { authenticated: false, loading: true },
 	effects: [
 		({ setSelf }) => {
 			const unSub = FirebaseAuth.onAuthStateChanged(auth, (myFirebaseUser) => {
 				if (myFirebaseUser) {
-					setSelf(myFirebaseUser)
+					setSelf({ authenticated: true, loading: false, me: myFirebaseUser })
 				} else {
-					setSelf({ unauthenticated: true, loading: false })
+					setSelf({ authenticated: false, loading: false })
 				}
 			})
 			return unSub
 		},
 	],
 })
-
 export const myselfSelector = selector<SystemUser | null>({
 	key: `myself`,
 	get: ({ get }) => {
-		const myFirebaseUser = get(myFirebaseUserAtom)
-		if (`unauthenticated` in myFirebaseUser) {
-			return null
+		const myAuthStatus = get(myAuthStatusAtom)
+		if (myAuthStatus.authenticated) {
+			const myself = get(systemUserAtoms, myAuthStatus.me.uid)
+			return myself
 		}
-		const myself = get(systemUserAtoms, myFirebaseUser.uid)
-		return myself
+		return null
 	},
 })
+export function logout(): void {
+	void FirebaseAuth.signOut(auth).then(() => {
+		setState(myAuthStatusAtom, { authenticated: false, loading: false })
+	})
+}
 
 export const electionAtom = atom<ElectionData>({
 	key: `election`,

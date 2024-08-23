@@ -6,9 +6,8 @@ import { useState } from "react"
 
 import ElectionManager from "~/src/components/ElectionManager/ElectionManager"
 import Modal from "~/src/components/Modal/Modal"
-import { currentElectionIdAtom, electionAtom } from "~/src/lib/atomStore"
+import { currentElectionIdAtom, electionAtom, logout, myselfSelector } from "~/src/lib/atomStore"
 import { db } from "~/src/lib/firebase"
-import { useUserStore } from "~/src/lib/userStore"
 
 import Logout from "../../Logout/Logout"
 
@@ -17,15 +16,11 @@ type UserBarProps = {
 }
 
 function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
-	const { currentUser, logout } = useUserStore()
+	const myself = useO(myselfSelector)
 	const [showLogout, setShowLogout] = useState(false)
 	const [showElectionManager, setShowElectionManager] = useState(false)
 	const setCurrentElectionId = useI(currentElectionIdAtom)
 	const election = useO(electionAtom)
-
-	function handleLogout() {
-		logout()
-	}
 
 	function handleAdmin() {
 		setShowElectionManager(false)
@@ -33,10 +28,10 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 	}
 
 	function handleChangeElection(id: string) {
-		if (currentUser == null) return
+		if (myself == null) return
 		setCurrentElectionId(id)
 		localStorage.setItem(`electionId`, id)
-		const docRef = doc(db, `votes`, currentUser?.id)
+		const docRef = doc(db, `votes`, myself.id)
 		deleteDoc(docRef)
 			.then(() => {
 				setShowElectionManager(false)
@@ -69,7 +64,9 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 				title="Logout"
 			>
 				<Logout
-					handleLogout={handleLogout}
+					handleLogout={() => {
+						logout()
+					}}
 					cancelLogout={() => {
 						setShowLogout(false)
 					}}
@@ -91,14 +88,14 @@ function UserBar({ toggleAdminMode }: UserBarProps): JSX.Element {
 				/>
 			</Modal>
 			<div className="user">
-				<h2>{currentUser?.username}</h2>
+				<h2>{myself?.username}</h2>
 				<button
 					type="button"
 					onClick={() => {
 						setShowLogout(true)
 					}}
 				>
-					<img src={currentUser?.avatar ?? `./avatar.png`} alt="avatar" />
+					<img src={myself?.avatar ?? `./avatar.png`} alt="avatar" />
 				</button>
 			</div>
 		</div>

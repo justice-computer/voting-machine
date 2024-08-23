@@ -1,27 +1,19 @@
-import { onAuthStateChanged } from "firebase/auth"
-import { useEffect } from "react"
+import { useO } from "atom.io/react"
 
 import Login from "./components/Login/Login"
 import Notification from "./components/Notification/Notification"
 import StateRouter from "./components/StateRouter/StateRouter"
 import SystemErrorBoundary from "./components/SystemErrorBoundary/SystemErrorBoundary"
-import { auth } from "./lib/firebase"
-import { useUserStore } from "./lib/userStore"
+import { myAuthStatusAtom } from "./lib/atomStore"
 
 const App = (): JSX.Element => {
-	const { currentUser, isLoading, fetchUserInfo } = useUserStore()
-	useEffect(() => {
-		const unSub = onAuthStateChanged(auth, async (newUser) => {
-			await fetchUserInfo(newUser?.uid)
-		})
-		return unSub
-	}, [fetchUserInfo])
+	const myAuthStatus = useO(myAuthStatusAtom)
 
-	if (isLoading) return <div className="loading">Loading...</div>
+	if (myAuthStatus.loading) return <div className="loading">Loading...</div>
 
 	return (
 		<SystemErrorBoundary>
-			{currentUser ? <StateRouter /> : <Login />}
+			{myAuthStatus.authenticated ? <StateRouter /> : <Login />}
 			<Notification />
 		</SystemErrorBoundary>
 	)
