@@ -2,11 +2,8 @@ import { useI, useO } from "atom.io/react"
 import { collection, doc, getDocs, onSnapshot } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
-import {
-	currentElectionIdAtom,
-	currentElectionLabelAtom,
-	myselfSelector,
-} from "~/src/lib/atomStore"
+import { myselfSelector } from "~/src/lib/auth"
+import { currentElectionIdAtom, currentElectionLabelAtom } from "~/src/lib/election"
 
 import { db } from "../../lib/firebase"
 import type { ElectionData, ElectionState, SerializedVote } from "../../types"

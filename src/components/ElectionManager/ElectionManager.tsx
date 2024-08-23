@@ -6,7 +6,7 @@ import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
 import Accordion from "~/src/components/Accordion/Accordion"
-import { myselfSelector } from "~/src/lib/atomStore"
+import { myselfSelector } from "~/src/lib/auth"
 import { db } from "~/src/lib/firebase"
 import { prepareBallot } from "~/src/stories/Ballot"
 import type { ElectionData, SerializedVote } from "~/src/types"

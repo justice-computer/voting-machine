@@ -6,7 +6,8 @@ import { useState } from "react"
 
 import ElectionManager from "~/src/components/ElectionManager/ElectionManager"
 import Modal from "~/src/components/Modal/Modal"
-import { currentElectionIdAtom, electionAtom, logout, myselfSelector } from "~/src/lib/atomStore"
+import { logout, myselfSelector } from "~/src/lib/auth"
+import { currentElectionIdAtom, electionAtom } from "~/src/lib/election"
 import { db } from "~/src/lib/firebase"
 
 import Logout from "../../Logout/Logout"

@@ -4,7 +4,7 @@ import Login from "./components/Login/Login"
 import Notification from "./components/Notification/Notification"
 import StateRouter from "./components/StateRouter/StateRouter"
 import SystemErrorBoundary from "./components/SystemErrorBoundary/SystemErrorBoundary"
-import { myAuthStatusAtom } from "./lib/atomStore"
+import { myAuthStatusAtom } from "./lib/auth"
 
 const App = (): JSX.Element => {
 	const myAuthStatus = useO(myAuthStatusAtom)

@@ -3,11 +3,8 @@ import "./waitForVoters.css"
 import { runTransaction } from "atom.io"
 import { useO } from "atom.io/react"
 
-import {
-	currentElectionVotersSelector,
-	joinElectionTX,
-	retractSubmittedBallotTX,
-} from "~/src/lib/atomStore"
+import { joinElectionTX, retractSubmittedBallotTX } from "~/src/lib/election"
+import { currentElectionVotersSelector } from "~/src/lib/election-voters"
 
 import type { ElectionState } from "../../types"
 

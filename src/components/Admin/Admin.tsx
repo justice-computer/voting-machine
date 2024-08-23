@@ -19,11 +19,8 @@ import { toast } from "react-toastify"
 
 import Modal from "~/src/components/Modal/Modal"
 import NewElection from "~/src/components/NewElection/NewElection"
-import {
-	currentElectionIdAtom,
-	currentElectionLabelAtom,
-	myselfSelector,
-} from "~/src/lib/atomStore"
+import { myselfSelector } from "~/src/lib/auth"
+import { currentElectionIdAtom, currentElectionLabelAtom } from "~/src/lib/election"
 import { db } from "~/src/lib/firebase"
 import type { ElectionData, SerializedVote, SystemUser } from "~/src/types"
 
