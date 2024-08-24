@@ -28,11 +28,7 @@ export const myselfSelector = selector<SystemUser | null>({
 	key: `myself`,
 	get: ({ get }) => {
 		const myAuthStatus = get(myAuthStatusAtom)
-		if (myAuthStatus.authenticated) {
-			const myself = get(systemUserAtoms, myAuthStatus.myself.uid)
-			return myself
-		}
-		return null
+		return myAuthStatus.authenticated ? get(systemUserAtoms, myAuthStatus.myself.uid) : null
 	},
 })
 export function logout(): void {
