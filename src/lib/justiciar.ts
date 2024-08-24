@@ -21,7 +21,7 @@ export function actualVoteToBallot(actualVote: ActualVote): Ballot {
 
 export function determineWinnersFromCurrentVotes(): string[] {
 	const currentElection = getState(currentElectionAtom)
-	if (currentElection.id === ``) {
+	if (!currentElection.id) {
 		return []
 	}
 

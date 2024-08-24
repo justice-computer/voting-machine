@@ -101,7 +101,6 @@ function Login(): JSX.Element {
 			await setDoc(userDoc, userData, { merge: true })
 
 			console.log(`Google Sign-In successful: ${user.email}`)
-			toast.success(`Google Sign-In successful: ${user.email}`)
 		} catch (error) {
 			console.error(`Google Sign-In error:`, error)
 			toast.error(`Error signing in with Google`)

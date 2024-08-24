@@ -12,7 +12,7 @@ function List(): JSX.Element {
 		(candidate) => candidate.id !== undefined,
 	)
 	const currentElection = useO(currentElectionAtom)
-	if (currentElection.id === ``) return <div>No election found</div>
+	if (!currentElection.id) return <div>No election found</div>
 
 	const elections = [
 		{

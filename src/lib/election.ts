@@ -6,6 +6,27 @@ import { myselfSelector } from "./auth"
 import { db } from "./firebase"
 import { actualVoteSelectors, serializedVoteAtoms } from "./votes"
 
+function deepEqual(obj1: any, obj2: any) {
+	if (obj1 === obj2) return true
+
+	if (typeof obj1 !== `object` || obj1 === null || typeof obj2 !== `object` || obj2 === null) {
+		return false
+	}
+
+	const keys1 = Object.keys(obj1)
+	const keys2 = Object.keys(obj2)
+
+	if (keys1.length !== keys2.length) return false
+
+	for (const key of keys1) {
+		if (!keys2.includes(key) || !deepEqual(obj1[key], obj2[key])) {
+			return false
+		}
+	}
+
+	return true
+}
+
 export const currentElectionAtom = atom<ElectionData>({
 	key: `currentElection`,
 	default: {
@@ -40,11 +61,12 @@ export const currentElectionAtom = atom<ElectionData>({
 							(election) => election.id === storedElectionId,
 						)
 						if (storedElection) {
-							setSelf(storedElection)
 							console.log(`using stored election ${storedElection.id}`)
+							setSelf(storedElection)
 						}
 					} else {
-						setSelf(sortedElections[0])
+						console.log(`using election`, sortedElections[0])
+						setSelf({ ...sortedElections[0], id: sortedElections[0].id })
 						localStorage.setItem(`electionId`, sortedElections[0].id)
 						console.log(`auto-selecting election ${sortedElections[0].name}`)
 					}
@@ -54,21 +76,19 @@ export const currentElectionAtom = atom<ElectionData>({
 				})
 		},
 		function onChange({ setSelf, onSet }) {
-			let gate = false
 			let unSub: (() => void) | undefined
-			onSet(({ newValue }) => {
-				if (gate) {
-					gate = false
+			onSet(({ oldValue, newValue }) => {
+				if (deepEqual(oldValue, newValue)) {
 					return
 				}
+				setSelf(newValue)
 				unSub?.()
 				if (newValue === null) {
 					return
 				}
 				unSub = onSnapshot(doc(db, `elections`, newValue.id), (snapshot) => {
-					gate = true
 					const election = snapshot.data() as ElectionData
-					setSelf(election)
+					setSelf({ ...election, id: newValue.id })
 				})
 			})
 			return unSub

@@ -9,7 +9,8 @@ export const currentElectionVotersSelector = selector<{ user: SystemUser; vote: 
 	key: `currentElectionVoters`,
 	get: ({ get }) => {
 		const currentElection = get(currentElectionAtom)
-		if (currentElection.id === ``) {
+		if (!currentElection.id) {
+			console.log(`currentElectionVoters: no currentElection`)
 			return []
 		}
 		const electionVoters = currentElection.users.map((userId) => {
@@ -17,6 +18,7 @@ export const currentElectionVotersSelector = selector<{ user: SystemUser; vote: 
 			const vote = get(actualVoteSelectors, userId)
 			return { user, vote }
 		})
+		console.log(`currentElectionVoters:`, JSON.stringify(electionVoters))
 		return electionVoters
 	},
 })

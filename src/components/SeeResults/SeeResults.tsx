@@ -311,7 +311,7 @@ function SeeResults(): JSX.Element {
 	const [candidates, setCandidates] = useState<Candidate[]>([])
 
 	useEffect(() => {
-		if (currentElection.id === ``) {
+		if (!currentElection.id) {
 			return
 		}
 		const electionToken = makeMolecule(root, electionMolecules, `election0`, {
