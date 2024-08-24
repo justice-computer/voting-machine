@@ -24,7 +24,7 @@ import { electionMolecules } from "justiciar"
 import type { FunctionComponent, ReactNode } from "react"
 import React, { useEffect, useRef, useState } from "react"
 
-import { currentElectionIdAtom, currentElectionLabelAtom } from "~/src/lib/election"
+import { currentElectionAtom } from "~/src/lib/election"
 import { candidateAtoms } from "~/src/lib/election-candidates"
 import { db } from "~/src/lib/firebase"
 import { actualVoteToBallot, root } from "~/src/lib/justiciar"
@@ -305,14 +305,13 @@ function ElectionRounds(props: {
 function SeeResults(): JSX.Element {
 	const resultsView = useO(resultsViewAtom)
 	const viewLocation = useO(viewLocationSelector)
-	const currentElectionId = useO(currentElectionIdAtom)
-	const currentElectionLabel = useO(currentElectionLabelAtom)
+	const currentElection = useO(currentElectionAtom)
 	const electionRef = useRef<ElectionInstance | null>(null)
 	const [actualVotes, setActualVotes] = useState<ActualVote[]>([])
 	const [candidates, setCandidates] = useState<Candidate[]>([])
 
 	useEffect(() => {
-		if (currentElectionId === null) {
+		if (currentElection.id === ``) {
 			return
 		}
 		const electionToken = makeMolecule(root, electionMolecules, `election0`, {
@@ -322,7 +321,7 @@ function SeeResults(): JSX.Element {
 		const election = getState(electionToken)
 		electionRef.current = election
 
-		void getDoc(doc(db, `elections`, currentElectionId)).then(async (snapshot) => {
+		void getDoc(doc(db, `elections`, currentElection.id)).then(async (snapshot) => {
 			const electionData = snapshot.data() as ElectionData
 			console.log({ electionData })
 			const votes = await Promise.all<ActualVote>(
@@ -349,7 +348,7 @@ function SeeResults(): JSX.Element {
 						...snapshot.data(),
 					} as Candidate
 				})
-				.filter((candidate) => candidate.label === currentElectionLabel)
+				.filter((candidate) => candidate.label === currentElection.label)
 			setCandidates(candidateDocs)
 		})
 

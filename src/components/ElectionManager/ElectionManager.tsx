@@ -1,19 +1,19 @@
 import "./electionManager.css"
 
 import { stringifyJson } from "atom.io/json"
-import { useO } from "atom.io/react"
+import { useI, useO } from "atom.io/react"
 import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
 import Accordion from "~/src/components/Accordion/Accordion"
 import { myselfSelector } from "~/src/lib/auth"
+import { currentElectionAtom } from "~/src/lib/election"
 import { db } from "~/src/lib/firebase"
+import { modalViewAtom } from "~/src/lib/view"
 import { prepareBallot } from "~/src/stories/Ballot"
 import type { ElectionData, SerializedVote } from "~/src/types"
 
 type ElectionManagerProps = {
-	handleChangeElection: (id: string) => void
-	handleAdmin: () => void
 	close: () => void
 }
 
@@ -21,13 +21,11 @@ type ElectionInfo = ElectionData & {
 	userName: string
 	formattedCreatedAt: string
 }
-function ElectionManager({
-	handleChangeElection,
-	handleAdmin,
-	close,
-}: ElectionManagerProps): JSX.Element {
+function ElectionManager({ close }: ElectionManagerProps): JSX.Element {
 	const [electionData, setElectionData] = useState<ElectionInfo[]>([])
 	const myself = useO(myselfSelector)
+	const setModalView = useI(modalViewAtom)
+	const setCurrentElection = useI(currentElectionAtom)
 
 	useEffect(() => {
 		getDocs(collection(db, `elections`))
@@ -97,7 +95,12 @@ function ElectionManager({
 		<div className="change-election">
 			<div className="change-icons">
 				{myself?.admin && (
-					<button type="button" onClick={handleAdmin}>
+					<button
+						type="button"
+						onClick={() => {
+							setModalView(`admin`)
+						}}
+					>
 						<img src="./gear-icon.svg" alt="admin" />
 						Manage
 					</button>
@@ -118,7 +121,7 @@ function ElectionManager({
 										<button
 											type="button"
 											onClick={() => {
-												handleChangeElection(election.id)
+												setCurrentElection(election)
 											}}
 										>
 											select
