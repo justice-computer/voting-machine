@@ -7,7 +7,7 @@ import { systemUserAtoms } from "./users"
 
 export type AuthStatus =
 	| { authenticated: false; loading: boolean }
-	| { authenticated: true; loading: false; me: FirebaseAuth.User }
+	| { authenticated: true; loading: false; myself: FirebaseAuth.User }
 export const myAuthStatusAtom = atom<AuthStatus>({
 	key: `myAuthStatus`,
 	default: { authenticated: false, loading: true },
@@ -15,7 +15,7 @@ export const myAuthStatusAtom = atom<AuthStatus>({
 		({ setSelf }) => {
 			const unSub = FirebaseAuth.onAuthStateChanged(auth, (myFirebaseUser) => {
 				if (myFirebaseUser) {
-					setSelf({ authenticated: true, loading: false, me: myFirebaseUser })
+					setSelf({ authenticated: true, loading: false, myself: myFirebaseUser })
 				} else {
 					setSelf({ authenticated: false, loading: false })
 				}
@@ -29,7 +29,7 @@ export const myselfSelector = selector<SystemUser | null>({
 	get: ({ get }) => {
 		const myAuthStatus = get(myAuthStatusAtom)
 		if (myAuthStatus.authenticated) {
-			const myself = get(systemUserAtoms, myAuthStatus.me.uid)
+			const myself = get(systemUserAtoms, myAuthStatus.myself.uid)
 			return myself
 		}
 		return null
