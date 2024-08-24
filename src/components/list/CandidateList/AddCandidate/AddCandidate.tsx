@@ -6,7 +6,7 @@ import type { ChangeEvent } from "react"
 import { useState } from "react"
 
 import { db } from "~/src//lib/firebase"
-import { currentElectionLabelAtom } from "~/src/lib/election"
+import { currentElectionAtom } from "~/src/lib/election"
 import { uploadImage } from "~/src/lib/upload"
 import type { AvatarImage } from "~/src/types"
 
@@ -22,13 +22,13 @@ type AddCandidateProps = {
 function AddCandidate({ close }: AddCandidateProps): JSX.Element {
 	const [avatarImage, setAvatarImage] = useState(initialImage)
 	// TODO: get the label from the election
-	const currentElectionLabel = useO(currentElectionLabelAtom)
+	const currentElection = useO(currentElectionAtom)
 
 	async function handleAdd(e: any) {
 		e.preventDefault()
 		const { name, heading, details } = e.target.elements
-		console.log(currentElectionLabel)
-		const label = currentElectionLabel as string
+		console.log(currentElection)
+		const label = currentElection.label
 		const newCandidate: any = {
 			id: undefined,
 			name: name.value,

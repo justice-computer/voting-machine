@@ -3,7 +3,7 @@ import type { Ballot } from "justiciar"
 import { electionMolecules } from "justiciar"
 
 import type { ActualVote } from "../types"
-import { currentElectionIdAtom } from "./election"
+import { currentElectionAtom } from "./election"
 import { candidatesInCurrentElectionSelector } from "./election-candidates"
 import { currentElectionVotersSelector } from "./election-voters"
 
@@ -20,8 +20,8 @@ export function actualVoteToBallot(actualVote: ActualVote): Ballot {
 }
 
 export function determineWinnersFromCurrentVotes(): string[] {
-	const currentElectionId = getState(currentElectionIdAtom)
-	if (currentElectionId == null) {
+	const currentElection = getState(currentElectionAtom)
+	if (currentElection.id === ``) {
 		return []
 	}
 

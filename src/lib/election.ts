@@ -1,23 +1,13 @@
-import { atom, getState, setState, subscribe, transaction } from "atom.io"
-import { doc, onSnapshot } from "firebase/firestore"
+import { atom, getState, setState, transaction } from "atom.io"
+import { collection, doc, getDocs, onSnapshot } from "firebase/firestore"
 
 import type { ElectionData } from "../types"
 import { myselfSelector } from "./auth"
 import { db } from "./firebase"
 import { actualVoteSelectors, serializedVoteAtoms } from "./votes"
 
-export const currentElectionIdAtom = atom<string | null>({
-	key: `currentElectionId`,
-	default: null,
-})
-
-export const currentElectionLabelAtom = atom<string | null>({
-	key: `currentElectionLabel`,
-	default: null,
-})
-
-export const electionAtom = atom<ElectionData>({
-	key: `election`,
+export const currentElectionAtom = atom<ElectionData>({
+	key: `currentElection`,
 	default: {
 		id: ``,
 		name: ``,
@@ -30,14 +20,53 @@ export const electionAtom = atom<ElectionData>({
 		subtitle: ``,
 	},
 	effects: [
-		({ setSelf }) => {
+		function startup({ setSelf }) {
+			getDocs(collection(db, `elections`))
+				.then((elections) => {
+					const electionsData = elections.docs.map((election) => {
+						const electionData = election.data() as ElectionData
+						return {
+							...electionData,
+							id: election.id,
+						}
+					})
+					// @ts-expect-error ts doesn't realize that Dates support arithmetic
+					const sortedElections = electionsData.sort((a, b) => b.createdAt - a.createdAt)
+
+					// Pick the newest election, unless there is one stored in localStorage
+					const storedElectionId = localStorage.getItem(`electionId`)
+					if (storedElectionId) {
+						const storedElection = sortedElections.find(
+							(election) => election.id === storedElectionId,
+						)
+						if (storedElection) {
+							setSelf(storedElection)
+							console.log(`using stored election ${storedElection.id}`)
+						}
+					} else {
+						setSelf(sortedElections[0])
+						localStorage.setItem(`electionId`, sortedElections[0].id)
+						console.log(`auto-selecting election ${sortedElections[0].name}`)
+					}
+				})
+				.catch((error) => {
+					console.error(error)
+				})
+		},
+		function onChange({ setSelf, onSet }) {
+			let gate = false
 			let unSub: (() => void) | undefined
-			subscribe(currentElectionIdAtom, ({ newValue }) => {
+			onSet(({ newValue }) => {
+				if (gate) {
+					gate = false
+					return
+				}
 				unSub?.()
 				if (newValue === null) {
 					return
 				}
-				unSub = onSnapshot(doc(db, `elections`, newValue), (snapshot) => {
+				unSub = onSnapshot(doc(db, `elections`, newValue.id), (snapshot) => {
+					gate = true
 					const election = snapshot.data() as ElectionData
 					setSelf(election)
 				})
@@ -67,7 +96,7 @@ export function retractSubmittedBallot(): void {
 export const joinElectionTX = transaction<() => void>({
 	key: `joinElection`,
 	do: ({ get, set }) => {
-		const currentElection = get(electionAtom)
+		const currentElection = get(currentElectionAtom)
 		const myId = get(myselfSelector)?.id
 		if (!myId) {
 			console.error(`Attempted to join an election but you are not logged in`)
@@ -77,7 +106,7 @@ export const joinElectionTX = transaction<() => void>({
 			console.error(`Attempted to join an election but you are already in it`)
 			return
 		}
-		set(electionAtom, {
+		set(currentElectionAtom, {
 			...currentElection,
 			users: [...currentElection.users, myId],
 		})
