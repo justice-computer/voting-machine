@@ -118,6 +118,7 @@ function ElectionManager(): JSX.Element {
 											type="button"
 											onClick={() => {
 												setCurrentElection(election)
+												setModalView(null)
 											}}
 										>
 											select
