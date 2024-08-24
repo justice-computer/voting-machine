@@ -3,7 +3,7 @@ import "./waitForVoters.css"
 import { runTransaction } from "atom.io"
 import { useO } from "atom.io/react"
 
-import { joinElectionTX, retractSubmittedBallotTX } from "~/src/lib/election"
+import { joinElectionTX, retractSubmittedBallot } from "~/src/lib/election"
 import { currentElectionVotersSelector } from "~/src/lib/election-voters"
 
 import type { ElectionState } from "../../types"
@@ -15,7 +15,6 @@ type WaitForVotersProps = {
 function WaitForVoters({ targetState }: WaitForVotersProps): JSX.Element {
 	const currentElectionVoters = useO(currentElectionVotersSelector)
 	const joinElection = runTransaction(joinElectionTX)
-	const retractSubmittedBallot = runTransaction(retractSubmittedBallotTX)
 
 	return (
 		<div className="waitForVoters">

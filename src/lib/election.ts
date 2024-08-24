@@ -1,4 +1,4 @@
-import { atom, subscribe, transaction } from "atom.io"
+import { atom, getState, setState, subscribe, transaction } from "atom.io"
 import { doc, onSnapshot } from "firebase/firestore"
 
 import type { ElectionData } from "../types"
@@ -47,25 +47,22 @@ export const electionAtom = atom<ElectionData>({
 	],
 })
 
-export const retractSubmittedBallotTX = transaction<() => void>({
-	key: `retractSubmittedBallot`,
-	do: ({ get, set }) => {
-		const myId = get(myselfSelector)?.id
-		if (!myId) {
-			console.error(`Attempted to retract a ballot but you are not logged in`)
-			return
-		}
-		const serializedVote = get(serializedVoteAtoms, myId)
-		if (serializedVote.finished) {
-			set(serializedVoteAtoms, myId, {
-				...serializedVote,
-				finished: false,
-			})
-		} else {
-			console.error(`Attempted to retract a ballot that is not finished`)
-		}
-	},
-})
+export function retractSubmittedBallot(): void {
+	const myId = getState(myselfSelector)?.id
+	if (!myId) {
+		console.error(`Attempted to retract a ballot but you are not logged in`)
+		return
+	}
+	const serializedVote = getState(serializedVoteAtoms, myId)
+	if (serializedVote.finished) {
+		setState(serializedVoteAtoms, myId, {
+			...serializedVote,
+			finished: false,
+		})
+	} else {
+		console.error(`Attempted to retract a ballot that is not finished`)
+	}
+}
 
 export const joinElectionTX = transaction<() => void>({
 	key: `joinElection`,
