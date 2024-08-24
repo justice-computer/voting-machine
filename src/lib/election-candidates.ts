@@ -55,7 +55,7 @@ export const candidatesInCurrentElectionSelector = selector<Candidate[]>({
 	key: `candidatesInCurrentElection`,
 	get: ({ get, find }) => {
 		const currentElection = get(currentElectionAtom)
-		if (currentElection.id === ``) {
+		if (!currentElection.id) {
 			return []
 		}
 		const candidateIds = get(find(candidateIndexAtoms, currentElection.label))

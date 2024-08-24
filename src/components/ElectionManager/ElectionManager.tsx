@@ -13,15 +13,11 @@ import { modalViewAtom } from "~/src/lib/view"
 import { prepareBallot } from "~/src/stories/Ballot"
 import type { ElectionData, SerializedVote } from "~/src/types"
 
-type ElectionManagerProps = {
-	close: () => void
-}
-
 type ElectionInfo = ElectionData & {
 	userName: string
 	formattedCreatedAt: string
 }
-function ElectionManager({ close }: ElectionManagerProps): JSX.Element {
+function ElectionManager(): JSX.Element {
 	const [electionData, setElectionData] = useState<ElectionInfo[]>([])
 	const myself = useO(myselfSelector)
 	const setModalView = useI(modalViewAtom)
@@ -88,7 +84,7 @@ function ElectionManager({ close }: ElectionManagerProps): JSX.Element {
 				await setDoc(doc(db, `elections`, election.id), { users: election.users }, { merge: true })
 			}
 		}
-		close()
+		setModalView(null)
 	}
 
 	return (

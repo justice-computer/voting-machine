@@ -3,12 +3,11 @@ import "~/src/font-face.scss"
 import { atomFamily, getState, selectorFamily, setState } from "atom.io"
 import { findState } from "atom.io/ephemeral"
 import { fromEntries } from "atom.io/json"
-import { useO } from "atom.io/react"
+import { useI, useO } from "atom.io/react"
 import { motion } from "framer-motion"
 import { Fragment, useEffect, useState } from "react"
 
-import CandidateDetail from "~/src/components/CandidateDetail/CandidateDetail"
-import Modal from "~/src/components/Modal/Modal"
+import { candidateDetailViewAtom } from "~/src/lib/view"
 import type { Candidate } from "~/src/types"
 
 import scss from "./Ballot.module.scss"
@@ -48,22 +47,6 @@ export const electionCandidatesAtoms = atomFamily<Candidate[], string>({
 	key: `ballotSheetElectionCandidates`,
 	default: [],
 })
-
-// type Entries<K extends keyof any, V> = [K, V][]
-// type KeyOfEntries<E extends Entries<any, any>> = E extends [infer K, any][] ? K : never
-// type CertainEntry<E extends Entries<any, any>, K extends KeyOfEntries<E>> = {
-// 	[P in 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9]: E[P] extends [K, infer V] ? V : never
-// }[0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9]
-// export type Flat<R extends { [K in PropertyKey]: any }> = {
-// 	[K in keyof R]: R[K]
-// }
-// type FromEntries<E extends Entries<keyof any, any>> = Flat<{
-// 	[K in KeyOfEntries<E>]: CertainEntry<E, K>
-// }>
-
-// function fromEntries<E extends Entries<keyof any, any>>(entries: E): FromEntries<E> {
-// 	return Object.fromEntries(entries) as FromEntries<E>
-// }
 
 const candidatesByTierSelectors = selectorFamily<
 	Candidate[],
@@ -229,21 +212,13 @@ export function BallotSheet({ title, elections }: BallotSheetProps): JSX.Element
 }
 
 function BallotElection({ id, name, candidates, config }: BallotSheetElection): JSX.Element {
-	const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null)
+	const setSelectedCandidate = useI(candidateDetailViewAtom)
 	useEffect(() => {
 		setState(electionCandidatesAtoms, id, candidates)
 		setState(electionConfigAtoms, id, config)
 	}, [candidates, config])
 	return (
 		<>
-			<Modal
-				isOpen={selectedCandidate != null}
-				onClose={() => {
-					setSelectedCandidate(null)
-				}}
-			>
-				<CandidateDetail candidate={selectedCandidate} />
-			</Modal>
 			<section key={name}>
 				<h2>{name}</h2>
 				<ul>
