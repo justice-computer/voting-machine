@@ -13,11 +13,11 @@ export const currentElectionVotersSelector = selector<{ user: SystemUser; vote: 
 			return []
 		}
 		const election = get(electionAtom)
-		const voters = election.users.map((userId) => {
+		const electionVoters = election.users.map((userId) => {
 			const user = get(systemUserAtoms, userId)
 			const vote = get(actualVoteSelectors, userId)
 			return { user, vote }
 		})
-		return voters
+		return electionVoters
 	},
 })
