@@ -14,6 +14,7 @@ type WaitForVotersProps = {
 
 function WaitForVoters({ targetState }: WaitForVotersProps): JSX.Element {
 	const currentElectionVoters = useO(currentElectionVotersSelector)
+	console.log(currentElectionVoters)
 	const joinElection = runTransaction(joinElectionTX)
 
 	return (

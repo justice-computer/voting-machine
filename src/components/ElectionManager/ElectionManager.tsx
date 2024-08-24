@@ -1,8 +1,7 @@
 import "./electionManager.css"
 
-import { stringifyJson } from "atom.io/json"
 import { useI, useO } from "atom.io/react"
-import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore"
+import { collection, doc, getDoc, getDocs } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
 import Accordion from "~/src/components/Accordion/Accordion"
@@ -10,8 +9,7 @@ import { myselfSelector } from "~/src/lib/auth"
 import { currentElectionAtom } from "~/src/lib/election"
 import { db } from "~/src/lib/firebase"
 import { modalViewAtom } from "~/src/lib/view"
-import { prepareBallot } from "~/src/stories/Ballot"
-import type { ElectionData, SerializedVote } from "~/src/types"
+import type { ElectionData } from "~/src/types"
 
 type ElectionInfo = ElectionData & {
 	userName: string
@@ -67,26 +65,6 @@ function ElectionManager(): JSX.Element {
 			})
 	}, [])
 
-	const handleFinished = async () => {
-		if (myself == null) return
-		for (const election of electionData) {
-			const tierList = stringifyJson(prepareBallot(election.id))
-			const newVote: SerializedVote = {
-				voterId: myself.id,
-				electionId: election.id,
-				tierList,
-				finished: true,
-			}
-
-			await setDoc(doc(db, `votes`, myself.id), newVote)
-			if (!election.users.includes(myself.id)) {
-				election.users.push(myself.id)
-				await setDoc(doc(db, `elections`, election.id), { users: election.users }, { merge: true })
-			}
-		}
-		setModalView(null)
-	}
-
 	return (
 		<div className="change-election">
 			<div className="change-icons">
@@ -101,11 +79,6 @@ function ElectionManager(): JSX.Element {
 						Manage
 					</button>
 				)}
-				{/* FIXME: Implement finish voting */}
-				<button type="button" onClick={handleFinished}>
-					<img src="./finish-icon.svg" alt="cancel" />
-					Finish Voting
-				</button>
 			</div>
 			<Accordion title="Change Election">
 				<div className="election-list">

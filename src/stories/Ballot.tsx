@@ -17,6 +17,7 @@ export type BallotSheetElection = {
 	name: string
 	id: string
 	candidates: Candidate[]
+	users: string[]
 	config: {
 		numberOfWinners: number
 		votingTiers: number[]

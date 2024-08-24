@@ -27,6 +27,7 @@ export const Primary: Story = {
 			{
 				name: "President of the United States of America",
 				id: "potus",
+				users: ["abc123"],
 				candidates: [
 					{
 						name: "Jonathan Jimble",
