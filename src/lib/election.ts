@@ -65,7 +65,6 @@ export const currentElectionAtom = atom<ElectionData>({
 							setSelf(storedElection)
 						}
 					} else {
-						console.log(`using election`, sortedElections[0])
 						setSelf({ ...sortedElections[0], id: sortedElections[0].id })
 						localStorage.setItem(`electionId`, sortedElections[0].id)
 						console.log(`auto-selecting election ${sortedElections[0].name}`)

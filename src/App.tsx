@@ -1,7 +1,6 @@
 import { useO } from "atom.io/react"
 
 import CandidateDetail from "~/src/components/CandidateDetail/CandidateDetail"
-import { logout } from "~/src/lib/auth"
 import { currentElectionAtom } from "~/src/lib/election"
 import { candidateDetailViewAtom, modalViewAtom, viewSelector } from "~/src/lib/view"
 
@@ -53,11 +52,7 @@ function Modals(): JSX.Element {
 	return (
 		<>
 			<Modal isOpen={modalView === `managing-auth`} title="Logout">
-				<Logout
-					handleLogout={() => {
-						logout()
-					}}
-				/>
+				<Logout />
 			</Modal>
 			<Modal
 				isOpen={modalView === `managing-elections`}

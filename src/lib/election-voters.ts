@@ -18,7 +18,6 @@ export const currentElectionVotersSelector = selector<{ user: SystemUser; vote: 
 			const vote = get(actualVoteSelectors, userId)
 			return { user, vote }
 		})
-		console.log(`currentElectionVoters:`, JSON.stringify(electionVoters))
 		return electionVoters
 	},
 })
