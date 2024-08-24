@@ -32,7 +32,11 @@ export const myselfSelector = selector<SystemUser | null>({
 	},
 })
 export function logout(): void {
-	void FirebaseAuth.signOut(auth).then(() => {
-		setState(myAuthStatusAtom, { authenticated: false, loading: false })
-	})
+	void FirebaseAuth.signOut(auth)
+		.then(() => {
+			setState(myAuthStatusAtom, { authenticated: false, loading: false })
+		})
+		.catch((error) => {
+			console.error(error)
+		})
 }
