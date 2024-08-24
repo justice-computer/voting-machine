@@ -2,6 +2,7 @@ import "./login.css"
 
 import {
 	createUserWithEmailAndPassword,
+	FacebookAuthProvider,
 	GoogleAuthProvider,
 	signInWithEmailAndPassword,
 	signInWithPopup,
@@ -108,6 +109,20 @@ function Login(): JSX.Element {
 		}
 	}
 
+	const handleFacebookSignIn = async () => {
+		const provider = new FacebookAuthProvider()
+
+		try {
+			const result = await signInWithPopup(auth, provider)
+			const user = result.user
+
+			// Handle signed-in user info
+			console.log(`Facebook Sign-In successful for user: ${user.email}`)
+		} catch (error) {
+			console.error(`Facebook Sign-In error:`, error)
+		}
+	}
+
 	const handleRegister = async (e: any) => {
 		e.preventDefault()
 		const formData = new FormData(e.target)
@@ -159,6 +174,11 @@ function Login(): JSX.Element {
 			<button className="google-button" type="button" onClick={handleGoogleSignIn}>
 				<img src="./google-settings.svg" alt="reset" />
 				Sign in with Google
+			</button>
+
+			<button className="google-button" type="button" onClick={handleFacebookSignIn}>
+				<img src="./google-settings.svg" alt="reset" />
+				Sign in with Facebook
 			</button>
 
 			<button
