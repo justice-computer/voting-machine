@@ -26,11 +26,8 @@ import { electionMolecules } from "justiciar"
 import type { FunctionComponent, ReactNode } from "react"
 import React, { useEffect, useRef, useState } from "react"
 
-import {
-	candidateAtoms,
-	currentElectionIdAtom,
-	currentElectionLabelAtom,
-} from "~/src/lib/atomStore"
+import { currentElectionIdAtom, currentElectionLabelAtom } from "~/src/lib/election"
+import { candidateAtoms } from "~/src/lib/election-candidates"
 import { db } from "~/src/lib/firebase"
 import type { ActualVote, Candidate, ElectionData, SerializedVote } from "~/src/types"
 

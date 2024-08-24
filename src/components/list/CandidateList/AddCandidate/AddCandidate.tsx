@@ -6,7 +6,7 @@ import type { ChangeEvent } from "react"
 import { useState } from "react"
 
 import { db } from "~/src//lib/firebase"
-import { currentElectionLabelAtom } from "~/src/lib/atomStore"
+import { currentElectionLabelAtom } from "~/src/lib/election"
 import { uploadImage } from "~/src/lib/upload"
 import type { AvatarImage } from "~/src/types"
 

@@ -1,12 +1,13 @@
 import "./electionManager.css"
 
 import { stringifyJson } from "atom.io/json"
+import { useO } from "atom.io/react"
 import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
 import Accordion from "~/src/components/Accordion/Accordion"
+import { myselfSelector } from "~/src/lib/auth"
 import { db } from "~/src/lib/firebase"
-import { useUserStore } from "~/src/lib/userStore"
 import { prepareBallot } from "~/src/stories/Ballot"
 import type { ElectionData, SerializedVote } from "~/src/types"
 
@@ -26,7 +27,7 @@ function ElectionManager({
 	close,
 }: ElectionManagerProps): JSX.Element {
 	const [electionData, setElectionData] = useState<ElectionInfo[]>([])
-	const { currentUser } = useUserStore()
+	const myself = useO(myselfSelector)
 
 	useEffect(() => {
 		getDocs(collection(db, `elections`))
@@ -73,19 +74,19 @@ function ElectionManager({
 	}, [])
 
 	const handleFinished = async () => {
-		if (currentUser == null) return
+		if (myself == null) return
 		for (const election of electionData) {
 			const tierList = stringifyJson(prepareBallot(election.id))
 			const newVote: SerializedVote = {
-				voterId: currentUser.id,
+				voterId: myself.id,
 				electionId: election.id,
 				tierList,
 				finished: true,
 			}
 
-			await setDoc(doc(db, `votes`, currentUser.id), newVote)
-			if (!election.users.includes(currentUser.id)) {
-				election.users.push(currentUser.id)
+			await setDoc(doc(db, `votes`, myself.id), newVote)
+			if (!election.users.includes(myself.id)) {
+				election.users.push(myself.id)
 				await setDoc(doc(db, `elections`, election.id), { users: election.users }, { merge: true })
 			}
 		}
@@ -95,7 +96,7 @@ function ElectionManager({
 	return (
 		<div className="change-election">
 			<div className="change-icons">
-				{currentUser?.admin && (
+				{myself?.admin && (
 					<button type="button" onClick={handleAdmin}>
 						<img src="./gear-icon.svg" alt="admin" />
 						Manage

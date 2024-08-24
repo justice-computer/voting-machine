@@ -2,10 +2,10 @@ import { useI, useO } from "atom.io/react"
 import { collection, doc, getDocs, onSnapshot } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
-import { currentElectionIdAtom, currentElectionLabelAtom } from "~/src/lib/atomStore"
+import { myselfSelector } from "~/src/lib/auth"
+import { currentElectionIdAtom, currentElectionLabelAtom } from "~/src/lib/election"
 
 import { db } from "../../lib/firebase"
-import { useUserStore } from "../../lib/userStore"
 import type { ElectionData, ElectionState, SerializedVote } from "../../types"
 import Admin from "../Admin/Admin"
 import List from "../list/List"
@@ -41,7 +41,7 @@ function NextComponent(
 }
 
 function StateRouter(): JSX.Element {
-	const { currentUser } = useUserStore()
+	const myself = useO(myselfSelector)
 	const [electionState, setElectionState] = useState<ElectionState>(`not-started`)
 	const [hasVoted, setHasVoted] = useState(false)
 	const [adminMode, setAdminMode] = useState(false)
@@ -82,7 +82,7 @@ function StateRouter(): JSX.Element {
 			.catch((error) => {
 				console.error(error)
 			})
-	}, [currentUser?.id, currentElectionId])
+	}, [myself?.id, currentElectionId])
 
 	// Election state
 	useEffect(() => {
@@ -92,19 +92,19 @@ function StateRouter(): JSX.Element {
 			setElectionState(electionData.state)
 		})
 		return unSub
-	}, [currentUser?.id, currentElectionId])
+	}, [myself?.id, currentElectionId])
 
 	// Votes
 	useEffect(() => {
-		if (currentUser == null) return
-		const unSub = onSnapshot(doc(db, `votes`, currentUser?.id), (res) => {
+		if (myself == null) return
+		const unSub = onSnapshot(doc(db, `votes`, myself?.id), (res) => {
 			const newVotes = res.data() as SerializedVote | undefined
 			if (newVotes) {
 				setHasVoted(newVotes.finished)
 			}
 		})
 		return unSub
-	}, [currentUser?.id, currentElectionId])
+	}, [myself?.id, currentElectionId])
 
 	let userElectionState = electionState
 	if (userElectionState === `voting` && hasVoted) {

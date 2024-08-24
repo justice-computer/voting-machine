@@ -2,11 +2,8 @@ import "./list.css"
 
 import { useO } from "atom.io/react"
 
-import {
-	candidatesInCurrentElectionSelector,
-	currentElectionIdAtom,
-	electionAtom,
-} from "~/src/lib/atomStore"
+import { currentElectionIdAtom, electionAtom } from "~/src/lib/election"
+import { candidatesInCurrentElectionSelector } from "~/src/lib/election-candidates"
 import type { BallotSheetElection } from "~/src/stories/Ballot"
 import { BallotSheet } from "~/src/stories/Ballot"
 

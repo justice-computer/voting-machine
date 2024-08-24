@@ -19,9 +19,9 @@ import { toast } from "react-toastify"
 
 import Modal from "~/src/components/Modal/Modal"
 import NewElection from "~/src/components/NewElection/NewElection"
-import { currentElectionIdAtom, currentElectionLabelAtom } from "~/src/lib/atomStore"
+import { myselfSelector } from "~/src/lib/auth"
+import { currentElectionIdAtom, currentElectionLabelAtom } from "~/src/lib/election"
 import { db } from "~/src/lib/firebase"
-import { useUserStore } from "~/src/lib/userStore"
 import type { ElectionData, SerializedVote, SystemUser } from "~/src/types"
 
 type AdminProps = {
@@ -43,7 +43,7 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 	const [showNewElection, setShowNewElection] = useState(false)
 	const currentElectionId = useO(currentElectionIdAtom)
 	const setCurrentElectionId = useI(currentElectionIdAtom)
-	const { currentUser } = useUserStore()
+	const myself = useO(myselfSelector)
 
 	useEffect(() => {
 		if (currentElectionId == null) return
@@ -119,11 +119,11 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 	}
 
 	async function handleNewElection(name: string, label: string) {
-		if (!currentUser) return
+		if (myself === null) return
 		try {
 			const newElection: Omit<ElectionData, `id`> = {
 				name,
-				createdBy: currentUser?.id,
+				createdBy: myself.id,
 				state: `not-started`,
 				createdAt: new Date(),
 				users: [],
@@ -134,7 +134,7 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 			const election = await addDoc(collection(db, `elections`), newElection)
 			setCurrentElectionId(election.id)
 			localStorage.setItem(`electionId`, election.id)
-			const docRef = doc(db, `votes`, currentUser?.id)
+			const docRef = doc(db, `votes`, myself.id)
 			await deleteDoc(docRef)
 			setShowNewElection(false)
 		} catch (error: any) {

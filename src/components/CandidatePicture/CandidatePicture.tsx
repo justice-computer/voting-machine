@@ -1,7 +1,7 @@
 import type { AtomToken, TokenType } from "atom.io"
 import { useO } from "atom.io/react"
 
-import type { candidateAtoms } from "~/src/lib/atomStore"
+import type { candidateAtoms } from "~/src/lib/election-candidates"
 
 import scss from "./CandidatePicture.module.scss"
 
