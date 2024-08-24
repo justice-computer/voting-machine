@@ -6,7 +6,12 @@ import type { ActualVote, SerializedVote } from "../types"
 import { myselfSelector } from "./auth"
 import { db } from "./firebase"
 
-const serializedVoteAtomsGate: Record<string, boolean> = {} // AtomIO calls onSet on setSelf, which I'm blocking using this.
+/**
+ * We don't want to tell Firebase what it just told us, so we're blocking
+ * the onSet calls once when we get a new value from Firebase.
+ * - @jeremybanka
+ */
+const serializedVoteAtomsGate: Record<string, boolean> = {}
 export const serializedVoteAtoms = atomFamily<SerializedVote, string>({
 	key: `serializedVote`,
 	default: {
