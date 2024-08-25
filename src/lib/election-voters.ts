@@ -5,7 +5,9 @@ import { currentElectionAtom } from "./election"
 import { systemUserAtoms } from "./users"
 import { actualVoteSelectors } from "./votes"
 
-export const currentElectionVotersSelector = selector<{ user: SystemUser; vote: ActualVote }[]>({
+export type CurrentElectionVoters = { user: SystemUser; vote: ActualVote }
+
+export const currentElectionVotersSelector = selector<CurrentElectionVoters[]>({
 	key: `currentElectionVoters`,
 	get: ({ get }) => {
 		const currentElection = get(currentElectionAtom)
