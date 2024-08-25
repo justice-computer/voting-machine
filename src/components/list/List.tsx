@@ -28,6 +28,7 @@ function List(): JSX.Element {
 			candidates,
 			config: {
 				numberOfWinners: 1,
+				// FIXME: hard-coded to 6 tiers
 				votingTiers: [1, 1, 1, 1, 1, 1],
 			},
 		},

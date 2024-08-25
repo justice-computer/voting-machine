@@ -35,6 +35,7 @@
 		"treeshake",
 		"tsup",
 		"unsub",
+		"visx",
 		"wayforge",
 		"zustand"
 	],
