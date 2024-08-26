@@ -1,100 +1,148 @@
 import { AxisBottom, AxisLeft } from "@visx/axis"
 import { Group } from "@visx/group"
-import { scaleBand, scaleLinear } from "@visx/scale"
+import { LegendOrdinal } from "@visx/legend"
+import { scaleBand, scaleLinear, scaleOrdinal } from "@visx/scale"
 import { BarStackHorizontal } from "@visx/shape"
-import { Text } from "@visx/text"
-import type { ScaleBand, ScaleLinear } from "d3-scale"
-import React from "react"
 
-interface DataObject {
-	[key: string]: number[]
-}
+import type { GraphableCandidateVote } from "~/src/types"
 
-const TEST_DATA: DataObject = {
-	Joe: [13, 12, 1, 0, 0, 0],
-	Ralph: [19, 1, 0, 32, 0, 1],
-	Sally: [0, 2, 21, 1, 0, 1],
-	Martha: [0, 10, 1, 11, 2, 1],
-	Martinez: [11, 1, 1, 90, 1, 1],
-	Gretchen: [20, 0, 1, 1, 2, 1],
-}
+type TierName = `t1` | `t2` | `t3` | `t4` | `t5` | `t6`
 
-const keys = [`value1`, `value2`, `value3`, `value4`, `value5`, `value6`]
-
-const colors = [`#f52c2c`, `#f52c68`, `#f52ca5`, `#d42cf5`, `#8a2cf5`, `#2c2cf5`]
-
-interface BarChartProps {
+export type BarStackHorizontalProps = {
 	width: number
 	height: number
-	data?: DataObject // Optional data prop
+	margin?: { top: number; right: number; bottom: number; left: number }
+	data?: GraphableCandidateVote[]
 }
 
-interface ChartData {
-	key: string
-	[key: string]: number | string
-}
+const purple1 = `#6c5efb`
+const purple2 = `#c998ff`
+const purple3 = `#a44afe`
+const background = `#eaedff`
+const defaultMargin = { top: 40, left: 50, right: 40, bottom: 100 }
 
-const BarChart: React.FC<BarChartProps> = ({ width, height, data = TEST_DATA }) => {
-	const margin = { top: 40, right: 30, bottom: 50, left: 100 }
+const TEST_DATA: GraphableCandidateVote[] = [
+	{ id: `Joe`, t1: 13, t2: 12, t3: 1, t4: 0, t5: 0, t6: 0 },
+	{ id: `Ralph`, t1: 19, t2: 1, t3: 0, t4: 32, t5: 0, t6: 1 },
+	{ id: `Sally`, t1: 0, t2: 2, t3: 21, t4: 1, t5: 0, t6: 1 },
+	{ id: `Martha`, t1: 0, t2: 10, t3: 1, t4: 11, t5: 2, t6: 1 },
+	{ id: `Martinez`, t1: 11, t2: 1, t3: 1, t4: 90, t5: 1, t6: 1 },
+	{ id: `Gretchen`, t1: 20, t2: 0, t3: 1, t4: 1, t5: 2, t6: 1 },
+]
+
+// accessors
+const getName = (d: GraphableCandidateVote) => d.id
+
+export default function BarChart({
+	width,
+	height,
+	margin = defaultMargin,
+	data = TEST_DATA,
+}: BarStackHorizontalProps): JSX.Element | null {
+	// bounds
 	const xMax = width - margin.left - margin.right
 	const yMax = height - margin.top - margin.bottom
 
-	const chartData: ChartData[] = Object.entries(data).map(([key, values]) => ({
-		key,
-		...Object.fromEntries(values.map((v, i) => [keys[i], v])),
-	}))
+	if (data.length === 0) {
+		return null
+	}
+	const keys = Object.keys(data[0]).filter((d) => d !== `id`) as TierName[]
 
-	const yScale: ScaleBand<string> = scaleBand({
-		domain: chartData.map((d) => d.key),
-		padding: 0.2,
-	}).rangeRound([0, yMax])
+	const tierTotals = data.reduce((allTotals, currentCandidate) => {
+		const totalVotes = keys.reduce((tierTotal, k) => {
+			tierTotal += Number(currentCandidate[k])
+			return tierTotal
+		}, 0)
+		allTotals.push(totalVotes)
+		return allTotals
+	}, [] as number[])
 
-	const xScale: ScaleLinear<number, number> = scaleLinear<number>({
-		domain: [0, Math.max(...Object.values(data).map((arr) => arr.reduce((a, b) => a + b, 0)))],
+	// scales
+	const tierScale = scaleLinear<number>({
+		domain: [0, Math.max(...tierTotals)],
 		nice: true,
-	}).range([0, xMax])
+	})
+	const nameScale = scaleBand<string>({
+		domain: data.map(getName),
+		padding: 0.2,
+	})
+	const colorScale = scaleOrdinal<TierName, string>({
+		domain: keys,
+		range: [purple1, purple2, purple3],
+	})
 
-	return (
-		<svg width={width} height={height}>
-			<title>Horizontal Stacked Bar Chart</title> {/* Accessible title */}
-			<Group left={margin.left} top={margin.top}>
-				<BarStackHorizontal<ChartData, string>
-					data={chartData}
-					keys={keys}
-					y={(d) => d.key}
-					xScale={xScale}
-					yScale={yScale}
-					color={(key) => colors[keys.indexOf(key)]}
-				>
-					{(barStacks) =>
-						barStacks.map((barStack) =>
-							barStack.bars.map((bar) => (
-								<Group key={`bar-stack-${barStack.index}-${bar.index}`}>
+	tierScale.rangeRound([0, xMax])
+	nameScale.rangeRound([yMax, 0])
+
+	return width < 10 ? null : (
+		<div>
+			<svg width={width} height={height}>
+				<title>Horizontal Stacked Bar Chart</title>
+				<rect width={width} height={height} fill={background} rx={14} />
+				<Group top={margin.top} left={margin.left}>
+					<BarStackHorizontal<GraphableCandidateVote, TierName>
+						data={data}
+						keys={keys}
+						height={yMax}
+						y={getName}
+						xScale={tierScale}
+						yScale={nameScale}
+						color={colorScale}
+					>
+						{(barStacks) => {
+							return barStacks.map((barStack) => {
+								// console.log(JSON.stringify(barStack, null, 2))
+								return barStack.bars.map((bar) => (
 									<rect
+										key={`barstack-horizontal-${barStack.index}-${bar.index}`}
 										x={bar.x}
 										y={bar.y}
 										width={bar.width}
 										height={bar.height}
 										fill={bar.color}
 									/>
-									<Text
-										x={bar.x + bar.width + 5} // Position the label a bit to the right of the bar
-										y={bar.y + bar.height / 2}
-										verticalAnchor="middle"
-										fill="#000"
-									>
-										{bar.key}
-									</Text>
-								</Group>
-							)),
-						)
-					}
-				</BarStackHorizontal>
-				<AxisLeft scale={yScale} />
-				<AxisBottom top={yMax} scale={xScale} />
-			</Group>
-		</svg>
+								))
+							})
+						}}
+					</BarStackHorizontal>
+					<AxisLeft
+						hideAxisLine
+						hideTicks
+						scale={nameScale}
+						stroke={purple3}
+						tickStroke={purple3}
+						tickLabelProps={{
+							fill: purple3,
+							fontSize: 11,
+							textAnchor: `end`,
+							dy: `0.33em`,
+						}}
+					/>
+					<AxisBottom
+						top={yMax}
+						scale={tierScale}
+						stroke={purple3}
+						tickStroke={purple3}
+						tickLabelProps={{
+							fill: purple3,
+							fontSize: 11,
+							textAnchor: `middle`,
+						}}
+					/>
+				</Group>
+			</svg>
+			<div
+				style={{
+					position: `absolute`,
+					top: margin.top / 2 - 10,
+					width: `100%`,
+					display: `flex`,
+					justifyContent: `center`,
+					fontSize: `14px`,
+				}}
+			>
+				<LegendOrdinal scale={colorScale} direction="row" labelMargin="0 15px 0 0" />
+			</div>
+		</div>
 	)
 }
-
-export default BarChart
