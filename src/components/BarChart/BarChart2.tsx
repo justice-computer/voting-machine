@@ -1,14 +1,12 @@
 import { AxisBottom, AxisLeft } from "@visx/axis"
 import { Group } from "@visx/group"
 import { LegendOrdinal } from "@visx/legend"
-import type { CityTemperature } from "@visx/mock-data/lib/mocks/cityTemperature"
-import cityTemperature from "@visx/mock-data/lib/mocks/cityTemperature"
 import { scaleBand, scaleLinear, scaleOrdinal } from "@visx/scale"
 import { BarStackHorizontal } from "@visx/shape"
-import { timeFormat, timeParse } from "@visx/vendor/d3-time-format"
-import React from "react"
 
-type CityName = `Austin` | `New York` | `San Francisco`
+import type { GraphableCandidateVote } from "~/src/types"
+
+type TierName = `t1` | `t2` | `t3` | `t4` | `t5` | `t6`
 
 export type BarStackHorizontalProps = {
 	width: number
@@ -23,35 +21,43 @@ export const purple3 = `#a44afe`
 export const background = `#eaedff`
 const defaultMargin = { top: 40, left: 50, right: 40, bottom: 100 }
 
-const data = cityTemperature.slice(0, 12)
-const keys = Object.keys(data[0]).filter((d) => d !== `date`) as CityName[]
+const TEST_DATA: GraphableCandidateVote[] = [
+	{ id: `Joe`, t1: 13, t2: 12, t3: 1, t4: 0, t5: 0, t6: 0 },
+	{ id: `Ralph`, t1: 19, t2: 1, t3: 0, t4: 32, t5: 0, t6: 1 },
+	{ id: `Sally`, t1: 0, t2: 2, t3: 21, t4: 1, t5: 0, t6: 1 },
+	{ id: `Martha`, t1: 0, t2: 10, t3: 1, t4: 11, t5: 2, t6: 1 },
+	{ id: `Martinez`, t1: 11, t2: 1, t3: 1, t4: 90, t5: 1, t6: 1 },
+	{ id: `Gretchen`, t1: 20, t2: 0, t3: 1, t4: 1, t5: 2, t6: 1 },
+]
 
-const temperatureTotals = data.reduce((allTotals, currentDate) => {
-	const totalTemperature = keys.reduce((dailyTotal, k) => {
-		dailyTotal += Number(currentDate[k])
-		return dailyTotal
+const data = TEST_DATA
+const keys = Object.keys(data[0]).filter((d) => d !== `id`) as TierName[]
+
+const tierTotals = data.reduce((allTotals, currentCandidate) => {
+	const totalVotes = keys.reduce((tierTotal, k) => {
+		tierTotal += Number(currentCandidate[k])
+		return tierTotal
 	}, 0)
-	allTotals.push(totalTemperature)
+	allTotals.push(totalVotes)
 	return allTotals
 }, [] as number[])
 
-const parseDate = timeParse(`%Y-%m-%d`)
-const format = timeFormat(`%b %d`)
-const formatDate = (date: string) => format(parseDate(date) as Date)
-
 // accessors
-const getDate = (d: CityTemperature) => d.date
+const getName = (d: GraphableCandidateVote) => d.id
 
+console.log(`------XXXXXXXXXXXXXXXXX--------`)
+console.log(tierTotals)
+console.log(`------XXXXXXXXXXXXXXXXX--------`)
 // scales
-const temperatureScale = scaleLinear<number>({
-	domain: [0, Math.max(...temperatureTotals)],
+const tierScale = scaleLinear<number>({
+	domain: [0, Math.max(...tierTotals)],
 	nice: true,
 })
-const dateScale = scaleBand<string>({
-	domain: data.map(getDate),
+const nameScale = scaleBand<string>({
+	domain: data.map(getName),
 	padding: 0.2,
 })
-const colorScale = scaleOrdinal<CityName, string>({
+const colorScale = scaleOrdinal<TierName, string>({
 	domain: keys,
 	range: [purple1, purple2, purple3],
 })
@@ -64,10 +70,10 @@ export default function BarChart({
 	// bounds
 	const xMax = width - margin.left - margin.right
 	const yMax = height - margin.top - margin.bottom
-	console.log(data)
+	// console.log(data)
 
-	temperatureScale.rangeRound([0, xMax])
-	dateScale.rangeRound([yMax, 0])
+	tierScale.rangeRound([0, xMax])
+	nameScale.rangeRound([yMax, 0])
 
 	return width < 10 ? null : (
 		<div>
@@ -75,18 +81,19 @@ export default function BarChart({
 				<title>Horizontal Stacked Bar Chart</title>
 				<rect width={width} height={height} fill={background} rx={14} />
 				<Group top={margin.top} left={margin.left}>
-					<BarStackHorizontal<CityTemperature, CityName>
+					<BarStackHorizontal<GraphableCandidateVote, TierName>
 						data={data}
 						keys={keys}
 						height={yMax}
-						y={getDate}
-						xScale={temperatureScale}
-						yScale={dateScale}
+						y={getName}
+						xScale={tierScale}
+						yScale={nameScale}
 						color={colorScale}
 					>
-						{(barStacks) =>
-							barStacks.map((barStack) =>
-								barStack.bars.map((bar) => (
+						{(barStacks) => {
+							return barStacks.map((barStack) => {
+								// console.log(JSON.stringify(barStack, null, 2))
+								return barStack.bars.map((bar) => (
 									<rect
 										key={`barstack-horizontal-${barStack.index}-${bar.index}`}
 										x={bar.x}
@@ -95,15 +102,14 @@ export default function BarChart({
 										height={bar.height}
 										fill={bar.color}
 									/>
-								)),
-							)
-						}
+								))
+							})
+						}}
 					</BarStackHorizontal>
 					<AxisLeft
 						hideAxisLine
 						hideTicks
-						scale={dateScale}
-						tickFormat={formatDate}
+						scale={nameScale}
 						stroke={purple3}
 						tickStroke={purple3}
 						tickLabelProps={{
@@ -115,7 +121,7 @@ export default function BarChart({
 					/>
 					<AxisBottom
 						top={yMax}
-						scale={temperatureScale}
+						scale={tierScale}
 						stroke={purple3}
 						tickStroke={purple3}
 						tickLabelProps={{
