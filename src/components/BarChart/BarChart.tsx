@@ -22,16 +22,16 @@ const background = `#eaedff`
 const defaultMargin = { top: 40, left: 50, right: 40, bottom: 100 }
 
 const TEST_DATA: GraphableCandidateVote[] = [
-	{ id: `Joe`, t1: 13, t2: 12, t3: 1, t4: 0, t5: 0, t6: 0 },
-	{ id: `Ralph`, t1: 19, t2: 1, t3: 0, t4: 32, t5: 0, t6: 1 },
-	{ id: `Sally`, t1: 0, t2: 2, t3: 21, t4: 1, t5: 0, t6: 1 },
-	{ id: `Martha`, t1: 0, t2: 10, t3: 1, t4: 11, t5: 2, t6: 1 },
-	{ id: `Martinez`, t1: 11, t2: 1, t3: 1, t4: 90, t5: 1, t6: 1 },
-	{ id: `Gretchen`, t1: 20, t2: 0, t3: 1, t4: 1, t5: 2, t6: 1 },
+	{ name: `Joe`, t1: 13, t2: 12, t3: 1, t4: 0, t5: 0, t6: 0 },
+	{ name: `Ralph`, t1: 19, t2: 1, t3: 0, t4: 32, t5: 0, t6: 1 },
+	{ name: `Sally`, t1: 0, t2: 2, t3: 21, t4: 1, t5: 0, t6: 1 },
+	{ name: `Martha`, t1: 0, t2: 10, t3: 1, t4: 11, t5: 2, t6: 1 },
+	{ name: `Martinez`, t1: 11, t2: 1, t3: 1, t4: 90, t5: 1, t6: 1 },
+	{ name: `Gretchen`, t1: 20, t2: 0, t3: 1, t4: 1, t5: 2, t6: 1 },
 ]
 
 // accessors
-const getName = (d: GraphableCandidateVote) => d.id
+const getName = (d: GraphableCandidateVote) => d.name
 
 export default function BarChart({
 	width,
@@ -43,10 +43,13 @@ export default function BarChart({
 	const xMax = width - margin.left - margin.right
 	const yMax = height - margin.top - margin.bottom
 
+	// TODO: FACTOR OUT
+	/* ----------------------------- PROCESS DATA ----------------------------- */
 	if (data.length === 0) {
 		return null
 	}
-	const keys = Object.keys(data[0]).filter((d) => d !== `id`) as TierName[]
+	// FIXME?
+	const keys = Object.keys(data[0]).filter((d) => d !== `name`) as TierName[]
 
 	const tierTotals = data.reduce((allTotals, currentCandidate) => {
 		const totalVotes = keys.reduce((tierTotal, k) => {
@@ -73,6 +76,7 @@ export default function BarChart({
 
 	tierScale.rangeRound([0, xMax])
 	nameScale.rangeRound([yMax, 0])
+	/* ----------------------------- PROCESS DATA ----------------------------- */
 
 	return width < 10 ? null : (
 		<div>

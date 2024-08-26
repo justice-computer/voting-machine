@@ -36,8 +36,8 @@ export type ElectionData = {
 }
 
 export interface GraphableCandidateVote {
-	name?: string
-	id: string
+	name: string
+	id?: string
 	t1: number
 	t2: number
 	t3: number
