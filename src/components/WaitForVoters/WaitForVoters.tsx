@@ -80,14 +80,11 @@ function WaitForVoters({ targetState }: WaitForVotersProps): JSX.Element {
 		<div className="waitForVoters">
 			{currentElectionVoters.length ? (
 				<>
-					<ul>
-						<BarChart
-							data={graphableCandidateVotes}
-							width={320}
-							height={700}
-							margin={{ top: 20, left: 150, right: 40, bottom: 100 }}
-						/>
-					</ul>
+					<BarChart
+						data={graphableCandidateVotes}
+						height={650}
+						margin={{ top: 20, left: 150, right: 40, bottom: 100 }}
+					/>
 				</>
 			) : (
 				<div>

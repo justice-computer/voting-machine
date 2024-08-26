@@ -3,13 +3,13 @@ import { Group } from "@visx/group"
 import { LegendOrdinal } from "@visx/legend"
 import { scaleBand, scaleLinear, scaleOrdinal } from "@visx/scale"
 import { BarStackHorizontal } from "@visx/shape"
+import { useEffect, useState } from "react"
 
 import type { GraphableCandidateVote } from "~/src/types"
 
 type TierName = `t1` | `t2` | `t3` | `t4` | `t5` | `t6`
 
 export type BarStackHorizontalProps = {
-	width: number
 	height: number
 	margin?: { top: number; right: number; bottom: number; left: number }
 	data?: GraphableCandidateVote[]
@@ -34,11 +34,22 @@ const TEST_DATA: GraphableCandidateVote[] = [
 const getName = (d: GraphableCandidateVote) => d.name
 
 export default function BarChart({
-	width,
 	height,
 	margin = defaultMargin,
 	data = TEST_DATA,
 }: BarStackHorizontalProps): JSX.Element | null {
+	const [width, setWidth] = useState(window.innerWidth)
+
+	useEffect(() => {
+		const handleResize = () => {
+			setWidth(window.innerWidth)
+		}
+		window.addEventListener(`resize`, handleResize)
+		return () => {
+			window.removeEventListener(`resize`, handleResize)
+		}
+	}, [])
+
 	// bounds
 	const xMax = width - margin.left - margin.right
 	const yMax = height - margin.top - margin.bottom
@@ -82,7 +93,7 @@ export default function BarChart({
 		<div>
 			<svg width={width} height={height}>
 				<title>Horizontal Stacked Bar Chart</title>
-				<rect width={width} height={height} fill={background} rx={14} />
+				<rect width={width} height={height} fill={background} />
 				<Group top={margin.top} left={margin.left}>
 					<BarStackHorizontal<GraphableCandidateVote, TierName>
 						data={data}
