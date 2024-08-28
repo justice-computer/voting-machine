@@ -7,7 +7,7 @@ import { useI, useO } from "atom.io/react"
 import { motion } from "framer-motion"
 import { Fragment, useEffect, useState } from "react"
 
-import { candidateDetailViewAtom } from "~/src/lib/view"
+import { candidateDetailViewAtom, modalViewAtom } from "~/src/lib/view"
 import type { Candidate } from "~/src/types"
 
 import scss from "./Ballot.module.scss"
@@ -214,6 +214,8 @@ export function BallotSheet({ title, elections }: BallotSheetProps): JSX.Element
 
 function BallotElection({ id, name, candidates, config }: BallotSheetElection): JSX.Element {
 	const setSelectedCandidate = useI(candidateDetailViewAtom)
+	const setModalView = useI(modalViewAtom)
+
 	useEffect(() => {
 		setState(electionCandidatesAtoms, id, candidates)
 		setState(electionConfigAtoms, id, config)
@@ -241,6 +243,7 @@ function BallotElection({ id, name, candidates, config }: BallotSheetElection): 
 									<button
 										onClick={() => {
 											setSelectedCandidate(candidate)
+											setModalView(`candidate-detail`)
 										}}
 										type="button"
 									>

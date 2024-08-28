@@ -60,7 +60,7 @@ function Modals(): JSX.Element {
 			>
 				<ElectionManager />
 			</Modal>
-			<Modal isOpen={candidateDetailView != null}>
+			<Modal isOpen={modalView === `candidate-detail`}>
 				<CandidateDetail />
 			</Modal>
 			<Modal isOpen={modalView === `new-election`}>
