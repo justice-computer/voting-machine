@@ -2,7 +2,7 @@ import { useO } from "atom.io/react"
 
 import CandidateDetail from "~/src/components/CandidateDetail/CandidateDetail"
 import { currentElectionAtom } from "~/src/lib/election"
-import { candidateDetailViewAtom, modalViewAtom, viewSelector } from "~/src/lib/view"
+import { modalViewAtom, viewSelector } from "~/src/lib/view"
 
 import Admin from "./components/Admin/Admin"
 import ElectionManager from "./components/ElectionManager/ElectionManager"

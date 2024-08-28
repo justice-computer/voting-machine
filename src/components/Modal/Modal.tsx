@@ -18,7 +18,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, title, children, noClose }) => {
 	const ignoreFirstClick = useRef(true)
 
 	useEffect(() => {
-		const handleClick = (e: MouseEvent) => {
+		const handleClick = (_: MouseEvent) => {
 			if (ignoreFirstClick.current) {
 				ignoreFirstClick.current = false
 				return
