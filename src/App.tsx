@@ -43,7 +43,6 @@ function NextComponent(): JSX.Element {
 function Modals(): JSX.Element {
 	const modalView = useO(modalViewAtom)
 	const currentElection = useO(currentElectionAtom)
-	const candidateDetailView = useO(candidateDetailViewAtom)
 
 	// Admin acts like a modal but it's not
 	if (modalView === `admin`) {
@@ -60,7 +59,7 @@ function Modals(): JSX.Element {
 			>
 				<ElectionManager />
 			</Modal>
-			<Modal isOpen={modalView === `candidate-detail`}>
+			<Modal isOpen={modalView === `candidate-detail`} noClose>
 				<CandidateDetail />
 			</Modal>
 			<Modal isOpen={modalView === `new-election`}>
