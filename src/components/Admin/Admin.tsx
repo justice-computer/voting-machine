@@ -1,32 +1,15 @@
 import "./admin.css"
 
 import { faker } from "@faker-js/faker"
-import { getState } from "atom.io"
 import { stringifyJson } from "atom.io/json"
 import { useI, useO } from "atom.io/react"
-import {
-	addDoc,
-	collection,
-	deleteDoc,
-	doc,
-	getDoc,
-	getDocs,
-	onSnapshot,
-	setDoc,
-} from "firebase/firestore"
+import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, setDoc } from "firebase/firestore"
 import { useEffect, useState } from "react"
-import { toast } from "react-toastify"
 
-import Modal from "~/src/components/Modal/Modal"
-import NewElection from "~/src/components/NewElection/NewElection"
-import { myselfSelector } from "~/src/lib/auth"
-import { currentElectionIdAtom, currentElectionLabelAtom } from "~/src/lib/election"
+import { currentElectionAtom } from "~/src/lib/election"
 import { db } from "~/src/lib/firebase"
+import { modalViewAtom } from "~/src/lib/view"
 import type { ElectionData, SerializedVote, SystemUser } from "~/src/types"
-
-type AdminProps = {
-	exitAdminMode: () => void
-}
 
 function shuffleArray(array: string[]) {
 	for (let i = array.length - 1; i > 0; i--) {
@@ -36,18 +19,16 @@ function shuffleArray(array: string[]) {
 	return array
 }
 
-function Admin({ exitAdminMode }: AdminProps): JSX.Element {
+function Admin(): JSX.Element {
 	const [voters, setVoters] = useState<SystemUser[]>()
 	const [finishedVoters, setFinishedVoters] = useState<string[]>([])
 	const [currentState, setCurrentState] = useState<string>(`not-started`)
-	const [showNewElection, setShowNewElection] = useState(false)
-	const currentElectionId = useO(currentElectionIdAtom)
-	const setCurrentElectionId = useI(currentElectionIdAtom)
-	const myself = useO(myselfSelector)
+	const currentElection = useO(currentElectionAtom)
+	const setModalView = useI(modalViewAtom)
 
 	useEffect(() => {
-		if (currentElectionId == null) return
-		const unSub = onSnapshot(doc(db, `elections`, currentElectionId), async (res) => {
+		if (!currentElection.id) return
+		const unSub = onSnapshot(doc(db, `elections`, currentElection.id), async (res) => {
 			const electionData = res.data() as ElectionData
 			setCurrentState(electionData.state)
 
@@ -76,24 +57,24 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 			})
 		})
 		return unSub
-	}, [currentElectionId])
+	}, [currentElection])
 
 	function handleElectionReset() {
-		if (currentElectionId == null) return
+		if (!currentElection.id) return
 		void setDoc(
-			doc(db, `elections`, currentElectionId),
+			doc(db, `elections`, currentElection.id),
 			{ state: `not-started`, users: [] },
 			{ merge: true },
 		)
 	}
 
 	function handleStartTheElection() {
-		if (currentElectionId == null) return
-		void setDoc(doc(db, `elections`, currentElectionId), { state: `voting` }, { merge: true })
+		if (!currentElection) return
+		void setDoc(doc(db, `elections`, currentElection.id), { state: `voting` }, { merge: true })
 	}
 
 	async function handleAddRandomVoter() {
-		if (currentElectionId == null) return
+		if (!currentElection) return
 		const newUser = {
 			username: faker.internet.userName(),
 			avatar: faker.image.avatar(),
@@ -108,48 +89,22 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 			finished: false,
 			tierList: `[]`,
 		})
-		const electionDoc = doc(db, `elections`, currentElectionId)
+		const electionDoc = doc(db, `elections`, currentElection.id)
 		const electionDocSnap = await getDoc(electionDoc)
 		const electionData = electionDocSnap.data() as ElectionData
 		await setDoc(
-			doc(db, `elections`, currentElectionId),
+			doc(db, `elections`, currentElection.id),
 			{ users: [...electionData.users, user.id] },
 			{ merge: true },
 		)
 	}
 
-	async function handleNewElection(name: string, label: string) {
-		if (myself === null) return
-		try {
-			const newElection: Omit<ElectionData, `id`> = {
-				name,
-				createdBy: myself.id,
-				state: `not-started`,
-				createdAt: new Date(),
-				users: [],
-				label,
-				title: ``,
-				subtitle: ``,
-			}
-			const election = await addDoc(collection(db, `elections`), newElection)
-			setCurrentElectionId(election.id)
-			localStorage.setItem(`electionId`, election.id)
-			const docRef = doc(db, `votes`, myself.id)
-			await deleteDoc(docRef)
-			setShowNewElection(false)
-		} catch (error: any) {
-			console.error(error)
-			toast.error(`Error creating election ${error.message}`)
-		}
-	}
-
 	async function handleAddVotes(voterId: string) {
-		const currentElectionLabel = getState(currentElectionLabelAtom)
 		const candidates = (await getDocs(collection(db, `candidates`))).docs.map((document) =>
 			document.data(),
 		)
 		const candidatesFiltered = candidates.filter(
-			(candidate) => candidate.label === currentElectionLabel,
+			(candidate) => candidate.label === currentElection.label,
 		)
 		const idsFiltered = candidatesFiltered.map((document) => document.id)
 		const idsShuffled = shuffleArray(idsFiltered)
@@ -168,25 +123,12 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 	}
 
 	async function handleFinishElection() {
-		if (currentElectionId == null) return
-		await setDoc(doc(db, `elections`, currentElectionId), { state: `closed` }, { merge: true })
+		if (!currentElection) return
+		await setDoc(doc(db, `elections`, currentElection.id), { state: `closed` }, { merge: true })
 	}
 
 	return (
 		<div className="admin">
-			<Modal
-				isOpen={showNewElection}
-				onClose={() => {
-					setShowNewElection(false)
-				}}
-			>
-				<NewElection
-					close={() => {
-						setShowNewElection(!showNewElection)
-					}}
-					handleNewElection={handleNewElection}
-				/>
-			</Modal>
 			<h1>Admin</h1>
 			<p>Current state: {currentState}</p>
 			<p>Current voters:</p>
@@ -225,7 +167,7 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 					className="admin-button"
 					type="button"
 					onClick={() => {
-						setShowNewElection(true)
+						setModalView(`new-election`)
 					}}
 				>
 					<img src="./new-icon.svg" alt="new" />
@@ -247,7 +189,13 @@ function Admin({ exitAdminMode }: AdminProps): JSX.Element {
 					<img src="./finish-icon.svg" alt="finish" />
 					Finish the election
 				</button>
-				<button className="admin-button" type="button" onClick={exitAdminMode}>
+				<button
+					className="admin-button"
+					type="button"
+					onClick={() => {
+						setModalView(null)
+					}}
+				>
 					<img src="./exit-icon.svg" alt="exit" />
 					EXIT ADMIN MODE
 				</button>

@@ -4,7 +4,6 @@ import {
 	disposeState,
 	getState,
 	makeMolecule,
-	makeRootMolecule,
 	runTransaction,
 	selector,
 	transaction,
@@ -15,7 +14,6 @@ import { useO } from "atom.io/react"
 import { collection, doc, getDoc, getDocs } from "firebase/firestore"
 import { LayoutGroup, motion } from "framer-motion"
 import type {
-	Ballot,
 	CandidateStatus,
 	ElectionInstance,
 	ElectionRoundInstance,
@@ -26,9 +24,10 @@ import { electionMolecules } from "justiciar"
 import type { FunctionComponent, ReactNode } from "react"
 import React, { useEffect, useRef, useState } from "react"
 
-import { currentElectionIdAtom, currentElectionLabelAtom } from "~/src/lib/election"
+import { currentElectionAtom } from "~/src/lib/election"
 import { candidateAtoms } from "~/src/lib/election-candidates"
 import { db } from "~/src/lib/firebase"
+import { actualVoteToBallot, root } from "~/src/lib/justiciar"
 import type { ActualVote, Candidate, ElectionData, SerializedVote } from "~/src/types"
 
 import { CandidatePicture } from "../CandidatePicture/CandidatePicture"
@@ -190,18 +189,6 @@ const changeFrameTX = transaction<(direction: `next` | `prev`, election: Electio
 	},
 )
 
-function actualVoteToBallot(actualVote: ActualVote): Ballot {
-	const ballot: Ballot = {
-		voterId: actualVote.voterId,
-		votes: {
-			election0: actualVote.tierList,
-		},
-	}
-	return ballot
-}
-
-const root = makeRootMolecule(`root`)
-
 export const STATUS_COLORS = {
 	running: `white`,
 	elected: `green`,
@@ -318,15 +305,13 @@ function ElectionRounds(props: {
 function SeeResults(): JSX.Element {
 	const resultsView = useO(resultsViewAtom)
 	const viewLocation = useO(viewLocationSelector)
-	const currentElectionId = useO(currentElectionIdAtom)
-	const currentElectionLabel = useO(currentElectionLabelAtom)
+	const currentElection = useO(currentElectionAtom)
 	const electionRef = useRef<ElectionInstance | null>(null)
 	const [actualVotes, setActualVotes] = useState<ActualVote[]>([])
 	const [candidates, setCandidates] = useState<Candidate[]>([])
 
-	console.log(currentElectionLabel)
 	useEffect(() => {
-		if (currentElectionId === null) {
+		if (!currentElection.id) {
 			return
 		}
 		const electionToken = makeMolecule(root, electionMolecules, `election0`, {
@@ -336,7 +321,7 @@ function SeeResults(): JSX.Element {
 		const election = getState(electionToken)
 		electionRef.current = election
 
-		void getDoc(doc(db, `elections`, currentElectionId)).then(async (snapshot) => {
+		void getDoc(doc(db, `elections`, currentElection.id)).then(async (snapshot) => {
 			const electionData = snapshot.data() as ElectionData
 			console.log({ electionData })
 			const votes = await Promise.all<ActualVote>(
@@ -363,7 +348,7 @@ function SeeResults(): JSX.Element {
 						...snapshot.data(),
 					} as Candidate
 				})
-				.filter((candidate) => candidate.label === currentElectionLabel)
+				.filter((candidate) => candidate.label === currentElection.label)
 			setCandidates(candidateDocs)
 		})
 
@@ -394,11 +379,9 @@ function SeeResults(): JSX.Element {
 				runTransaction(election.registerCandidate)(candidateId)
 			}
 			runTransaction(election.beginVoting)()
-			const ballots: Ballot[] = actualVotes.map(actualVoteToBallot)
 			for (const actualVote of actualVotes) {
 				console.log(actualVote)
 				const ballot = actualVoteToBallot(actualVote)
-				ballots.push(ballot)
 				runTransaction(election.castBallot)(ballot)
 			}
 			runTransaction(election.beginCounting)()

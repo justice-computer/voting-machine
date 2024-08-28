@@ -1,33 +1,25 @@
 import "./electionManager.css"
 
-import { stringifyJson } from "atom.io/json"
-import { useO } from "atom.io/react"
-import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore"
+import { useI, useO } from "atom.io/react"
+import { collection, doc, getDoc, getDocs } from "firebase/firestore"
 import { useEffect, useState } from "react"
 
 import Accordion from "~/src/components/Accordion/Accordion"
 import { myselfSelector } from "~/src/lib/auth"
+import { currentElectionAtom } from "~/src/lib/election"
 import { db } from "~/src/lib/firebase"
-import { prepareBallot } from "~/src/stories/Ballot"
-import type { ElectionData, SerializedVote } from "~/src/types"
-
-type ElectionManagerProps = {
-	handleChangeElection: (id: string) => void
-	handleAdmin: () => void
-	close: () => void
-}
+import { modalViewAtom } from "~/src/lib/view"
+import type { ElectionData } from "~/src/types"
 
 type ElectionInfo = ElectionData & {
 	userName: string
 	formattedCreatedAt: string
 }
-function ElectionManager({
-	handleChangeElection,
-	handleAdmin,
-	close,
-}: ElectionManagerProps): JSX.Element {
+function ElectionManager(): JSX.Element {
 	const [electionData, setElectionData] = useState<ElectionInfo[]>([])
 	const myself = useO(myselfSelector)
+	const setModalView = useI(modalViewAtom)
+	const setCurrentElection = useI(currentElectionAtom)
 
 	useEffect(() => {
 		getDocs(collection(db, `elections`))
@@ -73,40 +65,20 @@ function ElectionManager({
 			})
 	}, [])
 
-	const handleFinished = async () => {
-		if (myself == null) return
-		for (const election of electionData) {
-			const tierList = stringifyJson(prepareBallot(election.id))
-			const newVote: SerializedVote = {
-				voterId: myself.id,
-				electionId: election.id,
-				tierList,
-				finished: true,
-			}
-
-			await setDoc(doc(db, `votes`, myself.id), newVote)
-			if (!election.users.includes(myself.id)) {
-				election.users.push(myself.id)
-				await setDoc(doc(db, `elections`, election.id), { users: election.users }, { merge: true })
-			}
-		}
-		close()
-	}
-
 	return (
 		<div className="change-election">
 			<div className="change-icons">
 				{myself?.admin && (
-					<button type="button" onClick={handleAdmin}>
+					<button
+						type="button"
+						onClick={() => {
+							setModalView(`admin`)
+						}}
+					>
 						<img src="./gear-icon.svg" alt="admin" />
 						Manage
 					</button>
 				)}
-				{/* FIXME: Implement finish voting */}
-				<button type="button" onClick={handleFinished}>
-					<img src="./finish-icon.svg" alt="cancel" />
-					Finish Voting
-				</button>
 			</div>
 			<Accordion title="Change Election">
 				<div className="election-list">
@@ -118,7 +90,8 @@ function ElectionManager({
 										<button
 											type="button"
 											onClick={() => {
-												handleChangeElection(election.id)
+												setCurrentElection(election)
+												setModalView(null)
 											}}
 										>
 											select

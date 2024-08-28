@@ -2,7 +2,7 @@ import { atomFamily, selector } from "atom.io"
 import { collection, doc, onSnapshot } from "firebase/firestore"
 
 import type { Candidate } from "../types"
-import { currentElectionLabelAtom } from "./election"
+import { currentElectionAtom } from "./election"
 import { db } from "./firebase"
 
 export const candidateIndexAtoms = atomFamily<string[], string>({
@@ -54,11 +54,11 @@ export const candidateAtoms = atomFamily<Candidate, string>({
 export const candidatesInCurrentElectionSelector = selector<Candidate[]>({
 	key: `candidatesInCurrentElection`,
 	get: ({ get, find }) => {
-		const currentElectionLabel = get(currentElectionLabelAtom)
-		if (currentElectionLabel === null) {
+		const currentElection = get(currentElectionAtom)
+		if (!currentElection.id) {
 			return []
 		}
-		const candidateIds = get(find(candidateIndexAtoms, currentElectionLabel))
+		const candidateIds = get(find(candidateIndexAtoms, currentElection.label))
 		return candidateIds.map((id) => {
 			const candidate = get(find(candidateAtoms, id))
 			return candidate

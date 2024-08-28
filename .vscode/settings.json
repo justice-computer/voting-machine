@@ -11,6 +11,7 @@
 		"estree",
 		"eyecuelab",
 		"filestore",
+		"Graphable",
 		"hamr",
 		"hamt",
 		"immer",
@@ -35,6 +36,7 @@
 		"treeshake",
 		"tsup",
 		"unsub",
+		"visx",
 		"wayforge",
 		"zustand"
 	],

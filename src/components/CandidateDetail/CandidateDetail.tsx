@@ -1,12 +1,11 @@
 import "./candidateDetail.css"
 
-import type { Candidate } from "../../types"
+import { useO } from "atom.io/react"
 
-type CandidateDetailProps = {
-	candidate: Candidate | null
-}
+import { candidateDetailViewAtom } from "~/src/lib/view"
 
-function CandidateDetail({ candidate }: CandidateDetailProps): JSX.Element | null {
+function CandidateDetail(): JSX.Element | null {
+	const candidate = useO(candidateDetailViewAtom)
 	if (candidate == null) return null
 	return (
 		<div className="candidateDetail">
