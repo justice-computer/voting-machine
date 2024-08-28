@@ -10,7 +10,6 @@ import type { GraphableCandidateVote } from "~/src/types"
 type TierName = `t1` | `t2` | `t3` | `t4` | `t5` | `t6`
 
 export type BarStackHorizontalProps = {
-	height: number
 	margin?: { top: number; right: number; bottom: number; left: number }
 	data?: GraphableCandidateVote[]
 }
@@ -33,16 +32,19 @@ const TEST_DATA: GraphableCandidateVote[] = [
 // accessors
 const getName = (d: GraphableCandidateVote) => d.name
 
+const almostFullHeight = () => window.innerHeight - 175
+
 export default function BarChart({
-	height,
 	margin = defaultMargin,
 	data = TEST_DATA,
 }: BarStackHorizontalProps): JSX.Element | null {
 	const [width, setWidth] = useState(window.innerWidth)
+	const [height, setHeight] = useState(almostFullHeight())
 
 	useEffect(() => {
 		const handleResize = () => {
 			setWidth(window.innerWidth)
+			setHeight(almostFullHeight())
 		}
 		window.addEventListener(`resize`, handleResize)
 		return () => {
