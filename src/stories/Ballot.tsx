@@ -247,6 +247,7 @@ function BallotElection({ id, name, candidates, config }: BallotSheetElection): 
 										}}
 										type="button"
 									>
+										<img src="./info-icon.svg" alt="info" />
 										{candidate.name}
 									</button>
 								</header>
