@@ -90,11 +90,17 @@ article.class {
             padding-right: 6px;
             display: flex;
             align-items: center;
-
             button {
+              display: flex;
+              align-items: center;
               background: none;
               border: none;
               font-size: 16px;
+              img {
+                width: 20px;
+                height: 20px;
+                margin-right: 10px;
+              }
             }
           }
           > main {

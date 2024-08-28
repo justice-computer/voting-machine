@@ -1,134 +1,54 @@
 .candidateDetail {
-  height: max-content;
-  padding: 30px;
-  color: black;
-  border-radius: 10px;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 400px;
   margin: auto;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
 
-  img {
-    width: 100px;
-    height: 100px;
-    cursor: pointer;
-  }
+.imageContainer {
+  position: relative;
+  width: 100%;
+  padding-top: 75%; /* 4:3 Aspect Ratio */
+  overflow: hidden;
+}
 
-  .icons {
-    padding: 30px;
-    gap: 20px;
-    display: flex;
-    justify-content: space-between;
+.imageContainer img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
 
-    img {
-      padding: 10px;
-      color: white;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      width: 35px;
-      height: 35px;
-      padding-right: 10px;
-    }
+.nameOverlay {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  text-align: center;
+  padding: 10px;
+}
 
-    .first {
-      background-color: #6ae491;
-    }
+.nameOverlay h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
 
-    .second {
-      background-color: #7ee46a;
-    }
+.info {
+  padding: 15px;
+  text-align: center;
+}
 
-    .third {
-      background-color: #9de46a;
-    }
-
-    .cancel {
-      background-color: #e46a6a;
-    }
-
-    button {
-      width: 20px;
-      height: 20px;
-      cursor: pointer;
-      background-color: white;
-    }
-  }
-
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-
-    input {
-      padding: 20px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-    }
-
-    textarea {
-      padding: 20px;
-      height: 150px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-    }
-
-    label.avatar {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      text-decoration: underline;
-
-      img {
-        width: 50px;
-        height: 50px;
-        border-radius: 10px;
-        object-fit: cover;
-        opacity: 60%;
-      }
-    }
-    button {
-      padding: 20px;
-      border-radius: 10px;
-      background-color: #1a73e8;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-  }
-
-  .user {
-    margin-top: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    .detail {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-
-      img {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        object-fit: cover;
-      }
-    }
-
-    button {
-      padding: 10px;
-      border-radius: 10px;
-      background-color: #1a73e8;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-  }
+.info h3 {
+  margin: 0;
+  font-size: 1.2rem;
 }

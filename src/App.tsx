@@ -22,7 +22,6 @@ function NextComponent(): JSX.Element {
 	const view = useO(viewSelector)
 	const modalView = useO(modalViewAtom)
 	if (modalView === `admin`) return <div />
-	console.log(`view: ${view}`)
 
 	switch (view) {
 		case `not-started`:
@@ -59,7 +58,7 @@ function Modals(): JSX.Element {
 			>
 				<ElectionManager />
 			</Modal>
-			<Modal isOpen={modalView === `candidate-detail`}>
+			<Modal isOpen={modalView === `candidate-detail`} noClose>
 				<CandidateDetail />
 			</Modal>
 			<Modal isOpen={modalView === `new-election`}>
