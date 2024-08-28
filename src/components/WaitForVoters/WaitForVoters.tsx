@@ -82,7 +82,6 @@ function WaitForVoters({ targetState }: WaitForVotersProps): JSX.Element {
 				<>
 					<BarChart
 						data={graphableCandidateVotes}
-						height={650}
 						margin={{ top: 20, left: 150, right: 40, bottom: 100 }}
 					/>
 				</>
