@@ -2,7 +2,7 @@ import { useO } from "atom.io/react"
 
 import CandidateDetail from "~/src/components/CandidateDetail/CandidateDetail"
 import { currentElectionAtom } from "~/src/lib/election"
-import { candidateDetailViewAtom, modalViewAtom, viewSelector } from "~/src/lib/view"
+import { modalViewAtom, viewSelector } from "~/src/lib/view"
 
 import Admin from "./components/Admin/Admin"
 import ElectionManager from "./components/ElectionManager/ElectionManager"
@@ -43,7 +43,6 @@ function NextComponent(): JSX.Element {
 function Modals(): JSX.Element {
 	const modalView = useO(modalViewAtom)
 	const currentElection = useO(currentElectionAtom)
-	const candidateDetailView = useO(candidateDetailViewAtom)
 
 	// Admin acts like a modal but it's not
 	if (modalView === `admin`) {
@@ -60,7 +59,7 @@ function Modals(): JSX.Element {
 			>
 				<ElectionManager />
 			</Modal>
-			<Modal isOpen={candidateDetailView != null}>
+			<Modal isOpen={modalView === `candidate-detail`}>
 				<CandidateDetail />
 			</Modal>
 			<Modal isOpen={modalView === `new-election`}>
