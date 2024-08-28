@@ -22,7 +22,6 @@ function NextComponent(): JSX.Element {
 	const view = useO(viewSelector)
 	const modalView = useO(modalViewAtom)
 	if (modalView === `admin`) return <div />
-	console.log(`view: ${view}`)
 
 	switch (view) {
 		case `not-started`:
