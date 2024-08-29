@@ -10,6 +10,7 @@ import {
 	type CurrentElectionVoters,
 	currentElectionVotersSelector,
 } from "~/src/lib/election-voters"
+import { determineWinnersFromCurrentVotes } from "~/src/lib/justiciar"
 
 import type { ElectionState, GraphableCandidateVote } from "../../types"
 
@@ -75,7 +76,14 @@ function WaitForVoters({ targetState }: WaitForVotersProps): JSX.Element {
 
 	const liveCandidateVotes = getLiveCandidateVotes(currentElectionVoters)
 	const graphableCandidateVotes = transformToGraphable(liveCandidateVotes)
-	console.log(JSON.stringify(graphableCandidateVotes, null, 2))
+	try {
+		const winners = determineWinnersFromCurrentVotes()
+		console.log(`---------------------------------------`)
+		console.log(winners)
+		console.log(`---------------------------------------`)
+	} catch (error) {
+		console.error(error)
+	}
 	return (
 		<div className="waitForVoters">
 			{currentElectionVoters.length ? (
