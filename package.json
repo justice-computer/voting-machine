@@ -60,7 +60,7 @@
 		"@storybook/react-vite": "8.2.9",
 		"@storybook/test": "8.2.9",
 		"@testing-library/jest-dom": "6.5.0",
-		"@testing-library/react": "16.0.0",
+		"@testing-library/react": "16.0.1",
 		"@tsconfig/vite-react": "3.0.2",
 		"@types/d3-scale": "4.0.8",
 		"@types/eslint": "9.6.1",
