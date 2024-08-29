@@ -51,8 +51,8 @@ importers:
         specifier: 10.13.0
         version: 10.13.0
       framer-motion:
-        specifier: 11.3.30
-        version: 11.3.30(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 11.3.31
+        version: 11.3.31(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -143,7 +143,7 @@ importers:
         version: 4.3.1(vite@5.4.2(@types/node@20.16.2)(sass@1.77.8))
       atom.io:
         specifier: 0.28.2
-        version: 0.28.2(@testing-library/react@16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.3.0)(@types/react@18.3.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(eslint@9.9.1)(framer-motion@11.3.30(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 0.28.2(@testing-library/react@16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.3.0)(@types/react@18.3.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(eslint@9.9.1)(framer-motion@11.3.31(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       c8:
         specifier: 10.1.2
         version: 10.1.2
@@ -179,7 +179,7 @@ importers:
     dependencies:
       atom.io:
         specifier: 0.28.2
-        version: 0.28.2(@testing-library/react@16.0.0(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(eslint@9.9.1)(framer-motion@11.3.30(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 0.28.2(@testing-library/react@16.0.0(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(eslint@9.9.1)(framer-motion@11.3.31(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@vitest/browser':
         specifier: 2.0.5
@@ -3368,8 +3368,8 @@ packages:
     resolution: {integrity: sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==}
     engines: {node: '>= 0.6'}
 
-  framer-motion@11.3.30:
-    resolution: {integrity: sha512-9VmqGe9OIjfMoCcs+ZsKXlv6JaG5QagKX2F1uSbkG3Z33wgjnz60Kw+CngC1M49rDYau+Y9aL+8jGagAwrbVyw==}
+  framer-motion@11.3.31:
+    resolution: {integrity: sha512-Xmxs08WBXnc2tNzNZbFSpquI33lvleJg4Y+hmZ+vFkn+laN9ZnR3gbZnNGKDtuz7c/x3u8dLg05OU3EhLobCsg==}
     peerDependencies:
       '@emotion/is-prop-valid': '*'
       react: ^18.0.0
@@ -8202,7 +8202,7 @@ snapshots:
       magic-string: 0.30.11
       msw: 2.3.5(typescript@5.5.4)
       sirv: 2.0.4
-      vitest: 2.0.5(@types/node@20.16.2)(@vitest/browser@2.0.5)(jsdom@25.0.0)(sass@1.77.8)
+      vitest: 2.0.5(@types/node@22.4.1)(@vitest/browser@2.0.5)(jsdom@25.0.0)(sass@1.77.8)
       ws: 8.18.0
     optionalDependencies:
       webdriverio: 9.0.7
@@ -8527,18 +8527,18 @@ snapshots:
 
   asynckit@0.4.0: {}
 
-  atom.io@0.28.2(@testing-library/react@16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.3.0)(@types/react@18.3.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(eslint@9.9.1)(framer-motion@11.3.30(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
+  atom.io@0.28.2(@testing-library/react@16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.3.0)(@types/react@18.3.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(eslint@9.9.1)(framer-motion@11.3.31(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
     optionalDependencies:
       '@testing-library/react': 16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.3.0)(@types/react@18.3.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       eslint: 9.9.1
-      framer-motion: 11.3.30(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      framer-motion: 11.3.31(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
 
-  atom.io@0.28.2(@testing-library/react@16.0.0(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(eslint@9.9.1)(framer-motion@11.3.30(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
+  atom.io@0.28.2(@testing-library/react@16.0.0(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(eslint@9.9.1)(framer-motion@11.3.31(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
     optionalDependencies:
       '@testing-library/react': 16.0.0(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       eslint: 9.9.1
-      framer-motion: 11.3.30(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      framer-motion: 11.3.31(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
 
   available-typed-arrays@1.0.7:
@@ -9706,7 +9706,7 @@ snapshots:
 
   forwarded@0.2.0: {}
 
-  framer-motion@11.3.30(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  framer-motion@11.3.31(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       tslib: 2.6.3
     optionalDependencies:
