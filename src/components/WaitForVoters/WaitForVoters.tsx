@@ -2,6 +2,7 @@ import "./waitForVoters.css"
 
 import { runTransaction } from "atom.io"
 import { useO } from "atom.io/react"
+import { useEffect, useRef } from "react"
 
 import BarChart from "~/src/components/BarChart/BarChart"
 import { joinElectionTX, retractSubmittedBallot } from "~/src/lib/election"
@@ -73,17 +74,34 @@ function transformToGraphable(liveCandidateVotes: LiveCandidateVotes): Graphable
 function WaitForVoters({ targetState }: WaitForVotersProps): JSX.Element {
 	const currentElectionVoters = useO(currentElectionVotersSelector)
 	const joinElection = runTransaction(joinElectionTX)
-
 	const liveCandidateVotes = getLiveCandidateVotes(currentElectionVoters)
 	const graphableCandidateVotes = transformToGraphable(liveCandidateVotes)
-	try {
-		const winners = determineWinnersFromCurrentVotes()
-		console.log(`---------------------------------------`)
-		console.log(winners)
-		console.log(`---------------------------------------`)
-	} catch (error) {
-		console.error(error)
-	}
+
+	useEffect(() => {
+		// Start a timer to run the function 1 second after mounting
+		const timeoutId = setTimeout(() => {
+			// Set up the interval to run the function every second
+			const intervalId = setInterval(() => {
+				// Your periodic function here
+				console.log(`Function is running every second`)
+				const winners = determineWinnersFromCurrentVotes()
+				console.log(`---------------------------------------`)
+				console.log(winners)
+				console.log(`---------------------------------------`)
+			}, 10000)
+
+			// Cleanup function to stop the interval when the component unmounts
+			return () => {
+				clearInterval(intervalId)
+			}
+		}, 5000)
+
+		// Cleanup function to clear the timeout if the component unmounts before the timeout completes
+		return () => {
+			clearTimeout(timeoutId)
+		}
+	}, [])
+
 	return (
 		<div className="waitForVoters">
 			{currentElectionVoters.length ? (
