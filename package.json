@@ -36,7 +36,7 @@
 		"concurrently": "8.2.2",
 		"d3-scale": "4.0.2",
 		"d3-time-format": "link:@visx/vendor/d3-time-format",
-		"eslint-plugin-import": "2.29.1",
+		"eslint-plugin-import": "2.30.0",
 		"firebase": "10.13.1",
 		"framer-motion": "11.3.31",
 		"react": "18.3.1",
