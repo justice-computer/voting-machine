@@ -1,9 +1,8 @@
 import tsconfigPaths from "vite-tsconfig-paths"
 import { defineConfig } from "vitest/config"
 
-// @ts-expect-error vite is having a bad week
 export default defineConfig({
-	// @ts-expect-error vite is having a bad week
+	// @ts-expect-error vitest hates vite plugins
 	plugins: [tsconfigPaths()],
 
 	test: {
