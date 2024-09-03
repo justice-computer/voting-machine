@@ -1,7 +1,8 @@
 import react from "@vitejs/plugin-react"
-import type { UserConfig } from "vite"
-import { defineConfig, loadEnv } from "vite"
+import { loadEnv } from "vite"
 import tsConfigPaths from "vite-tsconfig-paths"
+import type { UserConfig } from "vitest/config"
+import { defineConfig } from "vitest/config"
 
 const VITE_DEVELOPMENT_PORT = Number.parseInt(process.env?.VITE_DEVELOPMENT_PORT ?? `5173`, 10)
 export default ({ mode }: { mode: `development` | `production` | `test` }): UserConfig => {
@@ -9,6 +10,7 @@ export default ({ mode }: { mode: `development` | `production` | `test` }): User
 	process.env = { ...process.env, ...loadEnv(mode, process.cwd()) }
 
 	return defineConfig({
+		// @ts-expect-error vitest hates vite plugins
 		plugins: [react(), tsConfigPaths({ projects: [`./tsconfig.json`] })],
 		test: {
 			globals: true,
