@@ -9,11 +9,11 @@ import { currentElectionVotersSelector } from "./election-voters"
 
 export const root = makeRootMolecule(`root`)
 
-export function actualVoteToBallot(actualVote: ActualVote): Ballot {
+export function actualVoteToBallot(electionKey: string, actualVote: ActualVote): Ballot {
 	const ballot: Ballot = {
 		voterId: actualVote.voterId,
 		votes: {
-			election0: actualVote.tierList,
+			[electionKey]: actualVote.tierList,
 		},
 	}
 	return ballot
@@ -43,7 +43,7 @@ export function determineWinnersFromCurrentVotes(): string[] {
 	runTransaction(election.beginVoting)()
 
 	for (const { vote } of currentElectionVoters) {
-		const ballot = actualVoteToBallot(vote)
+		const ballot = actualVoteToBallot(electionToken.key, vote)
 		debugger
 		try {
 			runTransaction(election.castBallot)(ballot)
