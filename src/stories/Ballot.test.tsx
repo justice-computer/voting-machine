@@ -4,6 +4,7 @@ import { beforeAll, expect } from "vitest"
 import type { Candidate } from "~/src/types"
 
 import {
+	candidatesByTierSelectors,
 	checkboxAtoms,
 	electionCandidatesAtoms,
 	electionConfigAtoms,
@@ -25,6 +26,10 @@ function vote(electionId: string, candidate: Candidate, tier: number): Disposabl
 			disposeState(checkboxAtoms, [
 				[`election`, electionId],
 				[`candidate`, candidate.id],
+				[`tier`, tier],
+			])
+			disposeState(candidatesByTierSelectors, [
+				[`election`, electionId],
 				[`tier`, tier],
 			])
 		},
