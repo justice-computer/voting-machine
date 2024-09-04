@@ -49,7 +49,7 @@ export const electionCandidatesAtoms = atomFamily<Candidate[], string>({
 	default: [],
 })
 
-const candidatesByTierSelectors = selectorFamily<
+export const candidatesByTierSelectors = selectorFamily<
 	Candidate[],
 	[[`election`, string], [`tier`, number]]
 >({
