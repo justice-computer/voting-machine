@@ -73,8 +73,8 @@ importers:
         specifier: 2.27.8
         version: 2.27.8
       '@chromatic-com/storybook':
-        specifier: 1.8.0
-        version: 1.8.0(react@18.3.1)
+        specifier: 1.9.0
+        version: 1.9.0(react@18.3.1)
       '@eslint/eslintrc':
         specifier: 3.1.0
         version: 3.1.0
@@ -970,8 +970,8 @@ packages:
   '@changesets/write@0.3.2':
     resolution: {integrity: sha512-kDxDrPNpUgsjDbWBvUo27PzKX4gqeKOlhibaOXDJA6kuBisGqNHv/HwGJrAu8U/dSf8ZEFIeHIPtvSlZI1kULw==}
 
-  '@chromatic-com/storybook@1.8.0':
-    resolution: {integrity: sha512-vkB9dPVmM2Yvqc/0DJ4MYwOGY1MOjd/KbB9TXTMGN+qshaEyiZtSOgbz9u0ExFALEgDKLmtUnWyUtoGb0pCzUg==}
+  '@chromatic-com/storybook@1.9.0':
+    resolution: {integrity: sha512-vYQ+TcfktEE3GHnLZXHCzXF/sN9dw+KivH8a5cmPyd9YtQs7fZtHrEgsIjWpYycXiweKMo1Lm1RZsjxk8DH3rA==}
     engines: {node: '>=16.0.0', yarn: '>=1.22.18'}
 
   '@esbuild/aix-ppc64@0.21.5':
@@ -6735,7 +6735,7 @@ snapshots:
       human-id: 1.0.2
       prettier: 2.8.8
 
-  '@chromatic-com/storybook@1.8.0(react@18.3.1)':
+  '@chromatic-com/storybook@1.9.0(react@18.3.1)':
     dependencies:
       chromatic: 11.7.1
       filesize: 10.1.4
