@@ -73,8 +73,8 @@ importers:
         specifier: 2.27.8
         version: 2.27.8
       '@chromatic-com/storybook':
-        specifier: 2.0.0
-        version: 2.0.0(react@18.3.1)(storybook@8.3.0)
+        specifier: 2.0.1
+        version: 2.0.1(react@18.3.1)
       '@eslint/eslintrc':
         specifier: 3.1.0
         version: 3.1.0
@@ -429,11 +429,9 @@ packages:
   '@changesets/write@0.3.2':
     resolution: {integrity: sha512-kDxDrPNpUgsjDbWBvUo27PzKX4gqeKOlhibaOXDJA6kuBisGqNHv/HwGJrAu8U/dSf8ZEFIeHIPtvSlZI1kULw==}
 
-  '@chromatic-com/storybook@2.0.0':
-    resolution: {integrity: sha512-9sG8BVdf4ipEbX9OGNFX/USvnpi3SffEuRiIn1Qzsp/dM263EVdCAPcS9GOAZz6zOgcgaScdyvjTQozBYJrIVA==}
+  '@chromatic-com/storybook@2.0.1':
+    resolution: {integrity: sha512-BWedsjGOMXsWIWqDmdV9VV1lx2GSauBISu0a2ZbwL2BPN4yrBypsOOuQ8hKvtEfFlYetGmTafi1N5W1oR1CW3A==}
     engines: {node: '>=16.0.0', yarn: '>=1.22.18'}
-    peerDependencies:
-      storybook: ^8.2.0
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -5047,13 +5045,12 @@ snapshots:
       human-id: 1.0.2
       prettier: 2.8.8
 
-  '@chromatic-com/storybook@2.0.0(react@18.3.1)(storybook@8.3.0)':
+  '@chromatic-com/storybook@2.0.1(react@18.3.1)':
     dependencies:
       chromatic: 11.7.1
       filesize: 10.1.4
       jsonfile: 6.1.0
       react-confetti: 6.1.0(react@18.3.1)
-      storybook: 8.3.0
       strip-ansi: 7.1.0
     transitivePeerDependencies:
       - '@chromatic-com/cypress'
