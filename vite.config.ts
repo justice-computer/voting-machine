@@ -10,7 +10,6 @@ export default ({ mode }: { mode: `development` | `production` | `test` }): User
 	process.env = { ...process.env, ...loadEnv(mode, process.cwd()) }
 
 	return defineConfig({
-		// @ts-expect-error vitest hates vite plugins
 		plugins: [react(), tsConfigPaths({ projects: [`./tsconfig.json`] })],
 		test: {
 			globals: true,
