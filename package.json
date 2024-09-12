@@ -33,7 +33,7 @@
 		"@visx/text": "3.3.0",
 		"@visx/tooltip": "3.3.0",
 		"@visx/vendor": "3.5.0",
-		"concurrently": "9.0.0",
+		"concurrently": "9.0.1",
 		"d3-scale": "4.0.2",
 		"d3-time-format": "link:@visx/vendor/d3-time-format",
 		"eslint-plugin-import": "2.30.0",
