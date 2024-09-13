@@ -15,7 +15,7 @@
 		"@vitest/browser": "2.1.1",
 		"@vitest/coverage-v8": "2.1.1",
 		"json-schema-to-zod": "2.4.1",
-		"openai": "4.60.0",
+		"openai": "4.61.0",
 		"varmint": "0.2.0",
 		"vite-tsconfig-paths": "5.0.1",
 		"vitest": "2.1.1",
