@@ -191,8 +191,8 @@ importers:
         specifier: 2.4.1
         version: 2.4.1
       openai:
-        specifier: 4.61.0
-        version: 4.61.0
+        specifier: 4.61.1
+        version: 4.61.1
       varmint:
         specifier: 0.2.0
         version: 0.2.0
@@ -3670,8 +3670,8 @@ packages:
     resolution: {integrity: sha512-kbpaSSGJTWdAY5KPVeMOKXSrPtr8C8C7wodJbcsd51jRnmD+GZu8Y0VoU6Dm5Z4vWr0Ig/1NKuWRKf7j5aaYSg==}
     engines: {node: '>=6'}
 
-  openai@4.61.0:
-    resolution: {integrity: sha512-xkygRBRLIUumxzKGb1ug05pWmJROQsHkGuj/N6Jiw2dj0dI19JvbFpErSZKmJ/DA+0IvpcugZqCAyk8iLpyM6Q==}
+  openai@4.61.1:
+    resolution: {integrity: sha512-jZ2WRn+f4QWZkYnrUS+xzEUIBllsGN75dUCaXmMIHcv2W9yn7O8amaReTbGHCNEYkL43vuDOcxPUWfNPUmoD3Q==}
     hasBin: true
     peerDependencies:
       zod: ^3.23.8
@@ -8860,7 +8860,7 @@ snapshots:
     dependencies:
       mimic-fn: 2.1.0
 
-  openai@4.61.0:
+  openai@4.61.1:
     dependencies:
       '@types/node': 18.19.50
       '@types/node-fetch': 2.6.11
