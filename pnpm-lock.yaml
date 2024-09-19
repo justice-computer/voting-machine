@@ -142,8 +142,8 @@ importers:
         specifier: 4.3.1
         version: 4.3.1(vite@5.4.6(@types/node@20.16.5)(sass@1.79.1))
       atom.io:
-        specifier: 0.29.2
-        version: 0.29.2(@testing-library/react@16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(eslint@9.10.0)(framer-motion@11.5.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        specifier: 0.29.3
+        version: 0.29.3(@testing-library/react@16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(eslint@9.10.0)(framer-motion@11.5.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       c8:
         specifier: 10.1.2
         version: 10.1.2
@@ -178,8 +178,8 @@ importers:
   packages/justiciar:
     dependencies:
       atom.io:
-        specifier: 0.29.2
-        version: 0.29.2(@testing-library/react@16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(eslint@9.10.0)(framer-motion@11.5.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        specifier: 0.29.3
+        version: 0.29.3(@testing-library/react@16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(eslint@9.10.0)(framer-motion@11.5.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@vitest/browser':
         specifier: 2.1.1
@@ -1963,8 +1963,8 @@ packages:
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
 
-  atom.io@0.29.2:
-    resolution: {integrity: sha512-dpgx90uaLPFpFcYf205eodQKdN6tQYIWOOhWWeB6Wbyzq71GAbgXgEOSj7o89/9nDkimjGLIoH08aTRQ6a8hig==}
+  atom.io@0.29.3:
+    resolution: {integrity: sha512-Ekgtp4qZLf/8hL64a39nck5n/Sjm7/XD7vMGaeHWWiJYigDK8/v9UEI7Fe5jGpsWpI1FcHJWwuE3nsokYFMYVg==}
     peerDependencies:
       '@floating-ui/react': '>=0.25.0'
       '@floating-ui/react-dom': '>=2.0.0'
@@ -7006,7 +7006,7 @@ snapshots:
 
   asynckit@0.4.0: {}
 
-  atom.io@0.29.2(@testing-library/react@16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(eslint@9.10.0)(framer-motion@11.5.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
+  atom.io@0.29.3(@testing-library/react@16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(eslint@9.10.0)(framer-motion@11.5.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
     optionalDependencies:
       '@testing-library/react': 16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       eslint: 9.10.0
