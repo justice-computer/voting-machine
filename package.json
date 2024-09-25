@@ -38,7 +38,7 @@
 		"d3-time-format": "link:@visx/vendor/d3-time-format",
 		"eslint-plugin-import": "2.30.0",
 		"firebase": "10.13.2",
-		"framer-motion": "11.5.6",
+		"framer-motion": "11.7.0",
 		"react": "18.3.1",
 		"react-dom": "18.3.1",
 		"react-toastify": "10.0.5",
