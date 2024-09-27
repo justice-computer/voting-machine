@@ -9,11 +9,11 @@ import { currentElectionVotersSelector } from "./election-voters"
 
 export const root = makeRootMolecule(`root`)
 
-export function actualVoteToBallot(actualVote: ActualVote): Ballot {
+export function actualVoteToBallot(electionKey: string, actualVote: ActualVote): Ballot {
 	const ballot: Ballot = {
 		voterId: actualVote.voterId,
 		votes: {
-			election0: actualVote.tierList,
+			[electionKey]: actualVote.tierList,
 		},
 	}
 	return ballot
@@ -43,9 +43,14 @@ export function determineWinnersFromCurrentVotes(): string[] {
 	runTransaction(election.beginVoting)()
 
 	for (const { vote } of currentElectionVoters) {
-		console.log(vote)
-		const ballot = actualVoteToBallot(vote)
-		runTransaction(election.castBallot)(ballot)
+		const ballot = actualVoteToBallot(electionToken.key, vote)
+		debugger
+		try {
+			runTransaction(election.castBallot)(ballot)
+		} catch (error: any) {
+			console.log(`Ignoring ballot ${error.message}`)
+			console.log(JSON.stringify(ballot, null, 2))
+		}
 	}
 	runTransaction(election.beginCounting)()
 
@@ -61,6 +66,7 @@ export function determineWinnersFromCurrentVotes(): string[] {
 			break
 		}
 		const round = election.spawnRound()
+		console.log(`Safety ${safety}`)
 		round.setup()
 		if (round.state.outcome) {
 			const outcome = getState(round.state.outcome)
@@ -72,7 +78,9 @@ export function determineWinnersFromCurrentVotes(): string[] {
 					winners.push(outcome.candidates[0].key)
 					break
 				case `eliminated`:
-					losers.push(outcome.candidates[0].key)
+					if (outcome.candidates.length > 0) {
+						losers.push(outcome.candidates[0].key)
+					}
 					break
 			}
 		}

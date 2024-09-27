@@ -18,7 +18,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, title, children, noClose }) => {
 	const ignoreFirstClick = useRef(true)
 
 	useEffect(() => {
-		const handleClick = (_: MouseEvent) => {
+		const handleClick = () => {
 			if (ignoreFirstClick.current) {
 				ignoreFirstClick.current = false
 				return
@@ -40,7 +40,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, title, children, noClose }) => {
 	const titleElement = title ? <h1 className="modal-title">{title}</h1> : null
 	return ReactDOM.createPortal(
 		<div className="modal-overlay">
-			<div className="modal-content">
+			<div className={noClose ? `` : `modal-content`}>
 				{titleElement}
 				{noClose ? null : (
 					<button
