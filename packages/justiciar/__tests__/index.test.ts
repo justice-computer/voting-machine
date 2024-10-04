@@ -1,11 +1,11 @@
-import { getState, makeMolecule, makeRootMolecule, runTransaction } from "atom.io"
+import { getState, makeMolecule, makeRootMoleculeInStore, runTransaction } from "atom.io"
 import { describe, it } from "vitest"
 
 import { electionMolecules, need, ok } from "../src"
 
 describe(`core procedures`, () => {
 	it(`should return the correct divisibleVotingPower`, () => {
-		const root = makeRootMolecule(`root`)
+		const root = makeRootMoleculeInStore(`root`)
 		const electionToken = makeMolecule(root, electionMolecules, `election0`, {
 			numberOfWinners: 2n,
 			votingTiers: [3n, 3n, 3n],

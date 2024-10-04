@@ -1,4 +1,10 @@
-import { disposeState, getState, makeMolecule, makeRootMolecule, runTransaction } from "atom.io"
+import {
+	disposeState,
+	getState,
+	makeMolecule,
+	makeRootMoleculeInStore,
+	runTransaction,
+} from "atom.io"
 import type { Ballot } from "justiciar"
 import { electionMolecules } from "justiciar"
 
@@ -7,7 +13,7 @@ import { currentElectionAtom } from "./election"
 import { candidatesInCurrentElectionSelector } from "./election-candidates"
 import { currentElectionVotersSelector } from "./election-voters"
 
-export const root = makeRootMolecule(`root`)
+export const root = makeRootMoleculeInStore(`root`)
 
 export function actualVoteToBallot(actualVote: ActualVote): Ballot {
 	const ballot: Ballot = {
