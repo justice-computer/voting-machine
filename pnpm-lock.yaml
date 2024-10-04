@@ -183,10 +183,10 @@ importers:
     devDependencies:
       '@vitest/browser':
         specifier: 2.1.1
-        version: 2.1.1(@vitest/spy@2.1.1)(typescript@5.6.2)(vite@5.4.6(@types/node@22.5.5)(sass@1.79.4))(vitest@2.1.1)(webdriverio@9.1.1)
+        version: 2.1.1(@vitest/spy@2.1.1)(typescript@5.6.2)(vite@5.4.6(@types/node@22.5.5)(sass@1.79.4))(vitest@2.1.1)(webdriverio@9.1.2)
       '@vitest/coverage-v8':
         specifier: 2.1.1
-        version: 2.1.1(@vitest/browser@2.1.1(@vitest/spy@2.1.1)(typescript@5.6.2)(vite@5.4.6(@types/node@22.5.5)(sass@1.79.4))(vitest@2.1.1)(webdriverio@9.1.1))(vitest@2.1.1(@types/node@22.5.5)(@vitest/browser@2.1.1)(jsdom@25.0.1)(msw@2.4.7(typescript@5.6.2))(sass@1.79.4))
+        version: 2.1.1(@vitest/browser@2.1.1(@vitest/spy@2.1.1)(typescript@5.6.2)(vite@5.4.6(@types/node@22.5.5)(sass@1.79.4))(vitest@2.1.1)(webdriverio@9.1.2))(vitest@2.1.1(@types/node@22.5.5)(@vitest/browser@2.1.1)(jsdom@25.0.1)(msw@2.4.7(typescript@5.6.2))(sass@1.79.4))
       json-schema-to-zod:
         specifier: 2.4.1
         version: 2.4.1
@@ -203,8 +203,8 @@ importers:
         specifier: 2.1.1
         version: 2.1.1(@types/node@22.5.5)(@vitest/browser@2.1.1)(jsdom@25.0.1)(msw@2.4.7(typescript@5.6.2))(sass@1.79.4)
       webdriverio:
-        specifier: 9.1.1
-        version: 9.1.1
+        specifier: 9.1.2
+        version: 9.1.2
 
 packages:
 
@@ -1543,9 +1543,6 @@ packages:
   '@types/node@20.16.10':
     resolution: {integrity: sha512-vQUKgWTjEIRFCvK6CyriPH3MZYiYlNy0fKiEYHWbcoWLEgs4opurGGKlebrTLqdSMIbXImH6XExNiIyNUv3WpA==}
 
-  '@types/node@20.16.9':
-    resolution: {integrity: sha512-rkvIVJxsOfBejxK7I0FO5sa2WxFmJCzoDwcd88+fq/CUfynNywTo/1/T6hyFz22CyztsnLS9nVlHOnTI36RH5w==}
-
   '@types/node@22.5.5':
     resolution: {integrity: sha512-Xjs4y5UPO/CLdzpgR6GirZJx36yScjh73+2NlLlkFRSoQN8B0DpfXPdZGnvVmLRLOsqDpOfTNv7D9trgGhmOIA==}
 
@@ -1787,8 +1784,8 @@ packages:
   '@vitest/utils@2.1.1':
     resolution: {integrity: sha512-Y6Q9TsI+qJ2CC0ZKj6VBb+T8UPz593N113nnUykqwANqhgf3QkZeHFlusgKLTqrnVHbj/XDKZcDHol+dxVT+rQ==}
 
-  '@wdio/config@9.1.0':
-    resolution: {integrity: sha512-lxrUJK5ZRilRMrKgamooGbmxpE9qeYFSpF2R3H8HGZXnFDUMUQnWYY2Hn6O5Hw0BA9DxZKqCi1hrBxRws9O2ww==}
+  '@wdio/config@9.1.2':
+    resolution: {integrity: sha512-M8jDFgTxOeljv5M75em7oCu2cV16jHWH6HWj5CD3ZNzaMeHf+EkIuHNyREJjt8PCnssehzXD26TF63tGPHdksA==}
     engines: {node: '>=18.20.0'}
 
   '@wdio/logger@8.38.0':
@@ -1806,12 +1803,12 @@ packages:
     resolution: {integrity: sha512-3iubjl4JX5zD21aFxZwQghqC3lgu+mSs8c3NaiYYNCC+IT5cI/8QuKlgh9s59bu+N3gG988jqMJeCYlKuUv/iw==}
     engines: {node: '>=18.20.0'}
 
-  '@wdio/types@9.1.0':
-    resolution: {integrity: sha512-bi3DTse8Nlat7FTCnciPnJWYggpRSszLQ70ReCcegAUlaancV+Y8ma4IWZROsBQ6f1hB+JIS9gwc/HGcp+6XSQ==}
+  '@wdio/types@9.1.2':
+    resolution: {integrity: sha512-mROY3xSBBNujSH0Opo3Sfi1QUm3l7HbVQ8/bDmPCwHXOeYlx0q14rLyyZI3LrN5uJ0KPpuNrVgE36NFaG8+xxw==}
     engines: {node: '>=18.20.0'}
 
-  '@wdio/utils@9.1.0':
-    resolution: {integrity: sha512-iH+P/Dakttc7MRsVaikLLe13SDkm9Z+GAAOi6yu6I3x+ao6563KECjsLqJxLCKtbfOjqAqID19QBAtPQTRBVRA==}
+  '@wdio/utils@9.1.2':
+    resolution: {integrity: sha512-8APCnvJjHkG/6KwXtrPhEYR29Ph+vs1Gx2mGRnbYXNgbworfPEIZETpienHXhDEbINdqSb7EY5LkapIjP7nKbg==}
     engines: {node: '>=18.20.0'}
 
   '@zeit/schemas@2.36.0':
@@ -4706,12 +4703,12 @@ packages:
     resolution: {integrity: sha512-QW95TCTaHmsYfHDybGMwO5IJIM93I/6vTRk+daHTWFPhwh+C8Cg7j7XyKrwrj8Ib6vYXe0ocYNrmzY4xAAN6ug==}
     engines: {node: '>= 14'}
 
-  webdriver@9.1.1:
-    resolution: {integrity: sha512-XRZitu+W3xpnuA6gFgiSGBCt2P8m4g2Yzt+zXgPqlKiDGwr27F5m40pP2AnlQBlQO7hw0OJJa68QR1KW2D9cHA==}
+  webdriver@9.1.2:
+    resolution: {integrity: sha512-NjeYVTCSMwQrd+EDpSSB8YnSNzYeEPU2IoJhvjaXUwTEhoaIvz6x6fM4UqCbm/ph8lZ1uWux43fqIcfDzFQl5Q==}
     engines: {node: '>=18.20.0'}
 
-  webdriverio@9.1.1:
-    resolution: {integrity: sha512-jREz3Vy7ItpNn0HG/vh5oZYAzSv4PGGy8mxht7j4BXkcUjkPCBfHtAAXHRwwJVxu1rWJLzn4QhfjLIaEFe73NA==}
+  webdriverio@9.1.2:
+    resolution: {integrity: sha512-Yk/OmxUmse6YVBMr+iM5zH3LKiy07cJQsq19qL2Zj29+2I3b8kK8uGxx8+DhqYF/A/MVwHUFxACzQDYsdW6pjw==}
     engines: {node: '>=18.20.0'}
     peerDependencies:
       puppeteer-core: ^22.3.0
@@ -6402,10 +6399,6 @@ snapshots:
     dependencies:
       undici-types: 6.19.8
 
-  '@types/node@20.16.9':
-    dependencies:
-      undici-types: 6.19.8
-
   '@types/node@22.5.5':
     dependencies:
       undici-types: 6.19.8
@@ -6667,7 +6660,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/browser@2.1.1(@vitest/spy@2.1.1)(typescript@5.6.2)(vite@5.4.6(@types/node@20.16.10)(sass@1.79.4))(vitest@2.1.1)(webdriverio@9.1.1)':
+  '@vitest/browser@2.1.1(@vitest/spy@2.1.1)(typescript@5.6.2)(vite@5.4.6(@types/node@20.16.10)(sass@1.79.4))(vitest@2.1.1)(webdriverio@9.1.2)':
     dependencies:
       '@testing-library/dom': 10.4.0
       '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
@@ -6680,7 +6673,7 @@ snapshots:
       vitest: 2.1.1(@types/node@20.16.10)(@vitest/browser@2.1.1)(jsdom@25.0.1)(msw@2.4.7(typescript@5.6.2))(sass@1.79.4)
       ws: 8.18.0
     optionalDependencies:
-      webdriverio: 9.1.1
+      webdriverio: 9.1.2
     transitivePeerDependencies:
       - '@vitest/spy'
       - bufferutil
@@ -6689,7 +6682,7 @@ snapshots:
       - vite
     optional: true
 
-  '@vitest/browser@2.1.1(@vitest/spy@2.1.1)(typescript@5.6.2)(vite@5.4.6(@types/node@22.5.5)(sass@1.79.4))(vitest@2.1.1)(webdriverio@9.1.1)':
+  '@vitest/browser@2.1.1(@vitest/spy@2.1.1)(typescript@5.6.2)(vite@5.4.6(@types/node@22.5.5)(sass@1.79.4))(vitest@2.1.1)(webdriverio@9.1.2)':
     dependencies:
       '@testing-library/dom': 10.4.0
       '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
@@ -6702,7 +6695,7 @@ snapshots:
       vitest: 2.1.1(@types/node@22.5.5)(@vitest/browser@2.1.1)(jsdom@25.0.1)(msw@2.4.7(typescript@5.6.2))(sass@1.79.4)
       ws: 8.18.0
     optionalDependencies:
-      webdriverio: 9.1.1
+      webdriverio: 9.1.2
     transitivePeerDependencies:
       - '@vitest/spy'
       - bufferutil
@@ -6710,7 +6703,7 @@ snapshots:
       - utf-8-validate
       - vite
 
-  '@vitest/coverage-v8@2.1.1(@vitest/browser@2.1.1(@vitest/spy@2.1.1)(typescript@5.6.2)(vite@5.4.6(@types/node@22.5.5)(sass@1.79.4))(vitest@2.1.1)(webdriverio@9.1.1))(vitest@2.1.1(@types/node@22.5.5)(@vitest/browser@2.1.1)(jsdom@25.0.1)(msw@2.4.7(typescript@5.6.2))(sass@1.79.4))':
+  '@vitest/coverage-v8@2.1.1(@vitest/browser@2.1.1(@vitest/spy@2.1.1)(typescript@5.6.2)(vite@5.4.6(@types/node@22.5.5)(sass@1.79.4))(vitest@2.1.1)(webdriverio@9.1.2))(vitest@2.1.1(@types/node@22.5.5)(@vitest/browser@2.1.1)(jsdom@25.0.1)(msw@2.4.7(typescript@5.6.2))(sass@1.79.4))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
@@ -6726,7 +6719,7 @@ snapshots:
       tinyrainbow: 1.2.0
       vitest: 2.1.1(@types/node@22.5.5)(@vitest/browser@2.1.1)(jsdom@25.0.1)(msw@2.4.7(typescript@5.6.2))(sass@1.79.4)
     optionalDependencies:
-      '@vitest/browser': 2.1.1(@vitest/spy@2.1.1)(typescript@5.6.2)(vite@5.4.6(@types/node@22.5.5)(sass@1.79.4))(vitest@2.1.1)(webdriverio@9.1.1)
+      '@vitest/browser': 2.1.1(@vitest/spy@2.1.1)(typescript@5.6.2)(vite@5.4.6(@types/node@22.5.5)(sass@1.79.4))(vitest@2.1.1)(webdriverio@9.1.2)
     transitivePeerDependencies:
       - supports-color
 
@@ -6802,11 +6795,11 @@ snapshots:
       loupe: 3.1.1
       tinyrainbow: 1.2.0
 
-  '@wdio/config@9.1.0':
+  '@wdio/config@9.1.2':
     dependencies:
       '@wdio/logger': 9.1.0
-      '@wdio/types': 9.1.0
-      '@wdio/utils': 9.1.0
+      '@wdio/types': 9.1.2
+      '@wdio/utils': 9.1.2
       decamelize: 6.0.0
       deepmerge-ts: 7.1.0
       glob: 10.4.5
@@ -6834,15 +6827,15 @@ snapshots:
     dependencies:
       '@types/node': 20.16.10
 
-  '@wdio/types@9.1.0':
+  '@wdio/types@9.1.2':
     dependencies:
       '@types/node': 20.16.10
 
-  '@wdio/utils@9.1.0':
+  '@wdio/utils@9.1.2':
     dependencies:
       '@puppeteer/browsers': 2.4.0
       '@wdio/logger': 9.1.0
-      '@wdio/types': 9.1.0
+      '@wdio/types': 9.1.2
       decamelize: 6.0.0
       deepmerge-ts: 7.1.0
       edgedriver: 5.6.1
@@ -10002,7 +9995,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 20.16.10
-      '@vitest/browser': 2.1.1(@vitest/spy@2.1.1)(typescript@5.6.2)(vite@5.4.6(@types/node@20.16.10)(sass@1.79.4))(vitest@2.1.1)(webdriverio@9.1.1)
+      '@vitest/browser': 2.1.1(@vitest/spy@2.1.1)(typescript@5.6.2)(vite@5.4.6(@types/node@20.16.10)(sass@1.79.4))(vitest@2.1.1)(webdriverio@9.1.2)
       jsdom: 25.0.1
     transitivePeerDependencies:
       - less
@@ -10038,7 +10031,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.5.5
-      '@vitest/browser': 2.1.1(@vitest/spy@2.1.1)(typescript@5.6.2)(vite@5.4.6(@types/node@22.5.5)(sass@1.79.4))(vitest@2.1.1)(webdriverio@9.1.1)
+      '@vitest/browser': 2.1.1(@vitest/spy@2.1.1)(typescript@5.6.2)(vite@5.4.6(@types/node@22.5.5)(sass@1.79.4))(vitest@2.1.1)(webdriverio@9.1.2)
       jsdom: 25.0.1
     transitivePeerDependencies:
       - less
@@ -10067,15 +10060,15 @@ snapshots:
 
   web-streams-polyfill@4.0.0-beta.3: {}
 
-  webdriver@9.1.1:
+  webdriver@9.1.2:
     dependencies:
       '@types/node': 20.16.10
       '@types/ws': 8.5.12
-      '@wdio/config': 9.1.0
+      '@wdio/config': 9.1.2
       '@wdio/logger': 9.1.0
       '@wdio/protocols': 9.0.8
-      '@wdio/types': 9.1.0
-      '@wdio/utils': 9.1.0
+      '@wdio/types': 9.1.2
+      '@wdio/utils': 9.1.2
       deepmerge-ts: 7.1.0
       ws: 8.18.0
     transitivePeerDependencies:
@@ -10083,16 +10076,16 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  webdriverio@9.1.1:
+  webdriverio@9.1.2:
     dependencies:
-      '@types/node': 20.16.9
+      '@types/node': 20.16.10
       '@types/sinonjs__fake-timers': 8.1.5
-      '@wdio/config': 9.1.0
+      '@wdio/config': 9.1.2
       '@wdio/logger': 9.1.0
       '@wdio/protocols': 9.0.8
       '@wdio/repl': 9.0.8
-      '@wdio/types': 9.1.0
-      '@wdio/utils': 9.1.0
+      '@wdio/types': 9.1.2
+      '@wdio/utils': 9.1.2
       archiver: 7.0.1
       aria-query: 5.3.1
       cheerio: 1.0.0
@@ -10111,7 +10104,7 @@ snapshots:
       rgb2hex: 0.2.5
       serialize-error: 11.0.3
       urlpattern-polyfill: 10.0.0
-      webdriver: 9.1.1
+      webdriver: 9.1.2
     transitivePeerDependencies:
       - bufferutil
       - supports-color
