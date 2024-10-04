@@ -142,8 +142,8 @@ importers:
         specifier: 4.3.2
         version: 4.3.2(vite@5.4.6(@types/node@20.16.10)(sass@1.79.4))
       atom.io:
-        specifier: 0.29.5
-        version: 0.29.5(@testing-library/react@16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(eslint@9.11.1)(framer-motion@11.11.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        specifier: 0.30.0
+        version: 0.30.0(@testing-library/react@16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(eslint@9.11.1)(framer-motion@11.11.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       c8:
         specifier: 10.1.2
         version: 10.1.2
@@ -178,15 +178,15 @@ importers:
   packages/justiciar:
     dependencies:
       atom.io:
-        specifier: 0.29.5
-        version: 0.29.5(@testing-library/react@16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(eslint@9.11.1)(framer-motion@11.11.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        specifier: 0.30.0
+        version: 0.30.0(@testing-library/react@16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(eslint@9.11.1)(framer-motion@11.11.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@vitest/browser':
         specifier: 2.1.2
         version: 2.1.2(@vitest/spy@2.1.2)(typescript@5.6.2)(vite@5.4.6(@types/node@22.5.5)(sass@1.79.4))(vitest@2.1.2)(webdriverio@9.1.2)
       '@vitest/coverage-v8':
         specifier: 2.1.2
-        version: 2.1.2(@vitest/browser@2.1.2(@vitest/spy@2.1.2)(typescript@5.6.2)(vite@5.4.6(@types/node@22.5.5)(sass@1.79.4))(vitest@2.1.2)(webdriverio@9.1.2))(vitest@2.1.2(@types/node@22.5.5)(@vitest/browser@2.1.2)(jsdom@25.0.1)(msw@2.4.7(typescript@5.6.2))(sass@1.79.4))
+        version: 2.1.2(@vitest/browser@2.1.2)(vitest@2.1.2)
       json-schema-to-zod:
         specifier: 2.4.1
         version: 2.4.1
@@ -1973,8 +1973,8 @@ packages:
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
 
-  atom.io@0.29.5:
-    resolution: {integrity: sha512-y/01EuuLk8MEOk3+rIkFB+Nw+WZHER7ShjWjbYaAk8tqzCPKy8JHrUYsroipdeZ2EeFUjZxyG9cAUFDzvM7sFA==}
+  atom.io@0.30.0:
+    resolution: {integrity: sha512-t/cH2W2zdSDMRsDj3oxFxjoNRKqKPCdcK+26ie3g1NHspxA7A2t3LS9bQfBBOe6XqmdTIuEB2CMmhIcPTgIRtg==}
     peerDependencies:
       '@floating-ui/react': '>=0.25.0'
       '@floating-ui/react-dom': '>=2.0.0'
@@ -6702,7 +6702,7 @@ snapshots:
       - utf-8-validate
       - vite
 
-  '@vitest/coverage-v8@2.1.2(@vitest/browser@2.1.2(@vitest/spy@2.1.2)(typescript@5.6.2)(vite@5.4.6(@types/node@22.5.5)(sass@1.79.4))(vitest@2.1.2)(webdriverio@9.1.2))(vitest@2.1.2(@types/node@22.5.5)(@vitest/browser@2.1.2)(jsdom@25.0.1)(msw@2.4.7(typescript@5.6.2))(sass@1.79.4))':
+  '@vitest/coverage-v8@2.1.2(@vitest/browser@2.1.2)(vitest@2.1.2)':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
@@ -7037,7 +7037,7 @@ snapshots:
 
   asynckit@0.4.0: {}
 
-  atom.io@0.29.5(@testing-library/react@16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(eslint@9.11.1)(framer-motion@11.11.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
+  atom.io@0.30.0(@testing-library/react@16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(eslint@9.11.1)(framer-motion@11.11.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
     optionalDependencies:
       '@testing-library/react': 16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       eslint: 9.11.1
