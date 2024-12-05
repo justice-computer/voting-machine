@@ -116,12 +116,20 @@ export const electionMolecules = moleculeFamily({
 					)
 				}
 				const { voterId } = ballot
+				if (voterId == null || voterId === ``) {
+					debugger
+					throw new Error(`Ballot "${voterId}" for election "${this.key}" submitted no voterId`)
+				}
 				const voterKeys = get(this.state.voters.relatedKeys)
 				if (!voterKeys.includes(voterId)) {
 					throw new Error(`Voter "${voterId}" not registered in election "${this.key}"`)
 				}
 
 				const votesByTier = ballot.votes[this.key]
+				if (votesByTier == null) {
+					debugger
+					throw new Error(`Ballot "${voterId}" for election "${this.key}" submitted no votes`)
+				}
 
 				const electionConfig = get(this.state.config)
 				const maximumTiers = electionConfig.votingTiers.length

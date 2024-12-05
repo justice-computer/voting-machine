@@ -58,7 +58,6 @@ function List(): JSX.Element {
 			<BallotSheet title={currentElection.title} elections={elections} />
 			<div className="change-icons">
 				<button type="button" onClick={handleFinished}>
-					<img src="./finish-icon.svg" alt="cancel" />
 					Finish Voting
 				</button>
 			</div>

@@ -58,6 +58,7 @@ export const actualVoteSelectors = selectorFamily<ActualVote, string>({
 			const serializedVote = get(serializedVoteAtoms, userId)
 			const actualVote: ActualVote = {
 				...serializedVote,
+				voterId: userId,
 				tierList: parseJson(serializedVote.tierList),
 			}
 			return actualVote
